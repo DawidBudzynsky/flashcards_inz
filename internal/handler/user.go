@@ -70,9 +70,12 @@ func (u *User) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var user models.User
-	if result := u.DB.Preload("FlashcardSets").Find(&user, userID); result.Error != nil {
-		// if result := u.DB.First(&user, userID); result.Error != nil {
-		http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
+	if result := u.DB.Preload("FlashcardSets").First(&user, userID); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			http.Error(w, "User not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
+		}
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
