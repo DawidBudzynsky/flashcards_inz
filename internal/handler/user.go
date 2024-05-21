@@ -128,4 +128,24 @@ func (u *User) UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 func (u *User) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("User DeleteByID called")
+	idParam := chi.URLParam(r, "id")
+	userID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var user models.User
+	if result := u.DB.First(&user, userID); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			http.Error(w, "User not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
+		}
+		return
+	}
+	if result := u.DB.Delete(&user, userID); result.Error != nil {
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
