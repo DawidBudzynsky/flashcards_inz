@@ -24,7 +24,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&models.User{}, &models.FlashcardSet{})
+	err = db.AutoMigrate(&models.User{},
+		&models.FlashcardSet{},
+		&models.Flashcard{},
+		&models.Folder{})
 	if err != nil {
 		log.Fatal("failed to migrate database", err)
 	}
