@@ -13,6 +13,17 @@ type User struct {
 }
 type Users []User
 
+type Folder struct {
+	ID             int       `gorm:"primaryKey"`
+	UserID         int       `gorm:"index"` // Foreign key
+	Name           string    `gorm:"size:255"`
+	Description    string    `gorm:"size:255"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	FlashcardsSets FlashcardsSets
+}
+
+type Folders []Folder
+
 type FlashcardSet struct {
 	ID          int       `gorm:"primaryKey"`
 	UserID      int       `gorm:"index"` // Foreign key
@@ -20,27 +31,16 @@ type FlashcardSet struct {
 	Description string    `gorm:"size:255"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	FolderID    int       `gorm:"index"`
+	Flashcards  Flashcards
 }
 type FlashcardsSets []FlashcardSet
 
-type Folder struct {
-	ID          int       `gorm:"primaryKey"`
-	UserID      int       `gorm:"index"` // Foreign key
-	Name        string    `gorm:"size:255"`
-	Description string    `gorm:"size:255"`
-	CreatedAt   time.Time `gorm:"autoCreateTime"`
-	ParentID    *int      `gorm:"index"` // Nullable self-referencing foreign key
-	SubFolders  []Folder  `gorm:"foreignKey:ParentID"`
-}
-
-type Folders []Folder
-
 type Flashcard struct {
-	ID        int       `gorm:"primaryKey"`
-	SetID     int       `gorm:"index"`
-	Question  string    `gorm:"size:255"`
-	Answer    string    `gorm:"size:255"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
+	ID             int       `gorm:"primaryKey"`
+	FlashcardSetID int       `gorm:"index"`
+	Question       string    `gorm:"size:255"`
+	Answer         string    `gorm:"size:255"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
 }
 
 type Flashcards []Flashcard
