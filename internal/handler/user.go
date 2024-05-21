@@ -10,22 +10,17 @@ import (
 )
 
 type User struct {
-	Service *service.UserService
+	Service service.UserServiceInterface
 }
 
 func (u *User) Create(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		GoogleID string `json:"google_id"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Role     string `json:"role"`
-	}
+	var body service.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	user, err := u.Service.CreateUser(body.GoogleID, body.Username, body.Email, body.Role)
+	user, err := u.Service.CreateUser(body)
 	if err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return

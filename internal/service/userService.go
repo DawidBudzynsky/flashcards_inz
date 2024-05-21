@@ -8,6 +8,21 @@ import (
 
 const flashcards = "FlashcardSets"
 
+type UserServiceInterface interface {
+	CreateUser(CreateUserRequest) (*models.User, error)
+	ListUsers() (models.Users, error)
+	GetUserByID(uint64) (*models.User, error)
+	UpdateUserByID(uint64, map[string]interface{}) (*models.User, error)
+	DeleteUserByID(uint64) error
+}
+
+type CreateUserRequest struct {
+	GoogleID string `json:"google_id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+}
+
 type UserService struct {
 	db *gorm.DB
 }
@@ -16,12 +31,12 @@ func NewUserSerivce(db *gorm.DB) *UserService {
 	return &UserService{db: db}
 }
 
-func (s *UserService) CreateUser(googleID, username, email, role string) (*models.User, error) {
+func (s *UserService) CreateUser(body CreateUserRequest) (*models.User, error) {
 	user := &models.User{
-		GoogleID: googleID,
-		Username: username,
-		Email:    email,
-		Role:     role,
+		GoogleID: body.GoogleID,
+		Username: body.Username,
+		Email:    body.Email,
+		Role:     body.Role,
 	}
 	if err := s.db.Create(user).Error; err != nil {
 		return nil, err
