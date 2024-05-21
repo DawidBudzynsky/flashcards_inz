@@ -84,8 +84,46 @@ func (u *User) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Currently updates every field, which means when you udpate only one, the rest will be set to none
 func (u *User) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("User UpdateByID called")
+	idParam := chi.URLParam(r, "id")
+	userID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var updatedUser models.User
+	if err := json.NewDecoder(r.Body).Decode(&updatedUser); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var user models.User
+	if result := u.DB.First(&user, userID); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			http.Error(w, "User not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	user.GoogleID = updatedUser.GoogleID
+	user.Username = updatedUser.Username
+	user.Email = updatedUser.Email
+	user.Role = updatedUser.Role
+
+	if result := u.DB.Save(&user); result.Error != nil {
+		http.Error(w, "Failed to update user", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
+	}
 }
 
 func (u *User) DeleteByID(w http.ResponseWriter, r *http.Request) {
