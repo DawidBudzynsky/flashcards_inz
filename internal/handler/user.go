@@ -2,16 +2,15 @@ package handler
 
 import (
 	"encoding/json"
-	"flashcards/internal/models"
+	"flashcards/internal/service"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"gorm.io/gorm"
 )
 
 type User struct {
-	DB *gorm.DB
+	Service *service.UserService
 }
 
 func (u *User) Create(w http.ResponseWriter, r *http.Request) {
@@ -25,16 +24,13 @@ func (u *User) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	user := models.User{
-		GoogleID: body.GoogleID,
-		Username: body.Username,
-		Email:    body.Email,
-		Role:     body.Role,
-	}
-	if result := u.DB.Create(&user); result.Error != nil {
+
+	user, err := u.Service.CreateUser(body.GoogleID, body.Username, body.Email, body.Role)
+	if err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
@@ -42,10 +38,9 @@ func (u *User) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *User) List(w http.ResponseWriter, r *http.Request) {
-	var users []models.User
-	if result := u.DB.Preload("FlashcardSets").Find(&users); result.Error != nil {
-		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
-		return
+	users, err := u.Service.ListUsers()
+	if err != nil {
+		http.Error(w, "Failed to list users", http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(users); err != nil {
@@ -60,13 +55,10 @@ func (u *User) GetByID(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var user models.User
-	if result := u.DB.Preload("FlashcardSets").First(&user, userID); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			http.Error(w, "User not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
-		}
+
+	user, err := u.Service.GetUserByID(userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
 
@@ -76,7 +68,6 @@ func (u *User) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Currently updates every field, which means when you udpate only one, the rest will be set to none
 func (u *User) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	userID, err := strconv.ParseUint(idParam, 10, 64)
@@ -85,30 +76,15 @@ func (u *User) UpdateByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updatedUser models.User
-	if err := json.NewDecoder(r.Body).Decode(&updatedUser); err != nil {
+	var updateData map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	var user models.User
-	if result := u.DB.First(&user, userID); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			http.Error(w, "User not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
-		}
-		return
-	}
-
-	user.GoogleID = updatedUser.GoogleID
-	user.Username = updatedUser.Username
-	user.Email = updatedUser.Email
-	user.Role = updatedUser.Role
-
-	if result := u.DB.Save(&user); result.Error != nil {
+	user, err := u.Service.UpdateUserByID(userID, updateData)
+	if err != nil {
 		http.Error(w, "Failed to update user", http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -124,18 +100,10 @@ func (u *User) DeleteByID(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var user models.User
-	if result := u.DB.First(&user, userID); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			http.Error(w, "User not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
-		}
-		return
+
+	if err := u.Service.DeleteUserByID(userID); err != nil {
+		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
 	}
-	if result := u.DB.Delete(&user, userID); result.Error != nil {
-		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
-		return
-	}
+
 	w.WriteHeader(http.StatusNoContent)
 }

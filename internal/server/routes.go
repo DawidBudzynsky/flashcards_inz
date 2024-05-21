@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"flashcards/internal/handler"
+	"flashcards/internal/service"
 	"log"
 	"net/http"
 
@@ -24,7 +25,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 func (s *Server) loadUserRoutes(router chi.Router) {
 	userHandler := &handler.User{
-		DB: s.db.GetDB(),
+		Service: service.NewUserSerivce(s.db.GetDB()),
 	}
 	router.Post("/", userHandler.Create)
 	router.Get("/", userHandler.List)
