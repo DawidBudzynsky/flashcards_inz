@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"flashcards/internal/handler"
 	"log"
 	"net/http"
 
@@ -14,10 +15,33 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Use(middleware.Logger)
 
 	r.Get("/", s.HelloWorldHandler)
-
 	r.Get("/health", s.healthHandler)
+	r.Route("/users", s.loadUserRoutes)
+	r.Route("/flashcards_sets", s.loadFlashcardSetRoutes)
 
 	return r
+}
+
+func (s *Server) loadUserRoutes(router chi.Router) {
+	userHandler := &handler.User{
+		DB: s.db.GetDB(),
+	}
+	router.Post("/", userHandler.Create)
+	router.Get("/", userHandler.List)
+	router.Get("/{id}", userHandler.GetByID)
+	router.Put("/{id}", userHandler.UpdateByID)
+	router.Delete("/{id}", userHandler.DeleteByID)
+}
+
+func (s *Server) loadFlashcardSetRoutes(router chi.Router) {
+	flashcardSetHandler := &handler.FlashcardSetHandler{
+		DB: s.db.GetDB(),
+	}
+	router.Post("/", flashcardSetHandler.Create)
+	router.Get("/", flashcardSetHandler.List)
+	router.Get("/{id}", flashcardSetHandler.GetByID)
+	router.Put("/{id}", flashcardSetHandler.UpdateByID)
+	router.Delete("/{id}", flashcardSetHandler.DeleteByID)
 }
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +52,6 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
 	}
-
 	_, _ = w.Write(jsonResp)
 }
 
