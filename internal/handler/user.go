@@ -9,11 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type User struct {
+type UserHandler struct {
 	Service service.UserServiceInterface
 }
 
-func (u *User) Create(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var body service.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -32,7 +32,7 @@ func (u *User) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u *User) List(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	users, err := u.Service.ListUsers()
 	if err != nil {
 		http.Error(w, "Failed to list users", http.StatusInternalServerError)
@@ -43,7 +43,7 @@ func (u *User) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u *User) GetByID(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	userID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
@@ -63,7 +63,7 @@ func (u *User) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u *User) UpdateByID(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	userID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
@@ -88,7 +88,7 @@ func (u *User) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u *User) DeleteByID(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	userID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {

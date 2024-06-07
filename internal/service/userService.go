@@ -6,7 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
-const flashcards = "FlashcardSets"
+const (
+	flashcard_sets = "FlashcardsSets"
+	folders        = "Folders"
+)
 
 type UserServiceInterface interface {
 	CreateUser(CreateUserRequest) (*models.User, error)
@@ -46,7 +49,7 @@ func (s *UserService) CreateUser(body CreateUserRequest) (*models.User, error) {
 
 func (s *UserService) ListUsers() (models.Users, error) {
 	var users models.Users
-	if err := s.db.Preload(flashcards).Find(&users).Error; err != nil {
+	if err := s.db.Preload(flashcard_sets).Preload(folders).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -54,7 +57,7 @@ func (s *UserService) ListUsers() (models.Users, error) {
 
 func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
 	var user models.User
-	if err := s.db.Preload(flashcards).First(&user, id).Error; err != nil {
+	if err := s.db.Preload(flashcard_sets).Preload(folders).First(&user, id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

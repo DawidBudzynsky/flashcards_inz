@@ -3,40 +3,27 @@ package handler
 import (
 	"encoding/json"
 	"flashcards/internal/models"
+	"flashcards/internal/service"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
-	"gorm.io/gorm"
 )
 
 type FlashcardSetHandler struct {
-	DB *gorm.DB
+	Service service.FlashcardSetInterface
 }
 
 func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		UserID      int    `json:"user_id"`
-		Title       string `json:"title"`
-		Description string `json:"description"`
-		FolderID    int    `json:"folder_id"`
-	}
+	var body service.CreateFlashcardSetRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
-	flashcardSet := models.FlashcardSet{
-		UserID:      body.UserID,
-		Title:       body.Title,
-		Description: body.Description,
-		CreatedAt:   time.Now(),
-		FolderID:    body.FolderID,
-	}
-
-	if result := h.DB.Create(&flashcardSet); result.Error != nil {
+	flashcardSet, err := h.Service.CreateFlashcardSet(body)
+	if err != nil {
 		http.Error(w, "Failed to create flashcard set", http.StatusInternalServerError)
 		return
 	}
@@ -49,7 +36,8 @@ func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *FlashcardSetHandler) List(w http.ResponseWriter, r *http.Request) {
 	var flashcardSets []models.FlashcardSet
-	if result := h.DB.Find(&flashcardSets); result.Error != nil {
+	flashcardSets, err := h.Service.ListFlashcardSets()
+	if err != nil {
 		http.Error(w, "Failed to retrieve flashcard sets", http.StatusInternalServerError)
 		return
 	}
@@ -67,13 +55,9 @@ func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var flashcardSet models.FlashcardSet
-	if result := h.DB.First(&flashcardSet, setID); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			http.Error(w, "FlashcardSet not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to retrieve flashcard set", http.StatusInternalServerError)
-		}
+	flashcardSet, err := h.Service.GetFlashcardSetByID(setID)
+	if err != nil {
+		http.Error(w, "FlashcardSet not found", http.StatusInternalServerError)
 		return
 	}
 
@@ -91,31 +75,20 @@ func (h *FlashcardSetHandler) UpdateByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var updatedFlashcardSet models.FlashcardSet
-	if err := json.NewDecoder(r.Body).Decode(&updatedFlashcardSet); err != nil {
+	var updateData map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	var flashcardSet models.FlashcardSet
-	if result := h.DB.First(&flashcardSet, flashcardSetID); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			http.Error(w, "Flashcard set not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to retrieve flashcard set", http.StatusInternalServerError)
-		}
-		return
+	flashcardSet, err := h.Service.UpdateFlashcardSetByID(flashcardSetID, updateData)
+	if err != nil {
+		http.Error(w, "Failed to update user", http.StatusInternalServerError)
 	}
 
-	flashcardSet.UserID = updatedFlashcardSet.UserID
-	flashcardSet.Title = updatedFlashcardSet.Title
-	flashcardSet.Description = updatedFlashcardSet.Description
-	flashcardSet.Description = updatedFlashcardSet.Description
-	flashcardSet.FolderID = updatedFlashcardSet.FolderID
-
-	if result := h.DB.Save(&flashcardSet); result.Error != nil {
-		http.Error(w, "Failed to update flashcard set", http.StatusInternalServerError)
-		return
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
+		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)
 	}
 }
 
@@ -126,16 +99,8 @@ func (h *FlashcardSetHandler) DeleteByID(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var flashcardSet models.FlashcardSet
-	if result := h.DB.First(&flashcardSet, flashcardSetID); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			http.Error(w, "Flashcard set not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to retrieve flashcard set", http.StatusInternalServerError)
-		}
-		return
-	}
-	if result := h.DB.Delete(&flashcardSet, flashcardSetID); result.Error != nil {
+
+	if err := h.Service.DeleteFlashcardSetByID(flashcardSetID); err != nil {
 		http.Error(w, "Failed to delete flashcard set", http.StatusInternalServerError)
 		return
 	}
