@@ -57,7 +57,7 @@ func (s *UserService) ListUsers() (models.Users, error) {
 
 func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
 	var user models.User
-	if err := s.db.Preload(flashcard_sets).Preload(folders).First(&user, id).Error; err != nil {
+	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload(folders).First(&user, id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
