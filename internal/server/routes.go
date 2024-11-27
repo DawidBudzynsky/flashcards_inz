@@ -9,11 +9,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/markbates/goth/gothic"
 	"github.com/rs/cors"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
+
+	// middlewares
 	r.Use(middleware.Logger)
 
 	cors := cors.New(cors.Options{
@@ -23,12 +26,24 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum age for preflight requests
 	})
-
 	// Apply CORS middleware
 	r.Use(cors.Handler)
 
-	r.Get("/", s.HelloWorldHandler)
-	r.Get("/health", s.healthHandler)
+	// Public routes
+	r.Group(func(r chi.Router) {
+		r.Get("/", s.HelloWorldHandler)
+		r.Get("/health", s.healthHandler)
+	})
+
+	// auth routes
+	// r.Group(func(r chi.Router) {
+	// 	r.Get("/auth/callback", s.getAuthCallbackFunction)
+	// 	r.Get("/logout", s.logout)
+	// 	r.Get("/auth", s.authHandler)
+	// })
+
+	// auth roues
+	s.loadAuthRoutes(r)
 	r.Route("/users", s.loadUserRoutes)
 	r.Route("/flashcards_sets", s.loadFlashcardSetRoutes)
 	r.Route("/flashcards", s.loadFlashcardRoutes)
@@ -36,6 +51,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Route("/tests", s.loadTestRoutes)
 
 	return r
+}
+
+func (s *Server) loadAuthRoutes(router chi.Router) {
+	authHandler := &handler.AuthHandler{
+		UserService: service.NewUserSerivce(s.db.GetDB()),
+	}
+	router.Get("/auth/callback", authHandler.GetAuthCallbackFunc)
+	router.Get("/auth", s.authHandler)
+	router.Get("/logout", s.logout)
 }
 
 func (s *Server) loadUserRoutes(router chi.Router) {
@@ -107,4 +131,17 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, _ := json.Marshal(s.db.Health())
 	_, _ = w.Write(jsonResp)
+}
+
+func (s *Server) authHandler(w http.ResponseWriter, r *http.Request) {
+	if _, err := gothic.CompleteUserAuth(w, r); err == nil {
+	} else {
+		gothic.BeginAuthHandler(w, r)
+	}
+}
+
+func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
+	gothic.Logout(w, r)
+	w.Header().Set("Location", "/")
+	w.WriteHeader(http.StatusTemporaryRedirect)
 }
