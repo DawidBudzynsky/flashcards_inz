@@ -15,6 +15,7 @@ type UserServiceInterface interface {
 	CreateUser(CreateUserRequest) (*models.User, error)
 	ListUsers() (models.Users, error)
 	GetUserByID(uint64) (*models.User, error)
+	GetUserByEmail(string) (*models.User, error)
 	UpdateUserByID(uint64, map[string]interface{}) (*models.User, error)
 	DeleteUserByID(uint64) error
 }
@@ -61,6 +62,21 @@ func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (s *UserService) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	// NOTE: here without preload, make sure its okay
+	err := s.db.First(&user, "email = ?", email).Error
+	if err == nil {
+		return &user, nil
+	}
+
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+
+	return nil, err
 }
 
 func (s *UserService) UpdateUserByID(id uint64, updateData map[string]interface{}) (*models.User, error) {
