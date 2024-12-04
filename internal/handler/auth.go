@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"flashcards/internal/models"
 	"flashcards/internal/service"
 	"flashcards/internal/util"
@@ -30,12 +31,12 @@ func (a *AuthHandler) GetAuthCallbackFunc(w http.ResponseWriter, r *http.Request
 
 	// try to get user from db
 	var user *models.User
-	fmt.Println(gotUser.Email)
-	user, err = a.UserService.GetUserByEmail(gotUser.UserID)
+	user, err = a.UserService.GetUserByEmail(gotUser.Email)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	fmt.Println(user)
 
 	// if no user in db
 	if user == nil {
@@ -62,4 +63,30 @@ func (a *AuthHandler) GetAuthCallbackFunc(w http.ResponseWriter, r *http.Request
 	}
 
 	http.Redirect(w, r, "http://localhost:5173", http.StatusFound)
+}
+
+func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	// first check if session exists
+	util.RemoveCookieSession(w, r)
+}
+
+func (a *AuthHandler) CheckIfUserLoggedIn(w http.ResponseWriter, r *http.Request) {
+	// Attempt to retrieve the user session
+	_, err := util.GetUserSessionFromStore(r)
+	if err != nil {
+		// User is not logged in
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"message": "User is not logged in",
+		})
+		return
+	}
+
+	// User is logged in
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "User is logged in",
+	})
 }

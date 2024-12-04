@@ -31,6 +31,8 @@ func NewFlashcardSetService(db *gorm.DB) *FlashcardSetService {
 	return &FlashcardSetService{db: db}
 }
 
+// TODO: should add each flashcard inside the request
+// TODO: or first on frontend send create set and then add flashcards to sets
 func (s *FlashcardSetService) CreateFlashcardSet(body CreateFlashcardSetRequest) (*models.FlashcardSet, error) {
 	flashcardSet := &models.FlashcardSet{
 		UserID:      body.UserID,
@@ -38,6 +40,8 @@ func (s *FlashcardSetService) CreateFlashcardSet(body CreateFlashcardSetRequest)
 		Description: body.Description,
 		FolderID:    body.FolderID,
 	}
+
+	// TODO: here should be body.flashcards i guess
 	if err := s.db.Create(flashcardSet).Error; err != nil {
 		return nil, err
 	}

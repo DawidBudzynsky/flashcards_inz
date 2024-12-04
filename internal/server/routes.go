@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Use(middleware.Logger)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // Allow all origins
+		AllowedOrigins:   []string{"http://localhost:5173"}, // Allow all origins
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -53,13 +53,28 @@ func (s *Server) RegisterRoutes() http.Handler {
 	return r
 }
 
+type Response struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+// TODO: for now its only this one
+func AuthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(Response{
+		Success: true,
+		Message: "User is logged in",
+	})
+}
+
 func (s *Server) loadAuthRoutes(router chi.Router) {
 	authHandler := &handler.AuthHandler{
 		UserService: service.NewUserSerivce(s.db.GetDB()),
 	}
 	router.Get("/auth/callback", authHandler.GetAuthCallbackFunc)
 	router.Get("/auth", s.authHandler)
-	router.Get("/logout", s.logout)
+	router.Get("/logout", authHandler.Logout)
+	// TODO: not sure if this
+	router.Get("/check-user-logged-in", authHandler.CheckIfUserLoggedIn)
 }
 
 func (s *Server) loadUserRoutes(router chi.Router) {
