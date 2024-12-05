@@ -11,14 +11,17 @@ async function handleLogout() {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        window.location.href = '/';
 
-        const data = await response.json();
-        if (data.success) {
-            console.log('User logged out successfully:', data.message);
-            window.location.href = '/';
-        } else {
-            console.log('User not logged out');
-        }
+        //TODO: probably dont need this one
+        //
+        // const data = await response.json();
+        // if (data.success) {
+        //     console.log('User logged out successfully:', data.message);
+        // } else {
+        //     console.log('User not logged out');
+        // }
+
     } catch (error) {
         console.error('Error checking if user is logged in:', error);
     }
