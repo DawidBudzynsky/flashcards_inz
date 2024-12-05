@@ -73,17 +73,3 @@ func RemoveCookieSession(w http.ResponseWriter, r *http.Request) error {
 	session.Options.MaxAge = -1
 	return session.Save(r, w)
 }
-
-// middleware
-func CheckLoggedInMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Replace this with your actual session retrieval logic
-		_, err := GetUserSessionFromStore(r)
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		// Call the next handler
-		next.ServeHTTP(w, r)
-	})
-}
