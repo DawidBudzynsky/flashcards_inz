@@ -75,18 +75,23 @@ func (a *AuthHandler) CheckIfUserLoggedIn(w http.ResponseWriter, r *http.Request
 	_, err := util.GetUserSessionFromStore(r)
 	if err != nil {
 		// User is not logged in
-		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "User is not logged in",
 		})
 		return
 	}
-
 	// User is logged in
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "User is logged in",
 	})
+}
+
+func (a *AuthHandler) AuthHandler(w http.ResponseWriter, r *http.Request) {
+	if _, err := gothic.CompleteUserAuth(w, r); err == nil {
+	} else {
+		gothic.BeginAuthHandler(w, r)
+	}
 }
