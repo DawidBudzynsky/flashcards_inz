@@ -15,21 +15,26 @@ type FlashcardHandler struct {
 }
 
 func (h *FlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var body service.CreateFlashcardRequest
+	// WARNING: assuuming that in the payload there is list of flashcards
+	var body []service.CreateFlashcardRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	flashcard, err := h.Service.CreateFlashcard(body)
-	if err != nil {
-		http.Error(w, "Failed to create flashcard", http.StatusInternalServerError)
-		return
+	for _, flashcard := range body {
+
+		_, err := h.Service.CreateFlashcard(flashcard)
+		if err != nil {
+			http.Error(w, "Failed to create flashcard", http.StatusInternalServerError)
+			return
+		}
+
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(flashcard); err != nil {
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "created flashcards"}); err != nil {
 		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
 	}
 }
