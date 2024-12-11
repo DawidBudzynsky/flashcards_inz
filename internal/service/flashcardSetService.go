@@ -17,10 +17,10 @@ type FlashcardSetInterface interface {
 const flashcards = "Flashcards"
 
 type CreateFlashcardSetRequest struct {
-	UserID      int    `json:"user_id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	FolderID    int    `json:"folder_id"`
+	UserGoogleID string `json:"-"` // TODO: maybe not today
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	FolderID     int    `json:"folder_id"`
 }
 
 type FlashcardSetService struct {
@@ -35,13 +35,12 @@ func NewFlashcardSetService(db *gorm.DB) *FlashcardSetService {
 // TODO: or first on frontend send create set and then add flashcards to sets
 func (s *FlashcardSetService) CreateFlashcardSet(body CreateFlashcardSetRequest) (*models.FlashcardSet, error) {
 	flashcardSet := &models.FlashcardSet{
-		UserID:      body.UserID,
-		Title:       body.Title,
-		Description: body.Description,
-		FolderID:    body.FolderID,
+		UserGoogleID: body.UserGoogleID,
+		Title:        body.Title,
+		Description:  body.Description,
+		FolderID:     body.FolderID,
 	}
 
-	// TODO: here should be body.flashcards i guess
 	if err := s.db.Create(flashcardSet).Error; err != nil {
 		return nil, err
 	}

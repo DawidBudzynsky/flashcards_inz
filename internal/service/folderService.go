@@ -15,9 +15,9 @@ type FolderServiceInterface interface {
 }
 
 type CreateFolderRequest struct {
-	UserID      int    `json:"user_id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	UserGoogleID string `json:"-"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
 }
 
 type FolderService struct {
@@ -30,9 +30,9 @@ func NewFolderService(db *gorm.DB) *FolderService {
 
 func (s *FolderService) CreateFolder(body CreateFolderRequest) (*models.Folder, error) {
 	folder := &models.Folder{
-		UserID:      body.UserID,
-		Name:        body.Name,
-		Description: body.Description,
+		UserGoogleID: body.UserGoogleID,
+		Name:         body.Name,
+		Description:  body.Description,
 	}
 	if err := s.db.Create(folder).Error; err != nil {
 		return nil, err

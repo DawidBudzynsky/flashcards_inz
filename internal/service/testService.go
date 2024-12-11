@@ -16,7 +16,7 @@ type TestServiceInterface interface {
 }
 
 type CreateTestRequest struct {
-	UserID         int       `json:"user_id"`
+	UserGoogleID   string    `json:"-"`
 	SetID          int       `json:"set_id"`
 	StartTime      time.Time `json:"start_time"`
 	EndTime        time.Time `json:"end_time"`
@@ -33,7 +33,7 @@ func NewTestService(db *gorm.DB) *TestService {
 
 func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 	test := &models.Test{
-		UserID:         body.UserID,
+		UserGoogleID:   body.UserGoogleID,
 		SetID:          body.SetID,
 		StartTime:      body.StartTime,
 		EndTime:        body.EndTime,
