@@ -24,7 +24,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&models.User{},
+	err = db.AutoMigrate(
+		&models.User{},
 		&models.FlashcardSet{},
 		&models.Flashcard{},
 		&models.Folder{})
