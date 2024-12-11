@@ -17,6 +17,10 @@ const FlashCardSetForm: React.FC = () => {
         setFlashcards([...flashcards, { question: "", answer: "" }]);
     };
 
+    const removeFlashcard = (indexToRemove: number) => {
+        setFlashcards(flashcards.filter((_, index) => index !== indexToRemove));
+    };
+
     const handleInputChange = (
         index: number,
         type: "question" | "answer",
@@ -29,15 +33,15 @@ const FlashCardSetForm: React.FC = () => {
 
     const sendCreateRequest = async () => {
         try {
-            const setResponse = await fetch("/flashcards_sets", {
+            const setResponse = await fetch("http://localhost:8080/flashcards_sets", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
                 body: JSON.stringify({
                     title: setName,
                     description: setDescription,
-                    // NOTE: here change it
-                    folder_id: null, // Replace with the actual folder ID if applicable
-                    user_id: 42,  // Replace with the actual user ID if needed
+                    folder_id: null,
+                    // user_id: null,                
                 }),
             });
 
@@ -46,15 +50,16 @@ const FlashCardSetForm: React.FC = () => {
             }
 
             const createdSet = await setResponse.json();
-            const flashcardSetId = createdSet.id; // Assuming the backend responds with the ID
+            // const flashcardSetId = createdSet.ID; // Assuming the backend responds with the ID
 
             // Step 2: Create the flashcards
-            const flashcardsResponse = await fetch("/flashcards", {
+            const flashcardsResponse = await fetch("http://localhost:8080/flashcards", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
                 body: JSON.stringify(
                     flashcards.map((card) => ({
-                        flashcard_set_id: flashcardSetId,
+                        flashcard_set_id: createdSet.ID,
                         question: card.question,
                         answer: card.answer,
                     }))
@@ -73,51 +78,31 @@ const FlashCardSetForm: React.FC = () => {
     };
 
     return (
-        <div className="p-4 max-w-4xl mx-auto">
+        <div className="p-4 max-w-4xl w-3/5 mx-auto">
             {/* Flashcard Set Name and Description */}
-            <div className="mb-8 p-4 bg-blue-900 text-white rounded-lg">
-                <div className="mb-4">
-                    <label htmlFor="setName" className="block text-lg font-medium mb-2">
-                        Flashcard Set Name
-                    </label>
-                    <input
-                        type="text"
-                        id="setName"
-                        value={setName}
-                        onChange={(e) => setSetName(e.target.value)}
-                        className="block w-full px-4 py-2 text-sm bg-transparent border-b-2 border-gray-300 text-gray-900 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-blue-600"
-                        placeholder="Enter the name of the set"
-                        required
-                    />
-                </div>
+            <div className="mb-8 p-4 bg-blue-900 text-black rounded-lg">
+                <label className="text-lg font-medium mb-2 text-white">Create your new set!</label>
                 <div>
-                    <label
-                        htmlFor="setDescription"
-                        className="block text-lg font-medium mb-2"
-                    >
-                        Flashcard Set Description
-                    </label>
-                    <textarea
-                        id="setDescription"
-                        value={setDescription}
-                        onChange={(e) => setSetDescription(e.target.value)}
-                        className="block w-full px-4 py-2 text-sm bg-transparent border-b-2 border-gray-300 text-gray-900 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-blue-600"
-                        placeholder="Enter a brief description of the set"
-                        rows={3}
-                        required
-                    />
+                    <div className="mb-4">
+                        <input type="text" id="setName" value={setName} onChange={(e) => setSetName(e.target.value)} required placeholder="Enter the name of the set" className="input input-bordered w-full" />
+                    </div>
+                    <div>
+                        <input type="text" id="setDescription" value={setDescription} onChange={(e) => setSetDescription(e.target.value)} required placeholder="Description of a set" className="input input-bordered w-full" />
+                    </div>
+
+                    {/* Flashcard Input Fields */}
+                    {flashcards.map((flashcard, index) => (
+                        <FlashcardInput
+                            key={index}
+                            index={index}
+                            flashcard={flashcard}
+                            handleDelete={removeFlashcard}
+                            handleInputChange={handleInputChange}
+                        />
+                    ))}
+
                 </div>
             </div>
-
-            {/* Flashcard Input Fields */}
-            {flashcards.map((flashcard, index) => (
-                <FlashcardInput
-                    key={index}
-                    index={index}
-                    flashcard={flashcard}
-                    handleInputChange={handleInputChange}
-                />
-            ))}
 
             {/* Add Flashcard Button */}
             <div className="flex justify-evenly p-4 mt-6 border border-gray-300 rounded-lg">
