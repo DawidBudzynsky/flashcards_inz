@@ -95,3 +95,21 @@ func (a *AuthHandler) AuthHandler(w http.ResponseWriter, r *http.Request) {
 		gothic.BeginAuthHandler(w, r)
 	}
 }
+
+func (a *AuthHandler) GetUserDatabaseId(w http.ResponseWriter, r *http.Request) {
+	userID, err := util.GetUserIDFromSession(r)
+	if err != nil {
+		http.Error(w, "Invalid session or user not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Step 3: Respond with user data
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(userID)
+	if err != nil {
+		http.Error(w, "Failed to encode user data", http.StatusInternalServerError)
+		return
+	}
+}
