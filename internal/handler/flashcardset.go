@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"flashcards/internal/middlewares"
 	"flashcards/internal/models"
 	"flashcards/internal/service"
 	"net/http"
@@ -21,6 +22,13 @@ func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+	body.UserGoogleID = userGoogleID
 
 	flashcardSet, err := h.Service.CreateFlashcardSet(body)
 	if err != nil {
