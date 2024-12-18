@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"flashcards/internal/middlewares"
 	"flashcards/internal/service"
 	"net/http"
 	"strconv"
@@ -19,6 +20,14 @@ func (h *FolderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// TODO: make it as a function (prob in util or all types of request should have this function)
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+	body.UserGoogleID = userGoogleID
 
 	folder, err := h.Service.CreateFolder(body)
 	if err != nil {
