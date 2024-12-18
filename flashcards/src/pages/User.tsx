@@ -1,30 +1,43 @@
 import { useState, useEffect } from 'react';
-import { User, FlashcardSet } from '../types/interfaces';
+import { User, FlashcardSet, Folder } from '../types/interfaces';
+import AddFolderModal from '../components/AddFolderModal';
+import { useNavigate } from 'react-router-dom';
 
 function Users() {
-    const [users, setUsers] = useState<User[]>([]);
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
-        fetchUsers();
+        fetchUser();
     }, []);
 
-    const fetchUsers = async () => {
+    const fetchUser = async () => {
         try {
-            const response = await fetch('http://localhost:8080/users', {
+            const response = await fetch('http://localhost:8080/users/me', {
                 credentials: 'include',
             });
             if (!response.ok) {
-                throw new Error('Failed to fetch users');
+                throw new Error('Failed to fetch user');
             }
             const data = await response.json();
-            setUsers(data);
 
+            setUser(data);
             setLoading(false);
         } catch (error) {
-            setError(error.message);
+            setError((error as Error).message);
             setLoading(false);
+        }
+    };
+
+    const addFolder = (newFolder: Folder) => {
+        if (user) {
+            setUser({
+                ...user,
+                Folders: [...user.Folders, newFolder], // Add new folder to the Folders array
+            });
         }
     };
 
@@ -37,22 +50,48 @@ function Users() {
     }
 
     return (
-        <div>
-            <h2>Users</h2>
-            <ul>
-                {users.map(user => (
-                    <li key={user.ID}>
-                        <strong>{user.Username}</strong> - {user.Email}
-                        <ul>
-                            {user.FlashcardsSets.map((flashcardSet: FlashcardSet) => (
-                                <li key={flashcardSet.ID}>
-                                    <a>{flashcardSet.Title}</a>
-                                </li>
+        <div className="w-screen flex justify-center">
+            <div className="px-6 py-6">
+                <div className="flex flex-col space-y-6">
+
+                    {/* User Flashcard Sets Section */}
+                    <div className="card bg-base-300 rounded-box">
+                        <h2 className="text-3xl mb-4">Your Flashcard Sets</h2>
+                        <div className="grid grid-cols-3 gap-4">
+                            {user?.FlashcardsSets.map((set: FlashcardSet) => (
+                                <div
+                                    draggable="true"
+                                    key={set.ID}
+                                    className="card bg-base-200 rounded-box p-4 cursor-pointer text-black"
+                                >
+                                    <h3>{set.Title}</h3>
+                                    {/* Add more set details if needed */}
+                                </div>
                             ))}
-                        </ul>
-                    </li>
-                ))}
-            </ul>
+                        </div>
+                    </div>
+
+                    {/* User Folders Section */}
+                    <div className="card bg-base-300 rounded-box">
+                        <h2 className="text-3xl mb-4">Your Folders</h2>
+                        <div className="grid grid-cols-3 gap-4">
+                            {user?.Folders.map((folder: Folder) => (
+                                <div
+                                    key={folder.ID}
+                                    className="card bg-base-200 rounded-box p-4 cursor-pointer text-black"
+                                    onClick={() => navigate(`/folders/${folder.ID}`)} // Navigate on click
+                                >
+                                    <h3>{folder.Name}</h3>
+
+                                    {/* Add more folder details if needed */}
+                                </div>
+                            ))}
+                        </div>
+                        <AddFolderModal onFolderAdd={addFolder} />
+                    </div>
+
+                </div>
+            </div>
         </div>
     );
 }

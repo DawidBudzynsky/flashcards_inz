@@ -4,6 +4,7 @@ import Users from './pages/User'
 import UserDetail from './pages/UserDetail'
 import FlashCardSetForm from './pages/FlashCardSetForm'
 import Layout from './layout'
+import FolderView from './pages/FolderView'
 
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
                     <Route path="/users" element={<Users />} />
                     <Route path="/users/:userId" element={<UserDetail />} />
                     <Route path="/create" element={<FlashCardSetForm />} />
+                    <Route path="/create" element={<FlashCardSetForm />} />
+                    <Route path="/folders/:folderId" element={<FolderView />} />
                 </Route>
             </Routes>
         </>

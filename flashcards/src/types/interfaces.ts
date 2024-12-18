@@ -25,3 +25,9 @@ export interface User {
     FlashcardsSets: FlashcardSet[];
     Folders: any[]; // Adjust the type if you have a specific type for folders
 }
+
+export interface Folder {
+    ID: number;
+    Name: string;
+    Description: string;
+}
