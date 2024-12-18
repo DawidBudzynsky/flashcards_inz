@@ -16,6 +16,7 @@ type UserServiceInterface interface {
 	ListUsers() (models.Users, error)
 	GetUserByID(uint64) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
+	GetUserByGoogleID(string) (*models.User, error)
 	UpdateUserByID(uint64, map[string]interface{}) (*models.User, error)
 	DeleteUserByID(uint64) error
 }
@@ -59,6 +60,14 @@ func (s *UserService) ListUsers() (models.Users, error) {
 func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
 	var user models.User
 	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload(folders).First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (s *UserService) GetUserByGoogleID(google_id string) (*models.User, error) {
+	var user models.User
+	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload("Folders").Where("google_id = ?", google_id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
