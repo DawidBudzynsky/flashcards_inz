@@ -16,6 +16,7 @@ func UserRouter(userHandler *handler.UserHandler) chi.Router {
 	r.Post("/", userHandler.Create)
 	r.Get("/", userHandler.List)
 	r.With(middlewares.CheckLoggedInMiddleware).Get("/", userHandler.List)
+	r.With(middlewares.UserIdFromSession).Get("/me", userHandler.GetByGoogleID)
 	r.Get("/{id}", userHandler.GetByID)
 	r.Put("/{id}", userHandler.UpdateByID)
 	r.Delete("/{id}", userHandler.DeleteByID)
