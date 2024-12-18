@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"flashcards/internal/middlewares"
 	"flashcards/internal/service"
 	"net/http"
 	"strconv"
@@ -55,6 +56,24 @@ func (u *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode users", http.StatusInternalServerError)
+	}
+}
+
+func (u *UserHandler) GetByGoogleID(w http.ResponseWriter, r *http.Request) {
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := u.Service.GetUserByGoogleID(userGoogleID)
+	if err != nil {
+		http.Error(w, "Failed to get user by google id from database", http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
