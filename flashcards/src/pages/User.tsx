@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { User, FlashcardSet, Folder } from '../types/interfaces';
 import AddFolderModal from '../components/AddFolderModal';
 import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '../stores/userStore';
 
 function Users() {
-    const [user, setUser] = useState<User | null>(null);
+    const { user, setUser } = useUserStore();
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -12,7 +14,7 @@ function Users() {
 
     useEffect(() => {
         fetchUser();
-    }, []);
+    }, [setUser]);
 
     const fetchUser = async () => {
         try {
@@ -62,7 +64,7 @@ function Users() {
                                 <div
                                     draggable="true"
                                     key={set.ID}
-                                    className="card bg-base-200 rounded-box p-4 cursor-pointer text-black"
+                                    className="card bg-base-200 rounded-box p-4 cursor-pointer"
                                 >
                                     <h3>{set.Title}</h3>
                                     {/* Add more set details if needed */}
@@ -78,12 +80,11 @@ function Users() {
                             {user?.Folders.map((folder: Folder) => (
                                 <div
                                     key={folder.ID}
-                                    className="card bg-base-200 rounded-box p-4 cursor-pointer text-black"
+                                    className="card bg-base-200 rounded-box p-4 cursor-pointer"
                                     onClick={() => navigate(`/folders/${folder.ID}`)} // Navigate on click
                                 >
                                     <h3>{folder.Name}</h3>
 
-                                    {/* Add more folder details if needed */}
                                 </div>
                             ))}
                         </div>

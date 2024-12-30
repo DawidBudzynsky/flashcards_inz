@@ -30,4 +30,5 @@ export interface Folder {
     ID: number;
     Name: string;
     Description: string;
+    FlashcardsSets: FlashcardSet[];
 }

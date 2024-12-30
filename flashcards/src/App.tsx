@@ -5,21 +5,25 @@ import UserDetail from './pages/UserDetail'
 import FlashCardSetForm from './pages/FlashCardSetForm'
 import Layout from './layout'
 import FolderView from './pages/FolderView'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+const queryClient = new QueryClient();
 
 function App() {
     return (
         <>
-            <Routes>
-                <Route element={<Layout />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/users" element={<Users />} />
-                    <Route path="/users/:userId" element={<UserDetail />} />
-                    <Route path="/create" element={<FlashCardSetForm />} />
-                    <Route path="/create" element={<FlashCardSetForm />} />
-                    <Route path="/folders/:folderId" element={<FolderView />} />
-                </Route>
-            </Routes>
+            <QueryClientProvider client={queryClient}>
+                <Routes>
+                    <Route element={<Layout />}>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/users" element={<Users />} />
+                        <Route path="/users/:userId" element={<UserDetail />} />
+                        <Route path="/create" element={<FlashCardSetForm />} />
+                        <Route path="/create" element={<FlashCardSetForm />} />
+                        <Route path="/folders/:folderId" element={<FolderView />} />
+                    </Route>
+                </Routes>
+            </QueryClientProvider>
         </>
     )
 }

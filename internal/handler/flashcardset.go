@@ -79,7 +79,7 @@ func (h *FlashcardSetHandler) UpdateByID(w http.ResponseWriter, r *http.Request)
 	idParam := chi.URLParam(r, "id")
 	flashcardSetID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
