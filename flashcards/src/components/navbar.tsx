@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import handleLogout from '../requests/logout';
+import api from '../api/api';
 // import { Link } from 'react-router-dom';
 // import checkIfLoggedIn from '../requests/check_session';
 // import handleLogout from '../requests/logout';
@@ -12,6 +13,7 @@ const Navbar: React.FC = () => {
     const handleLogin = () => {
         window.location.href = "http://localhost:8080/auth?provider=google"
     };
+
 
     const checkIfLoggedIn = async () => {
         try {
@@ -33,7 +35,10 @@ const Navbar: React.FC = () => {
             setIsLoggedIn(false);
         }
     };
+
     useEffect(() => {
+
+        api.get("get", "/check-user-logged-in")
         checkIfLoggedIn();
     }, []);
 

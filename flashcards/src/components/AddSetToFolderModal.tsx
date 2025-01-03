@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlashcardSet } from '../types/interfaces';
-import { useUserStore } from '../stores/userStore';
+import { useUserStore } from '../hooks/stores/userStore';
 import FlashcardComponent from './flashcard';
 import FlashcardSetComponent from './flashcardSet';
 

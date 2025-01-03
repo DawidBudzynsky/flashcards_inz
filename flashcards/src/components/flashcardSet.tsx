@@ -1,31 +1,33 @@
 import React from 'react';
 import { FlashcardSet } from '../types/interfaces';
-import { useUserStore } from '../stores/userStore';
-import { useMutation } from '@tanstack/react-query';
+import { useUserStore } from '../hooks/stores/userStore';
+// import { useMutation } from '@tanstack/react-query';
 import { updateFlashcardSetFolder } from '../requests/updateFlashcardSetFolder';
-import { useFolderStore } from '../stores/folderStore';
+import { useFolderStore } from '../hooks/stores/folderStore';
 import { useParams } from 'react-router-dom';
-
+import useApi from "../hooks/api"
 
 const FlashcardSetComponent: React.FC<{ flashcardSet: FlashcardSet }> = ({ flashcardSet }) => {
     const { user, setUser } = useUserStore();
-    const { flashcardSets, setFlashcardSets, refreshFolderSets } = useFolderStore();
+    const { refreshFolderSets } = useFolderStore();
     const { folderId } = useParams<{ folderId: string }>();
 
-    const { mutate } = useMutation(
-        {
-            mutationFn: (folderId: number) => updateFlashcardSetFolder(flashcardSet.ID, folderId),
-            onSuccess: () => {
-                refreshFolderSets(folderId);
-            },
-            onError: (error) => {
-                console.error('Error updating folder:', error);
-            },
-        }
-    );
+    const [{ isUpdating }, updateFolder] = useApi.put(`/flashcards_sets/${flashcardSet.ID}`)
+
+    // const { mutate } = useMutation(
+    //     {
+    //         mutationFn: (folderId: number) => updateFlashcardSetFolder(flashcardSet.ID, folderId),
+    //         onSuccess: () => {
+    //             refreshFolderSets(folderId);
+    //         },
+    //         onError: (error) => {
+    //             console.error('Error updating folder:', error);
+    //         },
+    //     }
+    // );
 
     const handleAssignToFolder = (folderId: number) => {
-        mutate(folderId);  // Uruchom mutację, aby zaktualizować folder
+        updateFolder(folderId);  // Uruchom mutację, aby zaktualizować folder
     };
 
     return (
@@ -37,7 +39,7 @@ const FlashcardSetComponent: React.FC<{ flashcardSet: FlashcardSet }> = ({ flash
                 {/* Right Side: Button */}
 
                 <button className="btn"
-                    onClick={() => handleAssignToFolder(10)}
+                    onClick={() => handleAssignToFolder(folderId)}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

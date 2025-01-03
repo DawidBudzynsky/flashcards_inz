@@ -1,44 +1,21 @@
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Folder } from '../types/interfaces';
+import { createFolder } from '../requests/folder';
 
 interface AddFolderModalProps {
-    onFolderAdd: (folder: Folder) => void;
+    onFolderAdd?: (folder: Folder) => void; // Optional, if needed for immediate UI updates
 }
 
 const AddFolderModal: React.FC<AddFolderModalProps> = ({ onFolderAdd }) => {
     const [folderName, setFolderName] = useState('');
     const [description, setDescription] = useState('');
+    const queryClient = useQueryClient();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        try {
-            const response = await fetch('http://localhost:8080/folders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    name: folderName,
-                    description: description,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create folder');
-            }
-
-            const newFolder = await response.json();
-            onFolderAdd(newFolder); // Notify parent component
-
-            // Reset the form and close the modal
-            setFolderName('');
-            setDescription('');
-            (document.getElementById('my_modal_2') as HTMLDialogElement)?.close();
-        } catch (error) {
-            console.error('Error creating folder:', error);
-        }
+        onFolderAdd({ name: folderName, description });
     };
 
     return (
@@ -70,8 +47,12 @@ const AddFolderModal: React.FC<AddFolderModalProps> = ({ onFolderAdd }) => {
                         onChange={(e) => setDescription(e.target.value)}
                         required
                     />
-                    <button type="submit" className="btn btn-primary w-full">
-                        Create Folder
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-full"
+                    // disabled={isLoading} // Disable button during mutation
+                    >
+                        {/* {isLoading ? 'Creating...' : 'Create Folder'} */}Create Folder
                     </button>
                 </form>
                 <form method="dialog" className="modal-backdrop">
@@ -83,4 +64,3 @@ const AddFolderModal: React.FC<AddFolderModalProps> = ({ onFolderAdd }) => {
 };
 
 export default AddFolderModal;
-

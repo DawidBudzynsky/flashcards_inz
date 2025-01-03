@@ -1,54 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, FlashcardSet, Folder } from '../types/interfaces';
 import AddFolderModal from '../components/AddFolderModal';
-import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '../stores/userStore';
+import { getUser } from '../requests/user';
+import { createFolder } from '../requests/folder';
 
 function Users() {
-    const { user, setUser } = useUserStore();
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        fetchUser();
-    }, [setUser]);
+    // Fetch user data using useQuery
+    const { data: user, status: userStatus, error: userError } = useQuery<User>({
+        queryKey: ["user"],
+        queryFn: getUser,
+    });
 
-    const fetchUser = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/users/me', {
-                credentials: 'include',
+    // Mutation for adding a folder
+    const { mutate: addFolder, isLoading: addingFolder } = useMutation({
+        mutationFn: createFolder,
+        onSuccess: (newFolder: Folder) => {
+            // Update the user data in the cache
+            queryClient.setQueryData<User>(["user"], (oldData) => {
+                if (!oldData) return oldData;
+                return {
+                    ...oldData,
+                    Folders: [...oldData.Folders, newFolder],
+                };
             });
-            if (!response.ok) {
-                throw new Error('Failed to fetch user');
-            }
-            const data = await response.json();
+            navigate(`/folders/${newFolder.ID}`);
+        },
+        onError: (error: any) => {
+            console.error("Error adding folder:", error);
+            alert(`Failed to add folder: ${error.message}`);
+        },
+    });
 
-            setUser(data);
-            setLoading(false);
-        } catch (error) {
-            setError((error as Error).message);
-            setLoading(false);
-        }
+    // Handle folder addition
+    const handleAddFolder = (newFolder: Folder) => {
+        addFolder(newFolder); // Trigger the mutation
     };
 
-    const addFolder = (newFolder: Folder) => {
-        if (user) {
-            setUser({
-                ...user,
-                Folders: [...user.Folders, newFolder], // Add new folder to the Folders array
-            });
-        }
-    };
-
-    if (loading) {
+    if (userStatus === "loading") {
         return <div>Loading...</div>;
     }
 
-    if (error) {
-        return <div>Error: {error}</div>;
+    if (userStatus === "error") {
+        return <div>Error: {(userError as Error).message}</div>;
     }
 
     return (
@@ -67,7 +64,6 @@ function Users() {
                                     className="card bg-base-200 rounded-box p-4 cursor-pointer"
                                 >
                                     <h3>{set.Title}</h3>
-                                    {/* Add more set details if needed */}
                                 </div>
                             ))}
                         </div>
@@ -84,11 +80,10 @@ function Users() {
                                     onClick={() => navigate(`/folders/${folder.ID}`)} // Navigate on click
                                 >
                                     <h3>{folder.Name}</h3>
-
                                 </div>
                             ))}
                         </div>
-                        <AddFolderModal onFolderAdd={addFolder} />
+                        <AddFolderModal onFolderAdd={handleAddFolder} />
                     </div>
 
                 </div>
@@ -98,3 +93,4 @@ function Users() {
 }
 
 export default Users;
+
