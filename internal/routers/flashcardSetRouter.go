@@ -17,6 +17,7 @@ func FlashcardSetRouter(handler *handler.FlashcardSetHandler) chi.Router {
 	r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)
 	r.Put("/{id}", handler.UpdateByID)
+	r.Post("/add_set_to_folder", handler.AddSetToFolder)
 	r.Delete("/{id}", handler.DeleteByID)
 
 	return r

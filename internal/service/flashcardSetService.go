@@ -12,6 +12,7 @@ type FlashcardSetInterface interface {
 	GetFlashcardSetByID(uint64) (*models.FlashcardSet, error)
 	UpdateFlashcardSetByID(uint64, map[string]interface{}) (*models.FlashcardSet, error)
 	DeleteFlashcardSetByID(uint64) error
+	AddFlashcardSetToFolder(uint64, uint64) (*models.FlashcardSet, error)
 }
 
 const flashcards = "Flashcards"
@@ -38,7 +39,6 @@ func (s *FlashcardSetService) CreateFlashcardSet(body CreateFlashcardSetRequest)
 		UserGoogleID: body.UserGoogleID,
 		Title:        body.Title,
 		Description:  body.Description,
-		FolderID:     body.FolderID,
 	}
 
 	if err := s.db.Create(flashcardSet).Error; err != nil {
@@ -71,6 +71,27 @@ func (s *FlashcardSetService) UpdateFlashcardSetByID(id uint64, updateData map[s
 	if err := s.db.Model(flashcardSet).Updates(updateData).Error; err != nil {
 		return nil, err
 	}
+	return flashcardSet, nil
+}
+
+func (s *FlashcardSetService) AddFlashcardSetToFolder(id, folderID uint64) (*models.FlashcardSet, error) {
+	// Get the flashcard set by ID
+	flashcardSet, err := s.GetFlashcardSetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the folder by ID
+	var folder models.Folder
+	if err := s.db.First(&folder, folderID).Error; err != nil {
+		return nil, err
+	}
+
+	// Append the flashcard set to the folder's association
+	if err := s.db.Model(&folder).Association("FlashcardsSets").Append(flashcardSet); err != nil {
+		return nil, err
+	}
+
 	return flashcardSet, nil
 }
 

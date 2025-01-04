@@ -1,33 +1,35 @@
 import React from 'react';
-import { FlashcardSet } from '../types/interfaces';
-import { useUserStore } from '../hooks/stores/userStore';
-// import { useMutation } from '@tanstack/react-query';
-import { updateFlashcardSetFolder } from '../requests/updateFlashcardSetFolder';
-import { useFolderStore } from '../hooks/stores/folderStore';
+import { FlashcardSet, Folder } from '../types/interfaces';
 import { useParams } from 'react-router-dom';
-import useApi from "../hooks/api"
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { addSetToFolder, appendSetToFolder } from '../requests/folder';
 
 const FlashcardSetComponent: React.FC<{ flashcardSet: FlashcardSet }> = ({ flashcardSet }) => {
-    const { user, setUser } = useUserStore();
-    const { refreshFolderSets } = useFolderStore();
     const { folderId } = useParams<{ folderId: string }>();
+    const queryClient = useQueryClient();
 
-    const [{ isUpdating }, updateFolder] = useApi.put(`/flashcards_sets/${flashcardSet.ID}`)
 
-    // const { mutate } = useMutation(
-    //     {
-    //         mutationFn: (folderId: number) => updateFlashcardSetFolder(flashcardSet.ID, folderId),
-    //         onSuccess: () => {
-    //             refreshFolderSets(folderId);
-    //         },
-    //         onError: (error) => {
-    //             console.error('Error updating folder:', error);
-    //         },
-    //     }
-    // );
+    const { mutate } = useMutation({
+        mutationFn: (folderId: number) => appendSetToFolder(flashcardSet.ID, folderId),
+        onSuccess: () => {
+            // After successful mutation, update the folder's cache
+            queryClient.setQueryData<Folder>(["folder", folderId], (oldData) => {
+                if (!oldData) return oldData;
+
+                // Add the new flashcard set to the folder's FlashcardsSets
+                const updatedSets = [...oldData.FlashcardsSets, flashcardSet];
+
+                // Return the updated folder data with the new set
+                return { ...oldData, FlashcardsSets: updatedSets };
+            });
+        },
+        onError: (error) => {
+            console.error('Error updating folder:', error);
+        },
+    });
 
     const handleAssignToFolder = (folderId: number) => {
-        updateFolder(folderId);  // Uruchom mutację, aby zaktualizować folder
+        mutate(folderId);  // Uruchom mutację, aby zaktualizować folder
     };
 
     return (

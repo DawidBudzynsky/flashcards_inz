@@ -15,12 +15,13 @@ type User struct {
 type Users []User
 
 type Folder struct {
-	ID             int            `gorm:"primaryKey"`
-	UserGoogleID   string         `gorm:"index"` // Foreign key
-	Name           string         `gorm:"size:255"`
-	Description    string         `gorm:"size:255"`
-	CreatedAt      time.Time      `gorm:"autoCreateTime"`
-	FlashcardsSets FlashcardsSets `gorm:"foreignKey:FolderID"`
+	ID           int       `gorm:"primaryKey"`
+	UserGoogleID string    `gorm:"index"` // Foreign key
+	Name         string    `gorm:"size:255"`
+	Description  string    `gorm:"size:255"`
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	// FlashcardsSets FlashcardsSets `gorm:"foreignKey:FolderID"`
+	FlashcardsSets []FlashcardSet `gorm:"many2many:folder_sets;"`
 }
 
 type Folders []Folder
@@ -31,7 +32,6 @@ type FlashcardSet struct {
 	Title        string    `gorm:"size:255"`
 	Description  string    `gorm:"size:255"`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
-	FolderID     int       `gorm:"index"`
 	Flashcards   Flashcards
 }
 type FlashcardsSets []FlashcardSet

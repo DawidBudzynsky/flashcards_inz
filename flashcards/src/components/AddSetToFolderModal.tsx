@@ -1,11 +1,10 @@
 import React from 'react';
 import { FlashcardSet } from '../types/interfaces';
-import { useUserStore } from '../hooks/stores/userStore';
-import FlashcardComponent from './flashcard';
 import FlashcardSetComponent from './flashcardSet';
+import { useUserData } from '../hooks/userData';
 
 const AddSetModal: React.FC = () => {
-    const { user } = useUserStore(); // Pobranie danych użytkownika z Zustand store
+    const { flashcardSets } = useUserData();
 
     return (
         <>
@@ -21,10 +20,10 @@ const AddSetModal: React.FC = () => {
             <dialog id="my_modal_4" className="modal">
                 <div className="modal-box w-11/12 max-w-3xl">
                     <h3 className="font-bold text-lg mb-4">Available Sets</h3>
-                    {user?.FlashcardsSets && user.FlashcardsSets.length > 0 ? (
+                    {flashcardSets && flashcardSets.length > 0 ? (
                         <div className="grid grid-cols-1 gap-4">
                             {/* Rendering each flashcard set */}
-                            {user.FlashcardsSets.map((set: FlashcardSet) => (
+                            {flashcardSets.map((set: FlashcardSet) => (
                                 <div key={set.ID} className="flex justify-center">
                                     <FlashcardSetComponent flashcardSet={set} />
                                 </div>
