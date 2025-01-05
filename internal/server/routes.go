@@ -40,6 +40,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	flashcardSetHandler := &handler.FlashcardSetHandler{Service: service.NewFlashcardSetService(s.db.GetDB())}
 	r.Mount("/flashcards_sets", routers.FlashcardSetRouter(flashcardSetHandler))
 
+	userFlashcardHandler := &handler.UserFlashcardHandler{Service: *service.NewUserFlashcardService(s.db.GetDB())}
+	r.Mount("/user_flashcards", routers.UserFlashcardRouter(userFlashcardHandler))
+
 	flashcardHandler := &handler.FlashcardHandler{Service: service.NewFlashcardService(s.db.GetDB())}
 	r.Mount("/flashcards", routers.FlashcardRouter(flashcardHandler))
 
