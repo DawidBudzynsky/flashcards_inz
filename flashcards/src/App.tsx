@@ -6,6 +6,7 @@ import FlashCardSetForm from './pages/FlashCardSetForm'
 import Layout from './layout'
 import FolderView from './pages/FolderView'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import FlashcardSetView from './pages/FlashcardSetView'
 
 const queryClient = new QueryClient();
 
@@ -19,8 +20,8 @@ function App() {
                         <Route path="/users" element={<Users />} />
                         <Route path="/users/:userId" element={<UserDetail />} />
                         <Route path="/create" element={<FlashCardSetForm />} />
-                        <Route path="/create" element={<FlashCardSetForm />} />
                         <Route path="/folders/:folderId" element={<FolderView />} />
+                        <Route path="/flashcards_sets/:setId" element={<FlashcardSetView />} />
                     </Route>
                 </Routes>
             </QueryClientProvider>
