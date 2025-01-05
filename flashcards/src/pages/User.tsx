@@ -59,9 +59,10 @@ function Users() {
                         <div className="grid grid-cols-3 gap-4">
                             {user?.FlashcardsSets.map((set: FlashcardSet) => (
                                 <div
-                                    draggable="true"
+                                    draggable="false"
                                     key={set.ID}
                                     className="card bg-base-200 rounded-box p-4 cursor-pointer"
+                                    onClick={() => navigate(`/flashcards_sets/${set.ID}`)} // Navigate on click
                                 >
                                     <h3>{set.Title}</h3>
                                 </div>
