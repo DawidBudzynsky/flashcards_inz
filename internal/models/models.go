@@ -24,7 +24,6 @@ type UserFlashcard struct {
 	LastReviewed              time.Time `gorm:autoCreateTime`
 	NextReviewDue             time.Time // When the card is next due for review
 	TotalReviews              int       `gorm:"default:0"` // Total number of reviews
-	QualityHistory            string    `gorm:"size:1000"` // JSON or CSV string for quality history
 
 	Flashcard Flashcard
 }

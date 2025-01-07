@@ -28,7 +28,8 @@ func main() {
 		&models.User{},
 		&models.FlashcardSet{},
 		&models.Flashcard{},
-		&models.Folder{})
+		&models.Folder{},
+		&models.UserFlashcard{})
 	if err != nil {
 		log.Fatal("failed to migrate database", err)
 	}
