@@ -23,11 +23,12 @@ var easinessFormula = func(oldEasiness, quality float64) float64 {
 	return oldEasiness + EasinessConst + (EasinessLineal * quality) + (EasinessQuadratic * math.Pow(quality, 2))
 }
 
+// has to be the same as model JSON
 type Item struct {
-	CardId                    int
+	FlashcardID               int
 	Easiness                  float64
 	ConsecutiveCorrectAnswers int
-	Due                       int64
+	NextReviewDue             time.Time
 }
 
 type Sm2 struct {
@@ -64,9 +65,9 @@ func (s *Sm2) Due(item []byte, t time.Time) (d review.DueItem) {
 		return d
 	}
 
-	if decodedItem.Due < t.Unix() {
+	if decodedItem.NextReviewDue.Before(t) {
 		return review.DueItem{
-			CardId: decodedItem.CardId,
+			CardId: decodedItem.FlashcardID,
 		}
 	}
 
@@ -75,17 +76,17 @@ func (s *Sm2) Due(item []byte, t time.Time) (d review.DueItem) {
 
 func update(oldItem Item, r review.ReviewItem, s time.Time) Item {
 	newItem := Item{}
-	newItem.CardId = r.CardId
+	newItem.FlashcardID = r.CardId
 
 	newItem.Easiness = calculateEasiness(oldItem.Easiness, quality(r.Quality))
 
 	if r.Quality < review.CorrectHard {
-		newItem.Due = s.AddDate(0, 0, 1).Unix()
+		newItem.NextReviewDue = s.AddDate(0, 0, 1)
 		newItem.ConsecutiveCorrectAnswers = 0
 	}
 	// TODO: take a look on that one
 	days := float64(DueDateStartDays) * math.Pow(oldItem.Easiness, float64(oldItem.ConsecutiveCorrectAnswers-1))
-	newItem.Due = s.AddDate(0, 0, int(math.Round(days))).Unix()
+	newItem.NextReviewDue = s.AddDate(0, 0, int(math.Round(days)))
 	newItem.ConsecutiveCorrectAnswers = oldItem.ConsecutiveCorrectAnswers + 1
 
 	return newItem
@@ -97,7 +98,7 @@ func quality(q int) float64 {
 
 func create(r review.ReviewItem, now time.Time) Item {
 	newItem := Item{}
-	newItem.CardId = r.CardId
+	newItem.FlashcardID = r.CardId
 
 	if r.Quality != review.NoReview {
 		// the first reveiw for a card
@@ -108,7 +109,7 @@ func create(r review.ReviewItem, now time.Time) Item {
 		newItem.ConsecutiveCorrectAnswers = 0
 	}
 
-	newItem.Due = now.AddDate(0, 0, 1).Unix()
+	newItem.NextReviewDue = now.AddDate(0, 0, 1)
 	return newItem
 }
 

@@ -22,10 +22,10 @@ func TestCreate(t *testing.T) {
 				Quality: review.CorrectEasy,
 			},
 			expected: Item{
-				CardId:                    1,
+				FlashcardID:               1,
 				Easiness:                  2.5 + EasinessConst + (EasinessLineal * 5) + (EasinessQuadratic * math.Pow(5, 2)),
 				ConsecutiveCorrectAnswers: 1,
-				Due:                       now.AddDate(0, 0, 1).Unix(),
+				NextReviewDue:             now.AddDate(0, 0, 1).Unix(),
 			},
 		},
 		{
@@ -35,10 +35,10 @@ func TestCreate(t *testing.T) {
 				Quality: review.NoReview,
 			},
 			expected: Item{
-				CardId:                    2,
+				FlashcardID:               2,
 				Easiness:                  DefaultEasiness,
 				ConsecutiveCorrectAnswers: 0,
-				Due:                       now.AddDate(0, 0, 1).Unix(),
+				NextReviewDue:             now.AddDate(0, 0, 1).Unix(),
 			},
 		},
 	}
@@ -47,8 +47,8 @@ func TestCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			item := create(tt.review, now)
 
-			if item.CardId != tt.expected.CardId {
-				t.Errorf("expected CardId %d, got %d", tt.expected.CardId, item.CardId)
+			if item.FlashcardID != tt.expected.FlashcardID {
+				t.Errorf("expected CardId %d, got %d", tt.expected.FlashcardID, item.FlashcardID)
 			}
 
 			if math.Abs(item.Easiness-tt.expected.Easiness) > 1e-6 {
@@ -59,8 +59,8 @@ func TestCreate(t *testing.T) {
 				t.Errorf("expected ConsecutiveCorrectAnswers %d, got %d", tt.expected.ConsecutiveCorrectAnswers, item.ConsecutiveCorrectAnswers)
 			}
 
-			if item.Due != tt.expected.Due {
-				t.Errorf("expected Due %d, got %d", tt.expected.Due, item.Due)
+			if item.NextReviewDue != tt.expected.NextReviewDue {
+				t.Errorf("expected Due %d, got %d", tt.expected.NextReviewDue, item.NextReviewDue)
 			}
 		})
 	}
