@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"flashcards/internal/handler"
+	"flashcards/internal/repositories"
 	"flashcards/internal/routers"
 	"flashcards/internal/service"
 	"log"
@@ -40,7 +41,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	flashcardSetHandler := &handler.FlashcardSetHandler{Service: service.NewFlashcardSetService(s.db.GetDB())}
 	r.Mount("/flashcards_sets", routers.FlashcardSetRouter(flashcardSetHandler))
 
-	userFlashcardHandler := &handler.UserFlashcardHandler{Service: *service.NewUserFlashcardService(s.db.GetDB())}
+	userFlashcardRepo := repositories.NewUserFlashcardRepo(s.db.GetDB())
+	userFlashcardHandler := &handler.UserFlashcardHandler{Service: *service.NewUserFlashcardService(userFlashcardRepo)}
 	r.Mount("/user_flashcards", routers.UserFlashcardRouter(userFlashcardHandler))
 
 	flashcardHandler := &handler.FlashcardHandler{Service: service.NewFlashcardService(s.db.GetDB())}

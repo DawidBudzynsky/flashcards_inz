@@ -83,8 +83,8 @@ const FlashcardSetView: React.FC = () => {
                     Back
                 </button>
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 

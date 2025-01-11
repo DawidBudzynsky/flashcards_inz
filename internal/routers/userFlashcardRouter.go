@@ -13,7 +13,8 @@ func UserFlashcardRouter(userFlashcardHandler *handler.UserFlashcardHandler) chi
 	//middlewares
 	//...
 
-	r.With(middlewares.UserIdFromSession).Post("/", userFlashcardHandler.Create)
+	r.With(middlewares.UserIdFromSession).Put("/reviews", userFlashcardHandler.Create)
+	// r.Put("/reviews", userFlashcardHandler.Create)
 	// r.Get("/", userHandler.List)
 	// r.With(middlewares.CheckLoggedInMiddleware).Get("/", userHandler.List)
 	// r.With(middlewares.UserIdFromSession).Get("/me", userHandler.GetByGoogleID)

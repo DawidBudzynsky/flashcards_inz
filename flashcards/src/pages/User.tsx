@@ -4,6 +4,7 @@ import { User, FlashcardSet, Folder } from '../types/interfaces';
 import AddFolderModal from '../components/AddFolderModal';
 import { getUser } from '../requests/user';
 import { createFolder } from '../requests/folder';
+import CreateTestModal from '../components/CreateTestModal';
 
 function Users() {
     const navigate = useNavigate();
@@ -53,6 +54,7 @@ function Users() {
             <div className="px-6 py-6">
                 <div className="flex flex-col space-y-6">
 
+                    <CreateTestModal />
                     {/* User Flashcard Sets Section */}
                     <div className="card bg-base-300 rounded-box">
                         <h2 className="text-3xl mb-4">Your Flashcard Sets</h2>
