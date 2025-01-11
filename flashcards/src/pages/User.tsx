@@ -7,10 +7,13 @@ import { getUser } from "../requests/user";
 import { createFolder } from "../requests/folder";
 import CreateTestModal from "../components/CreateTestModal";
 import ListItem from "../components/ListItem";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Users() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [searchQuery, setSearchQuery] = useState("");
+
 
     const [activeTab, setActiveTab] = useState("flashcards");
     const tabs = [
@@ -23,6 +26,24 @@ function Users() {
         queryKey: ["user"],
         queryFn: getUser,
     });
+
+
+    const fuzzyMatch = (query: string, target: string) => {
+        let queryIndex = 0;
+        for (const char of target.toLowerCase()) {
+            if (char === query[queryIndex]) {
+                queryIndex++;
+            }
+            if (queryIndex === query.length) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const filteredSets = user?.FlashcardsSets.filter((set: FlashcardSet) =>
+        fuzzyMatch(searchQuery.toLowerCase(), set.Title.toLowerCase())
+    );
 
     // Mutation for adding a folder
     const { mutate: addFolder, isLoading: addingFolder } = useMutation({
@@ -91,6 +112,15 @@ function Users() {
 
                     <div className="flex justify-between w-5/6 mx-auto py-3">
                         <h2 className="text-3xl mb-4">Your Flashcard Sets</h2>
+
+                        <input
+                            type="text"
+                            placeholder="Search for set"
+                            value={searchQuery} // Controlled input
+                            onChange={(e) => setSearchQuery(e.target.value)} // Update query on change
+                            className="input input-bordered w-full max-w-xs"
+                        />
+
                         <button
                             onClick={handleNavigate}
                             className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 hover:scale-105 duration-150"
@@ -99,10 +129,41 @@ function Users() {
                         </button>
                     </div>
 
+
                     <div className="max-w-5xl w-full space-y-3">
-                        {user?.FlashcardsSets.map((set: FlashcardSet) => (
-                            <ListItem set={set} />
-                        ))}
+
+                        <AnimatePresence>
+                            <AnimatePresence>
+                                {filteredSets && filteredSets.length > 0 ? (
+                                    filteredSets.map((set: FlashcardSet) => (
+                                        <motion.div
+                                            key={set.ID}
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <ListItem set={set} />
+                                        </motion.div>
+                                    ))
+                                ) : (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="text-center text-gray-500 mt-4"
+                                    >
+                                        No searches found ☹️
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                        </AnimatePresence>
+
+                        {/* {filteredSets?.map((set: FlashcardSet) => ( */}
+                        {/*     <ListItem set={set} /> */}
+                        {/* ))} */}
                     </div>
                 </div>
             ) : (

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FlashcardSet } from "../types/interfaces";
+import { dateToString } from "../utils/showDate";
 
 interface ListItemProps {
     set: FlashcardSet; // Explicitly typing the props
@@ -16,7 +17,7 @@ const ListItem: React.FC<ListItemProps> = ({ set }) => {
         >
             <div className="flex justify-between text-opacity-25">
                 <p>{set.Flashcards.length} items</p>
-                <p>created at: {new Date(set.CreatedAt).toLocaleDateString()}</p>
+                <p>created at: {dateToString(set.CreatedAt)}</p>
             </div>
 
             <p className="text-2xl font-medium">{set.Title}</p>
