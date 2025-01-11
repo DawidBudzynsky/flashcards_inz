@@ -54,7 +54,7 @@ const CreateTestModal: React.FC = () => {
     return (
         <>
             <button
-                className="btn"
+                className="btn max-w-5xl w-5/6 p-4"
                 onClick={() =>
                     (document.getElementById('create_test_modal') as HTMLDialogElement)?.showModal()
                 }
