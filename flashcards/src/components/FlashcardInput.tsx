@@ -16,17 +16,14 @@ interface FlashcardInputProps {
 const FlashcardInput: React.FC<FlashcardInputProps> = ({ index, flashcard, handleInputChange, handleDelete }) => {
 
     return (
-        < div className="flex flex-col mb-5 w-full space-x-10 bg-blue-800 px-6 py-2 rounded-lg mt-3" >
+        < div className="modal-box max-w-7xl w-full rounded-3xl space-y-5" >
 
             <div className='flex justify-between'>
-                <div className='text-white'>
+                <div className='text-lg font-bold'>
                     Card number: {index + 1}
-
                 </div>
-
-                <button className="btn btn-circle btn-outline"
+                <button className="btn btn-sm btn-circle hover:bg-red-500"
                     onClick={() => handleDelete(index)}>
-
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-6 w-6"
@@ -42,49 +39,35 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({ index, flashcard, handl
                 </button>
             </div>
 
-            <div className='flex space-x-10'>
-                <div className="w-1/2">
-                    <div className="form-control w-full">
-                        <label htmlFor={`question_${index}`} className="label">
-                            <span className="label-text text-white">Question</span>
-                        </label>
-
-                        <input
-                            type="text"
-                            name={`question_${index}`}
-                            id={`question_${index}`}
-                            className="input input-bordered w-full text-sm bg-transparent text-gray-900 border-gray-300 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-blue-600"
-                            value={flashcard.question}
-                            onChange={(e) => handleInputChange(index, 'question', e.target.value)}
-                            style={{ overflowWrap: 'break-word' }}
-                            required
-                        />
-                    </div>
+            <div className='flex justify-between space-x-24 pb-5'>
+                <div className="form-control w-full">
+                    <input
+                        className="input input-bordered w-full"
+                        type="text"
+                        id={`question_${index}`}
+                        name={`question_${index}`}
+                        placeholder="Question"
+                        value={flashcard.question}
+                        onChange={(e) => handleInputChange(index, 'question', e.target.value)}
+                        required
+                    />
                 </div>
-                <div className="w-1/2">
-                    <div className="form-control w-full">
-                        <label htmlFor={`answer_${index}`} className="label">
-                            <span className="label-text text-white">Answer</span>
-                        </label>
-                        <input
-                            type="text"
-                            name={`answer_${index}`}
-                            id={`answer_${index}`}
-                            className="input input-bordered w-full text-sm bg-transparent text-gray-900 border-gray-300 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-blue-600"
-                            value={flashcard.answer}
-                            onChange={(e) => handleInputChange(index, 'answer', e.target.value)}
-                            style={{ overflowWrap: 'break-word' }}
-                            required
-                        />
-                    </div>
+                <div className="form-control w-full">
+                    <input
+                        className="input input-bordered w-full"
+                        type="text"
+                        id={`answer_${index}`}
+                        name={`answer_${index}`}
+                        placeholder="Answer"
+                        value={flashcard.answer}
+                        onChange={(e) => handleInputChange(index, 'answer', e.target.value)}
+                        required
+                    />
                 </div>
             </div >
+
         </div >
-
-
-    )
-        ;
-
+    );
 }
 
 export default FlashcardInput;

@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import FlashcardInput from "../components/FlashcardInput";
+import { useMutation } from "@tanstack/react-query";
+import { FlashcardSetRequest, createFlashcardSet } from "../requests/flashcardset";
+import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
 
 interface Flashcard {
     question: string;
@@ -12,9 +15,13 @@ const FlashCardSetForm: React.FC = () => {
     const [flashcards, setFlashcards] = useState<Flashcard[]>([
         { question: "", answer: "" },
     ]);
+    const [recentlyAdded, setRecentlyAdded] = useState<number | null>(null);
 
     const addFlashcard = () => {
+        const newCardIndex = flashcards.length;
         setFlashcards([...flashcards, { question: "", answer: "" }]);
+        setRecentlyAdded(newCardIndex); // Track the newly added card index
+        setTimeout(() => setRecentlyAdded(null), 100); // Remove the animation state after 1s
     };
 
     const removeFlashcard = (indexToRemove: number) => {
@@ -31,92 +38,110 @@ const FlashCardSetForm: React.FC = () => {
         setFlashcards(updatedFlashcards);
     };
 
-    const sendCreateRequest = async () => {
-        try {
-            const setResponse = await fetch("http://localhost:8080/flashcards_sets", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: 'include',
-                body: JSON.stringify({
-                    title: setName,
-                    description: setDescription,
-                    folder_id: null,
-                    // user_id: null,                
-                }),
-            });
+    // Initialize useMutation for the API call
+    const { mutate } = useMutation({
+        mutationFn: (data: FlashcardSetRequest) => createFlashcardSet(data),
+        onSuccess: (createdSet) => {
+            console.log("FlashcardSet created successfully!");
 
-            if (!setResponse.ok) {
-                throw new Error("Failed to create flashcard set");
-            }
+            const flashcardsData = flashcards.map((card) => ({
+                flashcard_set_id: createdSet.ID,
+                question: card.question,
+                answer: card.answer,
+            }));
 
-            const createdSet = await setResponse.json();
-            // const flashcardSetId = createdSet.ID; // Assuming the backend responds with the ID
+            createFlashcardsMutation.mutate(flashcardsData);
+        },
+        onError: (error: any) => {
+            console.error("Error creating flashcardSet:", error);
+        },
+    });
 
-            // Step 2: Create the flashcards
-            const flashcardsResponse = await fetch("http://localhost:8080/flashcards", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: 'include',
-                body: JSON.stringify(
-                    flashcards.map((card) => ({
-                        flashcard_set_id: createdSet.ID,
-                        question: card.question,
-                        answer: card.answer,
-                    }))
-                ),
-            });
-
-            if (!flashcardsResponse.ok) {
-                throw new Error("Failed to create flashcards");
-            }
-
+    const createFlashcardsMutation = useMutation({
+        mutationFn: (data: FlashcardsDataRequest[]) => createFlashcards(data),
+        onSuccess: () => {
+            console.log("Flashcards created successfully.");
             alert("Flashcard set and flashcards created successfully!");
-        } catch (error) {
-            console.error(error);
-            alert("Failed to create flashcard set and flashcards. Please try again.");
+        },
+        onError: (error: any) => {
+            console.error("Error creating flashcards:", error);
+            alert("Failed to create flashcards.");
+        },
+    });
+
+    const handleSubmit = () => {
+        if (!setName || !setDescription) {
+            alert("Please provide a set name and description.");
+            return;
         }
+        // Trigger the mutation for creating the flashcard set
+        mutate({
+            title: setName,
+            description: setDescription,
+            folder_id: null,
+        });
     };
 
     return (
-        <div className="p-4 max-w-4xl w-3/5 mx-auto">
-            {/* Flashcard Set Name and Description */}
-            <div className="mb-8 p-4 bg-blue-900 text-black rounded-lg">
-                <label className="text-lg font-medium mb-2 text-white">Create your new set!</label>
-                <div>
-                    <div className="mb-4">
-                        <input type="text" id="setName" value={setName} onChange={(e) => setSetName(e.target.value)} required placeholder="Enter the name of the set" className="input input-bordered w-full" />
-                    </div>
-                    <div>
-                        <input type="text" id="setDescription" value={setDescription} onChange={(e) => setSetDescription(e.target.value)} required placeholder="Description of a set" className="input input-bordered w-full" />
-                    </div>
+        <div className="p-4 max-w-5xl w-5/6 mx-auto">
+            <div className="max-w-5xl w-5/6 mx-auto flex justify-between">
+                <h3 className="text-4xl font-bold">Create your new set!</h3>
+                <button
+                    onClick={handleSubmit}
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                >
+                    Create
+                </button>
+            </div>
 
-                    {/* Flashcard Input Fields */}
-                    {flashcards.map((flashcard, index) => (
-                        <FlashcardInput
-                            key={index}
-                            index={index}
-                            flashcard={flashcard}
-                            handleDelete={removeFlashcard}
-                            handleInputChange={handleInputChange}
+            <div className="modal-box max-w-5xl mx-auto w-full rounded-lg">
+                <div className="my-4">
+                    <div className="space-y-5">
+                        <input
+                            type="text"
+                            id="setName"
+                            value={setName}
+                            onChange={(e) => setSetName(e.target.value)}
+                            required
+                            placeholder="Enter the name of the set"
+                            className="input input-bordered w-full"
                         />
-                    ))}
-
+                        <input
+                            type="text"
+                            id="setDescription"
+                            value={setDescription}
+                            onChange={(e) => setSetDescription(e.target.value)}
+                            required
+                            placeholder="Description of a set"
+                            className="input input-bordered w-full"
+                        />
+                    </div>
                 </div>
             </div>
 
+            {/* Flashcard Input Fields */}
+            {flashcards.map((flashcard, index) => (
+                <div
+                    key={index}
+                    className={`transition-transform transform ${recentlyAdded === index ? "scale-105 opacity-100" : "opacity-90"
+                        } duration-300`}
+                >
+                    <FlashcardInput
+                        index={index}
+                        flashcard={flashcard}
+                        handleDelete={removeFlashcard}
+                        handleInputChange={handleInputChange}
+                    />
+                </div>
+            ))}
+
             {/* Add Flashcard Button */}
-            <div className="flex justify-evenly p-4 mt-6 border border-gray-300 rounded-lg">
+            <div className="modal-box max-w-5xl w-full rounded-3xl space-y-5">
                 <button
                     onClick={addFlashcard}
                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
                     Add More
-                </button>
-                <button
-                    onClick={sendCreateRequest}
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                >
-                    Create
                 </button>
             </div>
         </div>
