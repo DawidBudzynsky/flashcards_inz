@@ -1,14 +1,22 @@
-import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, FlashcardSet, Folder } from '../types/interfaces';
-import AddFolderModal from '../components/AddFolderModal';
-import { getUser } from '../requests/user';
-import { createFolder } from '../requests/folder';
-import CreateTestModal from '../components/CreateTestModal';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { User, FlashcardSet, Folder } from "../types/interfaces";
+import AddFolderModal from "../components/AddFolderModal";
+import { getUser } from "../requests/user";
+import { createFolder } from "../requests/folder";
+import CreateTestModal from "../components/CreateTestModal";
+import ListItem from "../components/ListItem";
 
 function Users() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
+    const [activeTab, setActiveTab] = useState("flashcards");
+    const tabs = [
+        { id: "flashcards", label: "Sets" },
+        { id: "folders", label: "Folders" },
+    ];
 
     // Fetch user data using useQuery
     const { data: user, status: userStatus, error: userError } = useQuery<User>({
@@ -48,49 +56,80 @@ function Users() {
     if (userStatus === "error") {
         return <div>Error: {(userError as Error).message}</div>;
     }
+    const handleNavigate = () => {
+        navigate("/create")
+    }
 
     return (
-        <div className="w-screen flex justify-center">
-            <div className="px-6 py-6">
-                <div className="flex flex-col space-y-6">
+        <div className="p-4 max-w-5xl w-full mx-auto">
+            <CreateTestModal />
 
-                    <CreateTestModal />
-                    {/* User Flashcard Sets Section */}
-                    <div className="card bg-base-300 rounded-box">
+            {/* Radio Picker */}
+            <div className="flex justify-center my-4">
+
+                <div role="tablist" className="tabs tabs-bordered">
+                    {tabs.map((tab) => (
+                        <a
+                            role="tab"
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`tab ${activeTab === tab.id ? "tab-active" : ""}`}
+
+                        >
+                            {tab.label}
+                        </a>
+                    ))}
+                </div>
+
+            </div>
+
+
+            {/* Conditionally Render Flashcards or Folders */}
+            {activeTab === "flashcards" ? (
+                // User Flashcard Sets Section
+                <div className="p-4 max-w-5xl w-full mx-auto">
+
+                    <div className="flex justify-between w-5/6 mx-auto py-3">
                         <h2 className="text-3xl mb-4">Your Flashcard Sets</h2>
-                        <div className="grid grid-cols-3 gap-4">
-                            {user?.FlashcardsSets.map((set: FlashcardSet) => (
-                                <div
-                                    draggable="false"
-                                    key={set.ID}
-                                    className="card bg-base-200 rounded-box p-4 cursor-pointer"
-                                    onClick={() => navigate(`/flashcards_sets/${set.ID}`)} // Navigate on click
-                                >
-                                    <h3>{set.Title}</h3>
-                                </div>
-                            ))}
-                        </div>
+                        <button
+                            onClick={handleNavigate}
+                            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 hover:scale-105 duration-150"
+                        >
+                            Create new Set
+                        </button>
                     </div>
 
-                    {/* User Folders Section */}
-                    <div className="card bg-base-300 rounded-box">
+                    <div className="max-w-5xl w-full space-y-3">
+                        {user?.FlashcardsSets.map((set: FlashcardSet) => (
+                            <ListItem set={set} />
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                // User Folders Section
+                <div className="p-4 max-w-5xl w-full mx-auto">
+
+
+                    <div className="flex justify-between w-5/6 mx-auto py-3">
                         <h2 className="text-3xl mb-4">Your Folders</h2>
-                        <div className="grid grid-cols-3 gap-4">
-                            {user?.Folders.map((folder: Folder) => (
-                                <div
-                                    key={folder.ID}
-                                    className="card bg-base-200 rounded-box p-4 cursor-pointer"
-                                    onClick={() => navigate(`/folders/${folder.ID}`)} // Navigate on click
-                                >
-                                    <h3>{folder.Name}</h3>
-                                </div>
-                            ))}
-                        </div>
+
                         <AddFolderModal onFolderAdd={handleAddFolder} />
                     </div>
 
+
+                    <div className="max-w-5xl w-full space-y-3">
+                        {user?.Folders.map((folder: Folder) => (
+                            <div
+                                key={folder.ID}
+                                className="modal-box max-w-5xl mx-auto bg-base-200 rounded-box p-4 cursor-pointer"
+                                onClick={() => navigate(`/folders/${folder.ID}`)} // Navigate on click
+                            >
+                                <h3>{folder.Name}</h3>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
