@@ -10,7 +10,7 @@ type FlashcardServiceInterface interface {
 	CreateFlashcard(CreateFlashcardRequest) (*models.Flashcard, error)
 	ListFlashcards() (models.Flashcards, error)
 	GetFlashcardByID(uint64) (*models.Flashcard, error)
-	UpdateFlashcardByID(uint64, map[string]interface{}) (*models.Flashcard, error)
+	UpdateFlashcardByID(uint64, UpdateFlashcardRequest) (*models.Flashcard, error)
 	DeleteFlashcardByID(uint64) error
 }
 
@@ -18,6 +18,12 @@ type CreateFlashcardRequest struct {
 	FlashcardSetID int    `json:"flashcard_set_id"`
 	Question       string `json:"question"`
 	Answer         string `json:"answer"`
+}
+
+type UpdateFlashcardRequest struct {
+	ID       uint64 `json:"id"`
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
 }
 
 type FlashcardService struct {
@@ -56,7 +62,7 @@ func (s *FlashcardService) GetFlashcardByID(id uint64) (*models.Flashcard, error
 	return &flashcard, nil
 }
 
-func (s *FlashcardService) UpdateFlashcardByID(id uint64, updateData map[string]interface{}) (*models.Flashcard, error) {
+func (s *FlashcardService) UpdateFlashcardByID(id uint64, updateData UpdateFlashcardRequest) (*models.Flashcard, error) {
 	flashcard, err := s.GetFlashcardByID(id)
 	if err != nil {
 		return nil, err

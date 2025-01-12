@@ -7,6 +7,12 @@ export interface FlashcardsDataRequest {
     answer: string,
 }
 
+export interface FlashcardsDataUpdateRequest {
+    id: string
+    question: string,
+    answer: string,
+}
+
 export interface FlashcardReviewRequest {
     CardID: number,
     Quality: number
@@ -15,6 +21,11 @@ export interface FlashcardReviewRequest {
 export const createFlashcards = async (flashcardsData: FlashcardsDataRequest[]) => {
     const url = `/flashcards/`;
     return await api.post(url, flashcardsData);
+};
+
+export const updateFlashcards = async (flashcardsData: FlashcardsDataUpdateRequest[]) => {
+    const url = `/flashcards/`;
+    return await api.put(url, flashcardsData);
 };
 
 export const sendFlashcardReview = async (reviewData: FlashcardReviewRequest) => {

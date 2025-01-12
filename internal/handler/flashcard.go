@@ -72,31 +72,53 @@ func (h *FlashcardHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *FlashcardHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	flashcardID, err := strconv.ParseUint(idParam, 10, 64)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+func (h *FlashcardHandler) UpdateFlashcards(w http.ResponseWriter, r *http.Request) {
+	var body []service.UpdateFlashcardRequest
+
+	// TODO: ensure they have IDS, maybe this below does that
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var updateData map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	for _, flashcard := range body {
+
+		_, err := h.Service.UpdateFlashcardByID(flashcard.ID, flashcard)
+		if err != nil {
+			http.Error(w, "Failed to update flashcard", http.StatusInternalServerError)
+			return
+		}
+
 	}
 
-	flashcard, err := h.Service.UpdateFlashcardByID(flashcardID, updateData)
-	if err != nil {
-		http.Error(w, "Failed to update flashcard", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(flashcard); err != nil {
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "created flashcards"}); err != nil {
 		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
 	}
 }
+
+// func (h *FlashcardHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
+// 	idParam := chi.URLParam(r, "id")
+// 	flashcardID, err := strconv.ParseUint(idParam, 10, 64)
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	var updateData map[string]interface{}
+// 	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	flashcard, err := h.Service.UpdateFlashcardByID(flashcardID, updateData)
+// 	if err != nil {
+// 		http.Error(w, "Failed to update flashcard", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	if err := json.NewEncoder(w).Encode(flashcard); err != nil {
+// 		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
+// 	}
+// }
 
 func (h *FlashcardHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")

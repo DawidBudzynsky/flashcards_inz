@@ -20,8 +20,11 @@ function App() {
                         <Route path="/users" element={<Users />} />
                         <Route path="/users/:userId" element={<UserDetail />} />
                         <Route path="/create" element={<FlashCardSetForm />} />
+                        <Route path="flashcards_sets/:setId/edit" element={<FlashCardSetForm />} />
+
                         <Route path="/folders/:folderId" element={<FolderView />} />
                         <Route path="/flashcards_sets/:setId" element={<FlashcardSetView />} />
+
                     </Route>
                 </Routes>
             </QueryClientProvider>

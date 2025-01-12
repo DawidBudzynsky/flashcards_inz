@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { getFlashcardSetByID } from '../requests/flashcardset';
+import { deleteSetByID, getFlashcardSetByID } from '../requests/flashcardset';
 import { Flashcard } from '../types/interfaces';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { dateToString } from '../utils/showDate';
+import FlashcardInput from '../components/FlashcardInput';
 
 
 const FlashcardSetView: React.FC = () => {
@@ -14,76 +16,125 @@ const FlashcardSetView: React.FC = () => {
         queryFn: () => getFlashcardSetByID(setID!),
     });
 
-    const [selectedQuality, setSelectedQuality] = useState<number | null>(null);
-    const [selectedCardID, setSelectedCardID] = useState<number | null>(null);
-
     const handleReviewClick = (quality: number, cardID: number) => {
-        setSelectedQuality(quality);
-        setSelectedCardID(cardID);
-
+        // setSelectedQuality(quality);
+        // setSelectedCardID(cardID);
         const reviewData = {
             CardID: cardID,
             Quality: quality,
         };
     }
 
+    // Mutation to delete the set
+    const { mutate: deleteSet, isLoading: isDeleting } = useMutation({
+        mutationFn: () => deleteSetByID(setID!),
+        onSuccess: () => {
+            alert("Set deleted successfully.");
+            navigate(-1);
+        },
+        onError: (error: any) => {
+            console.error("Error deleting set:", error);
+            alert(`Failed to delete set: ${error?.message || "An unexpected error occurred."}`);
+        },
+    });
+
+    const handleDelete = async () => {
+        const confirmation = window.confirm("Are you sure you want to delete this set?");
+        if (confirmation) { deleteSet() };
+    };
+
+    const handleEdit = () => {
+        navigate(`/flashcards_sets/${setID}/edit`)
+    }
+
     return (
-        <div className="w-screen flex justify-center">
+        <div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
+
             <div className="w-screen max-w-5xl flex flex-col justify-center">
 
-                <div className="px-6 py-6 grid grid-cols-2 bg-orange-100 justify-between items-center">
-                    <h1 className="text-3xl mx-auto">{set?.Title}</h1>
-                    <span className="text-sm text-gray-600">{set?.CreatedAt}</span>
+                <div className="max-w-5xl w-5/6 mx-auto flex justify-between">
+                    <h1 className="text-4xl font-bold">{set?.Title}</h1>
+                    <span className="text-sm text-gray-600">Created: {dateToString(set?.CreatedAt)}</span>
                 </div>
 
-                <div className="px-3 py-3 flex flex-row bg-orange-400 justify-center">
-                    <span>{set?.Description}</span>
+                <div className="flex justify-start ps-24">
+                    <span>Description: {set?.Description}</span>
                 </div>
+            </div>
 
-                <div className="px-6 flex justify-center gap-4 bg-blue-100">
-                    <div className="max-w-5xl">
-                        <div className="card card-compact bg-base-100 w-96 shadow-xl">
-                            <figure className="w-full h-96 bg-gray-200 flex items-center justify-center">
-                                <div className="w-64 h-64 bg-blue-500 flex items-center justify-center">
-                                    <h1 className='text-5xl'>{set?.Flashcards[0].Question}</h1>
-                                </div>
-                            </figure>
+
+            {/* <div className='flex justify-center'> */}
+            {/*     <div className='max-w-xl grid grid-cols-5 gap-2'> */}
+            {/*         {Array.from({ length: 5 }, (_, index) => ( */}
+            {/*             <button */}
+            {/*                 key={index} */}
+            {/*                 className='btn' */}
+            {/*                 onClick={() => handleReviewClick(index + 1, set?.Flashcards[0].ID!)} // Set the CardID as the first card's ID for simplicity */}
+            {/*             > */}
+            {/*                 {index + 1} */}
+            {/*             </button> */}
+            {/*         ))} */}
+            {/*     </div> */}
+            {/* </div> */}
+
+
+            <div className="flex w-3/4 mx-auto mb-4 gap-4">
+                <button className="btn flex-1">Learn</button>
+                <button className="btn flex-1">Track all</button>
+                <button className="btn flex-1" onClick={handleEdit}>Edit</button>
+                <button className="btn flex-1" onClick={handleDelete}>Remove</button>
+            </div>
+
+            <hr className="border-gray-300 my-4"></hr>
+
+
+
+            <h1 className="text-xl font-bold">Flashcards in this set:</h1>
+            <div className="">
+                {set?.Flashcards.map((flashcard: Flashcard, index: number) => (
+                    < div className="modal-box max-w-7xl w-full rounded-3xl space-y-5" >
+
+
+                        <div className='flex justify-between'>
+                            <div>Card {index + 1}</div>
+                        </div>
+
+                        <div className="absolute top-4 right-4">
+                            <input
+                                type="checkbox"
+                                className="checkbox checkbox-primary"
+                                value={index}
+                            />
+                        </div>
+
+                        <div className='flex justify-between space-x-24 pb-5'>
+                            <input
+                                className="input input-bordered w-full"
+                                disabled
+                                type="text"
+                                placeholder="Question"
+                                value={flashcard.Question}
+                            />
+                            <input
+                                className="input input-bordered w-full"
+                                disabled
+                                type="text"
+                                placeholder="Question"
+                                value={flashcard.Answer}
+                            />
                         </div>
                     </div>
-                </div>
 
-                <div className='flex justify-center'>
-                    <div className='max-w-xl grid grid-cols-5 gap-2'>
-                        {Array.from({ length: 5 }, (_, index) => (
-                            <button
-                                key={index}
-                                className='btn'
-                                onClick={() => handleReviewClick(index + 1, set?.Flashcards[0].ID!)} // Set the CardID as the first card's ID for simplicity
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                ))}
+            </div>
 
+            <button
+                className="btn mb-6"
+                onClick={() => navigate(-1)} // Go back to the previous page
+            >
+                Back
+            </button>
 
-                <div className="px-6 flex justify-center gap-4 bg-blue-100">
-                    {set?.Flashcards.map((flashcard: Flashcard) => (
-                        <div className="card bg-base-200 w-1/5 rounded-box p-4" >
-                            <h3>{flashcard.Question}</h3>
-                            <h3>{flashcard.Answer}</h3>
-                        </div>
-                    ))}
-                </div>
-
-                <button
-                    className="btn mb-6"
-                    onClick={() => navigate(-1)} // Go back to the previous page
-                >
-                    Back
-                </button>
-
-            </div >
         </div >
     );
 }

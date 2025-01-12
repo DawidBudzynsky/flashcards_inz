@@ -1,17 +1,20 @@
 import React from 'react';
+import { Flashcard } from '../types/interfaces';
 
-interface Flashcard {
-    question: string;
-    answer: string;
+
+interface FlashcardInputs {
+    id: string
+    question: string,
+    answer: string
 }
 
 interface FlashcardInputProps {
     index: number;
-    flashcard: Flashcard;
+    flashcard: FlashcardInputs;
     handleInputChange: (index: number, type: 'question' | 'answer', value: string) => void;
     handleDelete: (index: number) => void;
-
 }
+
 
 const FlashcardInput: React.FC<FlashcardInputProps> = ({ index, flashcard, handleInputChange, handleDelete }) => {
 
@@ -22,7 +25,7 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({ index, flashcard, handl
                 <div className='text-lg font-bold'>
                     Card number: {index + 1}
                 </div>
-                <button className="btn btn-sm btn-circle hover:bg-red-500"
+                <button className="btn btn-sm btn-circle hover: bg-red-500"
                     onClick={() => handleDelete(index)}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

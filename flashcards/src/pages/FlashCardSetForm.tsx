@@ -1,27 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FlashcardInput from "../components/FlashcardInput";
-import { useMutation } from "@tanstack/react-query";
-import { FlashcardSetRequest, createFlashcardSet } from "../requests/flashcardset";
-import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { FlashcardSetRequest, createFlashcardSet, getFlashcardSetByID, updateFlashcardSetByID } from "../requests/flashcardset";
+import { FlashcardsDataRequest, FlashcardsDataUpdateRequest, createFlashcards, updateFlashcards } from "../requests/flashcard";
+import { useParams, useNavigate } from 'react-router-dom';
+import { Flashcard } from "../types/interfaces";
 
-interface Flashcard {
-    question: string;
-    answer: string;
-}
 
 const FlashCardSetForm: React.FC = () => {
+    const navigate = useNavigate();
+    const { setId: setID } = useParams<{ setId: string }>();
+
+    const [recentlyAdded, setRecentlyAdded] = useState<number | null>(null);
     const [setName, setSetName] = useState("");
     const [setDescription, setSetDescription] = useState("");
-    const [flashcards, setFlashcards] = useState<Flashcard[]>([
-        { question: "", answer: "" },
+    const [flashcards, setFlashcards] = useState([
+        { id: "", question: "", answer: "" }
     ]);
-    const [recentlyAdded, setRecentlyAdded] = useState<number | null>(null);
+
+    const { data: existingSet, status: fetchStatus } = useQuery({
+        queryKey: ["flashcardSet", setID],
+        queryFn: () => getFlashcardSetByID(setID!),
+        enabled: !!setID,
+    });
+
+
+    useEffect(() => {
+        if (existingSet) {
+            setSetName(existingSet.Title);
+            setSetDescription(existingSet.Description);
+
+            const mappedFlashcards = (existingSet.Flashcards || []).map((flashcard: Flashcard) => ({
+                id: flashcard.ID,
+                question: flashcard.Question,
+                answer: flashcard.Answer
+            }))
+
+            setFlashcards(mappedFlashcards.length > 0 ? mappedFlashcards : [{ id: "", question: "", answer: "" }]);
+        }
+    }, [existingSet]);
 
     const addFlashcard = () => {
         const newCardIndex = flashcards.length;
-        setFlashcards([...flashcards, { question: "", answer: "" }]);
-        setRecentlyAdded(newCardIndex); // Track the newly added card index
-        setTimeout(() => setRecentlyAdded(null), 100); // Remove the animation state after 1s
+        setFlashcards([...flashcards, { id: "", question: "", answer: "" }]);
+        setRecentlyAdded(newCardIndex);
+        setTimeout(() => setRecentlyAdded(null), 100);
     };
 
     const removeFlashcard = (indexToRemove: number) => {
@@ -51,6 +74,8 @@ const FlashCardSetForm: React.FC = () => {
             }));
 
             createFlashcardsMutation.mutate(flashcardsData);
+
+            navigate(`/flashcards_sets/${createdSet.ID}`)
         },
         onError: (error: any) => {
             console.error("Error creating flashcardSet:", error);
@@ -69,28 +94,81 @@ const FlashCardSetForm: React.FC = () => {
         },
     });
 
+    const { mutate: updateSetMutate } = useMutation({
+        mutationFn: (data: { setID: string, body: FlashcardSetRequest }) => updateFlashcardSetByID(data.setID, data.body),
+        onSuccess: (updatedSet) => {
+
+            console.log("FlashcardSet updated successfully!");
+
+            // If any flashcards were updated, we need to update them too
+            const flashcardsData = flashcards.map((card) => ({
+                id: card.id,
+                question: card.question,
+                answer: card.answer,
+            }));
+            updateFlashcardsMutation.mutate(flashcardsData);
+
+            navigate(`/flashcards_sets/${updatedSet.ID}`);
+        },
+        onError: (error: any) => {
+            console.error("Error updating flashcardSet:", error);
+        },
+    });
+
+    //TODO: remember
+    const updateFlashcardsMutation = useMutation({
+        mutationFn: (data: FlashcardsDataUpdateRequest[]) => updateFlashcards(data),
+
+        onSuccess: () => {
+            console.log("Flashcards updated successfully.");
+            alert("Flashcard set and flashcards updated successfully!");
+        },
+        onError: (error: any) => {
+            console.error("Error updating flashcards:", error);
+            alert("Failed to update flashcards.");
+        },
+    });
+
     const handleSubmit = () => {
         if (!setName || !setDescription) {
             alert("Please provide a set name and description.");
             return;
         }
         // Trigger the mutation for creating the flashcard set
-        mutate({
-            title: setName,
-            description: setDescription,
-            folder_id: null,
-        });
+
+        if (setID) {
+            updateSetMutate({
+                setID: setID,
+                body: {
+                    title: setName,
+                    description: setDescription,
+                    folder_id: null,
+                }
+            })
+        } else {
+            mutate({
+                title: setName,
+                description: setDescription,
+                folder_id: null,
+            });
+
+        }
     };
+
+
+    if (fetchStatus === "error") {
+        return <div>Error loading data. Please try again later.</div>; // Show error message
+    }
 
     return (
         <div className="p-4 max-w-5xl w-5/6 mx-auto">
             <div className="max-w-5xl w-5/6 mx-auto flex justify-between">
-                <h3 className="text-4xl font-bold">Create your new set!</h3>
+                <h3 className="text-4xl font-bold">{setID ? "Edit Your Set" : "Create Your New Set"}</h3>
                 <button
                     onClick={handleSubmit}
                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
-                    Create
+                    {setID ? "Update" : "Create"}
                 </button>
             </div>
 
@@ -123,15 +201,16 @@ const FlashCardSetForm: React.FC = () => {
             {flashcards.map((flashcard, index) => (
                 <div
                     key={index}
-                    className={`transition-transform transform ${recentlyAdded === index ? "scale-105 opacity-100" : "opacity-90"
-                        } duration-300`}
+                    className={`transition-transform transform ${recentlyAdded === index ? "scale-105 opacity-100" : "opacity-90"} duration-300`}
                 >
+
                     <FlashcardInput
                         index={index}
                         flashcard={flashcard}
                         handleDelete={removeFlashcard}
                         handleInputChange={handleInputChange}
                     />
+
                 </div>
             ))}
 
@@ -146,6 +225,7 @@ const FlashCardSetForm: React.FC = () => {
             </div>
         </div>
     );
+
 };
 
 export default FlashCardSetForm;

@@ -13,9 +13,11 @@ func FlashcardRouter(handler *handler.FlashcardHandler) chi.Router {
 	//...
 
 	r.Post("/", handler.Create)
+	r.Put("/", handler.UpdateFlashcards)
+
 	r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)
-	r.Put("/{id}", handler.UpdateByID)
+	// r.Put("/{id}", handler.UpdateByID)
 	r.Delete("/{id}", handler.DeleteByID)
 
 	return r

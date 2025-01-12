@@ -8,6 +8,7 @@ import { createFolder } from "../requests/folder";
 import CreateTestModal from "../components/CreateTestModal";
 import ListItem from "../components/ListItem";
 import { motion, AnimatePresence } from "framer-motion";
+import { fuzzyMatch } from "../utils/fuzzySearch";
 
 function Users() {
     const navigate = useNavigate();
@@ -27,19 +28,6 @@ function Users() {
         queryFn: getUser,
     });
 
-
-    const fuzzyMatch = (query: string, target: string) => {
-        let queryIndex = 0;
-        for (const char of target.toLowerCase()) {
-            if (char === query[queryIndex]) {
-                queryIndex++;
-            }
-            if (queryIndex === query.length) {
-                return true;
-            }
-        }
-        return false;
-    };
 
     const filteredSets = user?.FlashcardsSets.filter((set: FlashcardSet) =>
         fuzzyMatch(searchQuery.toLowerCase(), set.Title.toLowerCase())
@@ -104,7 +92,6 @@ function Users() {
 
             </div>
 
-
             {/* Conditionally Render Flashcards or Folders */}
             {activeTab === "flashcards" ? (
                 // User Flashcard Sets Section
@@ -129,41 +116,32 @@ function Users() {
                         </button>
                     </div>
 
-
                     <div className="max-w-5xl w-full space-y-3">
-
                         <AnimatePresence>
-                            <AnimatePresence>
-                                {filteredSets && filteredSets.length > 0 ? (
-                                    filteredSets.map((set: FlashcardSet) => (
-                                        <motion.div
-                                            key={set.ID}
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <ListItem set={set} />
-                                        </motion.div>
-                                    ))
-                                ) : (
+                            {filteredSets && filteredSets.length > 0 ? (
+                                filteredSets.map((set: FlashcardSet) => (
                                     <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
+                                        key={set.ID}
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
                                         transition={{ duration: 0.3 }}
-                                        className="text-center text-gray-500 mt-4"
                                     >
-                                        No searches found ☹️
+                                        <ListItem set={set} />
                                     </motion.div>
-                                )}
-                            </AnimatePresence>
-
+                                ))
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="text-center text-gray-500 mt-4"
+                                >
+                                    No searches found ☹️
+                                </motion.div>
+                            )}
                         </AnimatePresence>
-
-                        {/* {filteredSets?.map((set: FlashcardSet) => ( */}
-                        {/*     <ListItem set={set} /> */}
-                        {/* ))} */}
                     </div>
                 </div>
             ) : (

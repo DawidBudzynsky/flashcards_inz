@@ -96,7 +96,7 @@ func (s *UserFlashcardService) create(card []byte, userGoogleID string) (*models
 		ConsecutiveCorrectAnswers: decodedCard.ConsecutiveCorrectAnswers,
 		LastReviewed:              time.Now(),
 		NextReviewDue:             decodedCard.NextReviewDue,
-		TotalReviews:              1, // Default value for new cards is 0, maybe should be 1 here because we reviewed it
+		TotalReviews:              0, // Default value for new cards is 0, maybe should be 1 here because we reviewed it
 	}
 
 	userFlashcard, err = s.repo.Create(userFlashcard)
