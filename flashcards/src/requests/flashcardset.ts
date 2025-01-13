@@ -6,8 +6,11 @@ export interface FlashcardSetRequest {
     folder_id: number | null,
 }
 
-export const createFlashcardSet = async (body: FlashcardSetRequest) => {
-    const url = "/flashcards_sets"
+export const createFlashcardSet = async (body: FlashcardSetRequest, folderId: number | null) => {
+    let url = "/flashcards_sets"
+    if (folderId) {
+        url += `?inFolder=${folderId}`
+    }
     return await api.post(url, body)
 }
 

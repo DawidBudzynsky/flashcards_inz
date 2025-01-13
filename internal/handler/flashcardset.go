@@ -18,6 +18,18 @@ type FlashcardSetHandler struct {
 }
 
 func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Request URL:", r.URL.String())
+
+	inFolder := r.URL.Query().Get("inFolder")
+	var folderID uint64
+	var err error
+	if inFolder != "" {
+		folderID, err = strconv.ParseUint(inFolder, 10, 64)
+		if err != nil {
+			http.Error(w, "Invalid folder ID", http.StatusBadRequest)
+			return
+		}
+	}
 	var body repositories.CreateFlashcardSetRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -36,6 +48,14 @@ func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to create flashcard set", http.StatusInternalServerError)
 		return
+	}
+
+	if folderID != 0 {
+		_, err = h.Service.AddFlashcardSetToFolder(uint64(flashcardSet.ID), folderID)
+		if err != nil {
+			http.Error(w, "Failed to add set to folder", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusCreated)

@@ -11,6 +11,8 @@ const FlashCardSetForm: React.FC = () => {
     const navigate = useNavigate();
     const { setId: setID } = useParams<{ setId: string }>();
 
+    const [folderId, setFolderId] = useState<number | null>(null);
+
     const [recentlyAdded, setRecentlyAdded] = useState<number | null>(null);
     const [setName, setSetName] = useState("");
     const [setDescription, setSetDescription] = useState("");
@@ -24,6 +26,13 @@ const FlashCardSetForm: React.FC = () => {
         enabled: !!setID,
     });
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const inFolder = params.get('inFolder');
+        if (inFolder) {
+            setFolderId(Number(inFolder));
+        }
+    }, [location]);
 
     useEffect(() => {
         if (existingSet) {
@@ -63,7 +72,7 @@ const FlashCardSetForm: React.FC = () => {
 
     // Initialize useMutation for the API call
     const { mutate } = useMutation({
-        mutationFn: (data: FlashcardSetRequest) => createFlashcardSet(data),
+        mutationFn: (data: FlashcardSetRequest) => createFlashcardSet(data, folderId),
         onSuccess: (createdSet) => {
             console.log("FlashcardSet created successfully!");
 
