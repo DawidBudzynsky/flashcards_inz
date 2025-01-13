@@ -1,94 +1,103 @@
 package service
 
 import (
+	"encoding/json"
 	"flashcards/internal/models"
-
-	"gorm.io/gorm"
+	"flashcards/internal/repositories"
 )
-
-type FlashcardSetInterface interface {
-	CreateFlashcardSet(CreateFlashcardSetRequest) (*models.FlashcardSet, error)
-	ListFlashcardSets() (models.FlashcardsSets, error)
-	GetFlashcardSetByID(uint64) (*models.FlashcardSet, error)
-	UpdateFlashcardSetByID(uint64, map[string]interface{}) (*models.FlashcardSet, error)
-	DeleteFlashcardSetByID(uint64) error
-	AddFlashcardSetToFolder(uint64, uint64) (*models.FlashcardSet, error)
-}
 
 const flashcards = "Flashcards"
 
-type CreateFlashcardSetRequest struct {
-	UserGoogleID string `json:"-"` // TODO: maybe not today
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	FolderID     int    `json:"folder_id"`
-}
-
 type FlashcardSetService struct {
-	db *gorm.DB
+	Repo             *repositories.FlashcardSetRepo
+	FlashcardService *FlashcardService
 }
 
-func NewFlashcardSetService(db *gorm.DB) *FlashcardSetService {
-	return &FlashcardSetService{db: db}
-}
-
-// TODO: should add each flashcard inside the request
-// TODO: or first on frontend send create set and then add flashcards to sets
-func (s *FlashcardSetService) CreateFlashcardSet(body CreateFlashcardSetRequest) (*models.FlashcardSet, error) {
-	flashcardSet := &models.FlashcardSet{
-		UserGoogleID: body.UserGoogleID,
-		Title:        body.Title,
-		Description:  body.Description,
+func NewFlashcardSetService(repository *repositories.FlashcardSetRepo, flashcardService *FlashcardService) *FlashcardSetService {
+	return &FlashcardSetService{
+		Repo:             repository,
+		FlashcardService: flashcardService,
 	}
+}
 
-	if err := s.db.Create(flashcardSet).Error; err != nil {
+func (s *FlashcardSetService) CreateFlashcardSet(body repositories.CreateFlashcardSetRequest) (*models.FlashcardSet, error) {
+	// buisiness logic here
+	//
+	newFlashcardSet, err := s.Repo.CreateFlashcardSet(body)
+	if err != nil {
+		return nil, err
+	}
+	return newFlashcardSet, nil
+}
+
+func (s *FlashcardSetService) ListFlashcardSets() (models.FlashcardsSets, error) {
+	// buisiness logic here
+	//
+	flashcardsSets, err := s.Repo.ListFlashcardSets()
+	if err != nil {
+		return nil, err
+	}
+	return flashcardsSets, nil
+}
+
+func (s *FlashcardSetService) GetFlashcardSetByID(id uint64) (*models.FlashcardSet, error) {
+	// buisiness logic here
+	//
+	flashcardSet, err := s.Repo.GetFlashcardSetByID(id)
+	if err != nil {
 		return nil, err
 	}
 	return flashcardSet, nil
 }
 
-func (s *FlashcardSetService) ListFlashcardSets() (models.FlashcardsSets, error) {
-	var flashcardSets models.FlashcardsSets
-	if err := s.db.Preload(flashcards).Find(&flashcardSets).Error; err != nil {
-		return nil, err
-	}
-	return flashcardSets, nil
-}
-
-func (s *FlashcardSetService) GetFlashcardSetByID(id uint64) (*models.FlashcardSet, error) {
-	var flashcardSet models.FlashcardSet
-	if err := s.db.Preload(flashcards).First(&flashcardSet, id).Error; err != nil {
-		return nil, err
-	}
-	return &flashcardSet, nil
-}
-
 func (s *FlashcardSetService) UpdateFlashcardSetByID(id uint64, updateData map[string]interface{}) (*models.FlashcardSet, error) {
-	flashcardSet, err := s.GetFlashcardSetByID(id)
+	// buisiness logic here
+	//
+	//
+	updateJSON, err := json.Marshal(updateData)
 	if err != nil {
 		return nil, err
 	}
-	if err := s.db.Model(flashcardSet).Updates(updateData).Error; err != nil {
+
+	var updateFlashcardSet models.FlashcardSet
+	if err := json.Unmarshal(updateJSON, &updateFlashcardSet); err != nil {
 		return nil, err
 	}
+
+	existingSet, err := s.Repo.GetFlashcardSetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// delete non existand flashcards
+	idsMap := createMapOfFlashcardsIDS(updateFlashcardSet.Flashcards)
+	for _, existingFlashcard := range existingSet.Flashcards {
+		if !idsMap[existingFlashcard.ID] {
+			if err := s.FlashcardService.DeleteFlashcardByID(existingFlashcard.ID); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// update Set data
+	existingSet.Title = updateFlashcardSet.Title
+	existingSet.Description = updateFlashcardSet.Description
+	existingSet.Flashcards = updateFlashcardSet.Flashcards
+
+	flashcardSet, err := s.Repo.UpdateFlashcardSetByID(id, existingSet)
+	if err != nil {
+		return nil, err
+	}
+
 	return flashcardSet, nil
 }
 
 func (s *FlashcardSetService) AddFlashcardSetToFolder(id, folderID uint64) (*models.FlashcardSet, error) {
-	// Get the flashcard set by ID
-	flashcardSet, err := s.GetFlashcardSetByID(id)
+	// buisiness logic here
+	//
+	// TODO: change it later to make all buisiness logic here
+	flashcardSet, err := s.Repo.AddFlashcardSetToFolder(id, folderID)
 	if err != nil {
-		return nil, err
-	}
-
-	// Get the folder by ID
-	var folder models.Folder
-	if err := s.db.First(&folder, folderID).Error; err != nil {
-		return nil, err
-	}
-
-	// Append the flashcard set to the folder's association
-	if err := s.db.Model(&folder).Association("FlashcardsSets").Append(flashcardSet); err != nil {
 		return nil, err
 	}
 
@@ -96,8 +105,19 @@ func (s *FlashcardSetService) AddFlashcardSetToFolder(id, folderID uint64) (*mod
 }
 
 func (s *FlashcardSetService) DeleteFlashcardSetByID(id uint64) error {
-	if err := s.db.Delete(&models.FlashcardSet{}, id).Error; err != nil {
+	err := s.Repo.DeleteFlashcardSetByID(id)
+	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func createMapOfFlashcardsIDS(flashcards models.Flashcards) map[int]bool {
+	flashcardsMap := make(map[int]bool)
+	for _, flashcard := range flashcards {
+		if flashcard.ID != 0 {
+			flashcardsMap[flashcard.ID] = true
+		}
+	}
+	return flashcardsMap
 }

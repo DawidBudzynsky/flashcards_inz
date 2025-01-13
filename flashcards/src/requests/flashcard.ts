@@ -9,6 +9,7 @@ export interface FlashcardsDataRequest {
 
 export interface FlashcardsDataUpdateRequest {
     id: string
+    flashcard_set_id: number,
     question: string,
     answer: string,
 }

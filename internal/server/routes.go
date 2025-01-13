@@ -38,15 +38,17 @@ func (s *Server) RegisterRoutes() http.Handler {
 	userHandler := &handler.UserHandler{Service: service.NewUserSerivce(s.db.GetDB())}
 	r.Mount("/users", routers.UserRouter(userHandler))
 
-	flashcardSetHandler := &handler.FlashcardSetHandler{Service: service.NewFlashcardSetService(s.db.GetDB())}
-	r.Mount("/flashcards_sets", routers.FlashcardSetRouter(flashcardSetHandler))
-
 	userFlashcardRepo := repositories.NewUserFlashcardRepo(s.db.GetDB())
 	userFlashcardHandler := &handler.UserFlashcardHandler{Service: *service.NewUserFlashcardService(userFlashcardRepo)}
 	r.Mount("/user_flashcards", routers.UserFlashcardRouter(userFlashcardHandler))
 
-	flashcardHandler := &handler.FlashcardHandler{Service: service.NewFlashcardService(s.db.GetDB())}
+	flashcardRepo := repositories.NewFlashcardRepo(s.db.GetDB())
+	flashcardHandler := &handler.FlashcardHandler{Service: service.NewFlashcardService(flashcardRepo)}
 	r.Mount("/flashcards", routers.FlashcardRouter(flashcardHandler))
+
+	flashcardSetRepo := repositories.NewFlashcardSetRepo(s.db.GetDB())
+	flashcardSetHandler := &handler.FlashcardSetHandler{Service: *service.NewFlashcardSetService(flashcardSetRepo, service.NewFlashcardService(flashcardRepo))}
+	r.Mount("/flashcards_sets", routers.FlashcardSetRouter(flashcardSetHandler))
 
 	folderHandler := &handler.FolderHandler{Service: service.NewFolderService(s.db.GetDB())}
 	r.Mount("/folders", routers.FolderRouter(folderHandler))

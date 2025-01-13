@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"flashcards/internal/models"
+	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"net/http"
 	"strconv"
@@ -11,12 +12,12 @@ import (
 )
 
 type FlashcardHandler struct {
-	Service service.FlashcardServiceInterface
+	Service *service.FlashcardService
 }
 
 func (h *FlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// WARNING: assuuming that in the payload there is list of flashcards
-	var body []service.CreateFlashcardRequest
+	var body []repositories.CreateFlashcardRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -73,9 +74,8 @@ func (h *FlashcardHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FlashcardHandler) UpdateFlashcards(w http.ResponseWriter, r *http.Request) {
-	var body []service.UpdateFlashcardRequest
+	var body []repositories.UpdateFlashcardRequest
 
-	// TODO: ensure they have IDS, maybe this below does that
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -122,7 +122,7 @@ func (h *FlashcardHandler) UpdateFlashcards(w http.ResponseWriter, r *http.Reque
 
 func (h *FlashcardHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
-	flashcardID, err := strconv.ParseUint(idParam, 10, 64)
+	flashcardID, err := strconv.Atoi(idParam)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

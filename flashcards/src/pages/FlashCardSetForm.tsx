@@ -15,7 +15,7 @@ const FlashCardSetForm: React.FC = () => {
     const [setName, setSetName] = useState("");
     const [setDescription, setSetDescription] = useState("");
     const [flashcards, setFlashcards] = useState([
-        { id: "", question: "", answer: "" }
+        { id: 0, question: "", answer: "" }
     ]);
 
     const { data: existingSet, status: fetchStatus } = useQuery({
@@ -42,7 +42,7 @@ const FlashCardSetForm: React.FC = () => {
 
     const addFlashcard = () => {
         const newCardIndex = flashcards.length;
-        setFlashcards([...flashcards, { id: "", question: "", answer: "" }]);
+        setFlashcards([...flashcards, { id: 0, question: "", answer: "" }]);
         setRecentlyAdded(newCardIndex);
         setTimeout(() => setRecentlyAdded(null), 100);
     };
@@ -95,18 +95,19 @@ const FlashCardSetForm: React.FC = () => {
     });
 
     const { mutate: updateSetMutate } = useMutation({
-        mutationFn: (data: { setID: string, body: FlashcardSetRequest }) => updateFlashcardSetByID(data.setID, data.body),
+        mutationFn: (data: { setID: string, body }) => updateFlashcardSetByID(data.setID, data.body),
         onSuccess: (updatedSet) => {
 
             console.log("FlashcardSet updated successfully!");
 
             // If any flashcards were updated, we need to update them too
-            const flashcardsData = flashcards.map((card) => ({
-                id: card.id,
-                question: card.question,
-                answer: card.answer,
-            }));
-            updateFlashcardsMutation.mutate(flashcardsData);
+            // const flashcardsData = flashcards.map((card) => ({
+            //     id: card.id,
+            //     flashcard_set_id: updatedSet.ID,
+            //     question: card.question,
+            //     answer: card.answer,
+            // }));
+            // updateFlashcardsMutation.mutate(flashcardsData);
 
             navigate(`/flashcards_sets/${updatedSet.ID}`);
         },
@@ -115,19 +116,19 @@ const FlashCardSetForm: React.FC = () => {
         },
     });
 
-    //TODO: remember
-    const updateFlashcardsMutation = useMutation({
-        mutationFn: (data: FlashcardsDataUpdateRequest[]) => updateFlashcards(data),
-
-        onSuccess: () => {
-            console.log("Flashcards updated successfully.");
-            alert("Flashcard set and flashcards updated successfully!");
-        },
-        onError: (error: any) => {
-            console.error("Error updating flashcards:", error);
-            alert("Failed to update flashcards.");
-        },
-    });
+    ////TODO: remember
+    //const updateFlashcardsMutation = useMutation({
+    //    mutationFn: (data: FlashcardsDataUpdateRequest[]) => updateFlashcards(data),
+    //
+    //    onSuccess: () => {
+    //        console.log("Flashcards updated successfully.");
+    //        alert("Flashcard set and flashcards updated successfully!");
+    //    },
+    //    onError: (error: any) => {
+    //        console.error("Error updating flashcards:", error);
+    //        alert("Failed to update flashcards.");
+    //    },
+    //});
 
     const handleSubmit = () => {
         if (!setName || !setDescription) {
@@ -136,14 +137,21 @@ const FlashCardSetForm: React.FC = () => {
         }
         // Trigger the mutation for creating the flashcard set
 
+        const payload = {
+            title: setName,
+            description: setDescription,
+            folder_id: null,
+            flashcards: flashcards.map((card) => ({
+                id: card.id || 0,
+                question: card.question,
+                answer: card.answer,
+            })),
+        };
+
         if (setID) {
             updateSetMutate({
                 setID: setID,
-                body: {
-                    title: setName,
-                    description: setDescription,
-                    folder_id: null,
-                }
+                body: payload
             })
         } else {
             mutate({
@@ -164,12 +172,22 @@ const FlashCardSetForm: React.FC = () => {
         <div className="p-4 max-w-5xl w-5/6 mx-auto">
             <div className="max-w-5xl w-5/6 mx-auto flex justify-between">
                 <h3 className="text-4xl font-bold">{setID ? "Edit Your Set" : "Create Your New Set"}</h3>
-                <button
-                    onClick={handleSubmit}
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                >
-                    {setID ? "Update" : "Create"}
-                </button>
+
+                <div className="space-x-5">
+                    <button
+                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                        onClick={() => navigate(-1)}
+                    >
+                        {setID ? "Cancel" : "Back"}
+                    </button>
+
+                    <button
+                        onClick={handleSubmit}
+                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    >
+                        {setID ? "Update" : "Create"}
+                    </button>
+                </div>
             </div>
 
             <div className="modal-box max-w-5xl mx-auto w-full rounded-lg">

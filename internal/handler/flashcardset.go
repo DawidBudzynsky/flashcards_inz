@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flashcards/internal/middlewares"
 	"flashcards/internal/models"
+	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"fmt"
 	"net/http"
@@ -13,11 +14,11 @@ import (
 )
 
 type FlashcardSetHandler struct {
-	Service service.FlashcardSetInterface
+	Service service.FlashcardSetService
 }
 
 func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var body service.CreateFlashcardSetRequest
+	var body repositories.CreateFlashcardSetRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)

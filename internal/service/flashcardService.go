@@ -2,79 +2,64 @@ package service
 
 import (
 	"flashcards/internal/models"
-
-	"gorm.io/gorm"
+	"flashcards/internal/repositories"
 )
 
-type FlashcardServiceInterface interface {
-	CreateFlashcard(CreateFlashcardRequest) (*models.Flashcard, error)
-	ListFlashcards() (models.Flashcards, error)
-	GetFlashcardByID(uint64) (*models.Flashcard, error)
-	UpdateFlashcardByID(uint64, UpdateFlashcardRequest) (*models.Flashcard, error)
-	DeleteFlashcardByID(uint64) error
-}
-
-type CreateFlashcardRequest struct {
-	FlashcardSetID int    `json:"flashcard_set_id"`
-	Question       string `json:"question"`
-	Answer         string `json:"answer"`
-}
-
-type UpdateFlashcardRequest struct {
-	ID       uint64 `json:"id"`
-	Question string `json:"question"`
-	Answer   string `json:"answer"`
-}
-
 type FlashcardService struct {
-	db *gorm.DB
+	Repo repositories.FlashcardRepoInterface
 }
 
-func NewFlashcardService(db *gorm.DB) *FlashcardService {
-	return &FlashcardService{db: db}
-}
-
-func (s *FlashcardService) CreateFlashcard(body CreateFlashcardRequest) (*models.Flashcard, error) {
-	flashcard := &models.Flashcard{
-		FlashcardSetID: body.FlashcardSetID,
-		Question:       body.Question,
-		Answer:         body.Answer,
+func NewFlashcardService(repository *repositories.FlashcardRepo) *FlashcardService {
+	return &FlashcardService{
+		Repo: repository,
 	}
-	if err := s.db.Create(flashcard).Error; err != nil {
+}
+
+func (s *FlashcardService) CreateFlashcard(flashcard repositories.CreateFlashcardRequest) (*models.Flashcard, error) {
+	// buisiness logic here
+	//
+	newFlashcard, err := s.Repo.CreateFlashcard(flashcard)
+	if err != nil {
 		return nil, err
 	}
-	return flashcard, nil
+	return newFlashcard, nil
 }
 
 func (s *FlashcardService) ListFlashcards() (models.Flashcards, error) {
-	var flashcards models.Flashcards
-	if err := s.db.Find(&flashcards).Error; err != nil {
+	// buisiness logic here
+	//
+	flashcards, err := s.Repo.ListFlashcards()
+	if err != nil {
 		return nil, err
 	}
 	return flashcards, nil
 }
 
 func (s *FlashcardService) GetFlashcardByID(id uint64) (*models.Flashcard, error) {
-	var flashcard models.Flashcard
-	if err := s.db.First(&flashcard, id).Error; err != nil {
-		return nil, err
-	}
-	return &flashcard, nil
-}
-
-func (s *FlashcardService) UpdateFlashcardByID(id uint64, updateData UpdateFlashcardRequest) (*models.Flashcard, error) {
-	flashcard, err := s.GetFlashcardByID(id)
+	// buisiness logic here
+	//
+	flashcard, err := s.Repo.GetFlashcardByID(id)
 	if err != nil {
-		return nil, err
-	}
-	if err := s.db.Model(flashcard).Updates(updateData).Error; err != nil {
 		return nil, err
 	}
 	return flashcard, nil
 }
 
-func (s *FlashcardService) DeleteFlashcardByID(id uint64) error {
-	if err := s.db.Delete(&models.Flashcard{}, id).Error; err != nil {
+func (s *FlashcardService) UpdateFlashcardByID(id uint64, updateData repositories.UpdateFlashcardRequest) (*models.Flashcard, error) {
+	// buisiness logic here
+	//
+	updatedCard, err := s.Repo.UpdateFlashcardByID(id, updateData)
+	if err != nil {
+		return nil, err
+	}
+	return updatedCard, nil
+}
+
+func (s *FlashcardService) DeleteFlashcardByID(id int) error {
+	// buisiness logic here
+	//
+	err := s.Repo.DeleteFlashcardByID(id)
+	if err != nil {
 		return err
 	}
 	return nil
