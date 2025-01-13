@@ -12,6 +12,7 @@ export interface Flashcard {
     ID: number;
     Question: string;
     Answer: string;
+    Tracking: boolean
     CreatedAt: string;
 }
 

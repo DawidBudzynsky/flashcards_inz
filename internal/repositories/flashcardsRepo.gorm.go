@@ -12,6 +12,7 @@ type FlashcardRepoInterface interface {
 	GetFlashcardByID(uint64) (*models.Flashcard, error)
 	UpdateFlashcardByID(uint64, UpdateFlashcardRequest) (*models.Flashcard, error)
 	DeleteFlashcardByID(int) error
+	Save(*models.Flashcard) error
 }
 
 type CreateFlashcardRequest struct {
@@ -76,6 +77,13 @@ func (s *FlashcardRepo) UpdateFlashcardByID(id uint64, updateData UpdateFlashcar
 
 func (s *FlashcardRepo) DeleteFlashcardByID(id int) error {
 	if err := s.db.Delete(&models.Flashcard{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *FlashcardRepo) Save(flashcard *models.Flashcard) error {
+	if err := s.db.Save(flashcard).Error; err != nil {
 		return err
 	}
 	return nil

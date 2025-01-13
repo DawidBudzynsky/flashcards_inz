@@ -97,6 +97,22 @@ func (h *FlashcardHandler) UpdateFlashcards(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func (h *FlashcardHandler) ToggleTracking(w http.ResponseWriter, r *http.Request) {
+	flashcardIDStr := chi.URLParam(r, "id")
+	flashcardID, err := strconv.ParseUint(flashcardIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid flashcard ID", http.StatusBadRequest)
+		return
+	}
+
+	h.Service.ToggleTracking(flashcardID)
+
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "created flashcards"}); err != nil {
+		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
+	}
+}
+
 // func (h *FlashcardHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 // 	idParam := chi.URLParam(r, "id")
 // 	flashcardID, err := strconv.ParseUint(idParam, 10, 64)

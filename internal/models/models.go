@@ -57,6 +57,7 @@ type Flashcard struct {
 	FlashcardSetID int       `gorm:"index"` // Foreign key
 	Question       string    `gorm:"size:255"`
 	Answer         string    `gorm:"size:255"`
+	Tracking       bool      `gorm:"default:false"`
 	CreatedAt      time.Time `gorm:"autoCreateTime"`
 }
 type Flashcards []Flashcard

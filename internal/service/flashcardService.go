@@ -64,3 +64,19 @@ func (s *FlashcardService) DeleteFlashcardByID(id int) error {
 	}
 	return nil
 }
+
+func (s *FlashcardService) ToggleTracking(id uint64) error {
+	// buisiness logic here
+	//
+	flashcard, err := s.Repo.GetFlashcardByID(id)
+	if err != nil {
+		return err
+	}
+
+	flashcard.Tracking = !flashcard.Tracking
+
+	if err := s.Repo.Save(flashcard); err != nil {
+		return err
+	}
+	return nil
+}

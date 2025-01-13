@@ -34,3 +34,8 @@ export const sendFlashcardReview = async (reviewData: FlashcardReviewRequest) =>
     return await api.post(url, reviewData);
 };
 
+
+export const toggleFlashcardTracking = async (id: number) => {
+    const url = `/flashcards/${id}/tracking`;
+    return await api.put(url);
+};

@@ -5,6 +5,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { dateToString } from '../utils/showDate';
 import FlashcardInput from '../components/FlashcardInput';
+import { toggleFlashcardTracking } from '../requests/flashcard';
 
 
 const FlashcardSetView: React.FC = () => {
@@ -50,6 +51,28 @@ const FlashcardSetView: React.FC = () => {
     const handleLearning = () => {
         navigate(`/flashcards_sets/${setID}/learn`)
     }
+
+    console.log(set?.Flashcards)
+
+    const { mutate: toggleTracking } = useMutation({
+        mutationFn: (cardID: number) => toggleFlashcardTracking(cardID),
+        onSuccess: (_, cardID) => {
+            if (set?.Flashcards) {
+                set.Flashcards = set.Flashcards.map((flashcard: Flashcard) =>
+                    flashcard.ID === cardID
+                        ? { ...flashcard, Tracking: !flashcard.Tracking }
+                        : flashcard
+                );
+            }
+        },
+        onError: (error: any) => {
+            console.error("Error toggling tracking:", error);
+        },
+    });
+
+    const handleTracking = (cardID: number) => {
+        toggleTracking(cardID);
+    };
 
     return (
         <div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
@@ -104,10 +127,13 @@ const FlashcardSetView: React.FC = () => {
                         </div>
 
                         <div className="absolute top-4 right-4">
+                            <span>tracking:</span>
                             <input
                                 type="checkbox"
                                 className="checkbox checkbox-primary"
+                                checked={flashcard.Tracking}
                                 value={index}
+                                onChange={() => handleTracking(flashcard.ID)}
                             />
                         </div>
 

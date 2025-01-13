@@ -15,6 +15,8 @@ func FlashcardRouter(handler *handler.FlashcardHandler) chi.Router {
 	r.Post("/", handler.Create)
 	r.Put("/", handler.UpdateFlashcards)
 
+	r.Put("/{id}/tracking", handler.ToggleTracking)
+
 	r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)
 	// r.Put("/{id}", handler.UpdateByID)

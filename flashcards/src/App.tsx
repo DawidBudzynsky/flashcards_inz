@@ -8,6 +8,7 @@ import FolderView from './pages/FolderView'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import FlashcardSetView from './pages/FlashcardSetView'
 import FlashcardSetLearn from './pages/FlashcardSetLearn'
+import Home from './pages/Home'
 
 const queryClient = new QueryClient();
 
@@ -32,22 +33,6 @@ function App() {
             </QueryClientProvider>
         </>
     )
-}
-
-
-
-const handleCheck = () => {
-    window.location.href = "http://localhost:8080/check-user-logged-in"
-};
-
-function Home() {
-    return (
-        <>
-            <h1>Home</h1>
-            <button onClick={handleCheck}>check</button>
-        </>
-    )
-
 }
 
 
