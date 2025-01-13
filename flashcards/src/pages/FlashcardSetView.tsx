@@ -47,6 +47,10 @@ const FlashcardSetView: React.FC = () => {
         navigate(`/flashcards_sets/${setID}/edit`)
     }
 
+    const handleLearning = () => {
+        navigate(`/flashcards_sets/${setID}/learn`)
+    }
+
     return (
         <div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
 
@@ -79,7 +83,7 @@ const FlashcardSetView: React.FC = () => {
 
 
             <div className="flex w-3/4 mx-auto mb-4 gap-4">
-                <button className="btn flex-1">Learn</button>
+                <button className="btn flex-1" onClick={handleLearning}>Learn</button>
                 <button className="btn flex-1">Track all</button>
                 <button className="btn flex-1" onClick={handleEdit}>Edit</button>
                 <button className="btn flex-1" onClick={handleDelete}>Remove</button>
