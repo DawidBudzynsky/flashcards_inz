@@ -12,11 +12,11 @@ const ListItem: React.FC<ListItemProps> = ({ set }) => {
 
     return (
         <div
-            className="modal-box max-w-5xl mx-auto bg-base-200 rounded-box p-4 cursor-pointer pb-8"
+            className="modal-box max-w-5xl mx-auto bg-base-200 rounded-box p-4 cursor-pointer pb-8 hover:scale-95"
             onClick={() => navigate(`/flashcards_sets/${set.ID}`)} // Navigate on click
         >
             <div className="flex justify-between text-opacity-25">
-                <p>{set.Flashcards.length} items</p>
+                <p>{set.Flashcards ? set.Flashcards.length : 0} items</p>
                 <p>created at: {dateToString(set.CreatedAt)}</p>
             </div>
 

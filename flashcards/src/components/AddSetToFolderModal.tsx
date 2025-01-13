@@ -11,10 +11,10 @@ const AddSetModal: React.FC = () => {
         <>
             {/* Button to open the modal */}
             <button
-                className="btn"
+                className="btn flex-1"
                 onClick={() => (document.getElementById('my_modal_4') as HTMLDialogElement)?.showModal()}
             >
-                +
+                Add Set
             </button>
             {/* Modal */}
             <dialog id="my_modal_4" className="modal">

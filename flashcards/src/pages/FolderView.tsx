@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FlashcardSet, Folder } from '../types/interfaces';
 import AddSetModal from '../components/AddSetToFolderModal';
+
+import ListItem from "../components/ListItem";
 import { useFolderStore } from '../hooks/stores/folderStore';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { deleteFolderByID, getFolderByID } from '../requests/folder';
+import { dateToString } from '../utils/showDate';
 
 function FolderView() {
     const navigate = useNavigate();
@@ -34,32 +37,35 @@ function FolderView() {
     };
 
     return (
-        <div className="w-screen flex flex-col justify-center">
-            <div className="px-6 py-6 flex flex-row bg-orange-100 justify-center">
-                <h1 className="text-3xl mb-6">{folder?.Name}</h1>
 
-                <AddSetModal />
+        <div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
 
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn m-1">...</div>
-                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                        <li><a>Share</a></li>
-                        <li><a onClick={handleDelete}>
-                            {isDeleting ? "Deleting..." : "Delete Folder"}
-                        </a></li>
+            <div className="w-screen max-w-5xl flex flex-col justify-center">
 
-                    </ul>
+                <div className="max-w-5xl w-5/6 mx-auto flex justify-between">
+                    <h1 className="text-4xl font-bold">{folder?.Name}</h1>
+                    <span className="text-sm text-gray-600">Created: {dateToString(folder?.CreatedAt)}</span>
                 </div>
 
+                <div className="flex justify-start ps-24">
+                    <span>Description: {folder?.Description}</span>
+                </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 bg-blue-100">
+
+            <div className="flex w-3/4 mx-auto mb-4 gap-4">
+                <AddSetModal />
+                <button className="btn flex-1" onClick={() => { }}>Share</button>
+                <button className="btn flex-1" onClick={() => { }}>Remove</button>
+            </div>
+
+
+            <h1 className='text-xl font-bold'>Sets avaliable in this folder:</h1>
+
+
+            <div className="max-w-5xl w-full space-y-3">
+
                 {folder?.FlashcardsSets.map((set: FlashcardSet) => (
-                    <div
-                        key={set.ID}
-                        className="card bg-base-200 rounded-box p-4 cursor-pointer text-black"
-                    >
-                        <h3>{set.Title}</h3>
-                    </div>
+                    <ListItem set={set} />
                 ))}
 
                 <button

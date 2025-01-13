@@ -26,3 +26,8 @@ export const appendSetToFolder = async (flashcardsetid: number, folderid: number
     const url = `/flashcards_sets/add_set_to_folder`;
     return await api.post(url, { FlashcardSetID: flashcardsetid, FolderID: Number(folderid) });
 }
+
+export const removeSetFromFolder = async (flashcardsetid: number, folderid: number) => {
+    const url = `/flashcards_sets/remove_set_from_folder`;
+    return await api.post(url, { FlashcardSetID: flashcardsetid, FolderID: Number(folderid) });
+}

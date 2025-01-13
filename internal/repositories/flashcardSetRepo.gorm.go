@@ -102,6 +102,27 @@ func (s *FlashcardSetRepo) AddFlashcardSetToFolder(id, folderID uint64) (*models
 	return flashcardSet, nil
 }
 
+func (s *FlashcardSetRepo) RemoveSetFromFolder(id, folderID uint64) (*models.FlashcardSet, error) {
+	// Get the flashcard set by ID
+	flashcardSet, err := s.GetFlashcardSetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the folder by ID
+	var folder models.Folder
+	if err := s.db.First(&folder, folderID).Error; err != nil {
+		return nil, err
+	}
+
+	// Remove the flashcard set from the folder's association
+	if err := s.db.Model(&folder).Association("FlashcardsSets").Delete(flashcardSet); err != nil {
+		return nil, err
+	}
+
+	return flashcardSet, nil
+}
+
 func (s *FlashcardSetRepo) DeleteFlashcardSetByID(id uint64) error {
 	if err := s.db.Delete(&models.FlashcardSet{}, id).Error; err != nil {
 		return err

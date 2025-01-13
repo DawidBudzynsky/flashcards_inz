@@ -112,6 +112,17 @@ func (s *FlashcardSetService) DeleteFlashcardSetByID(id uint64) error {
 	return nil
 }
 
+func (s *FlashcardSetService) RemoveSetFromFolder(setID, folderID uint64) (*models.FlashcardSet, error) {
+	//
+
+	flashcardSet, err := s.Repo.RemoveSetFromFolder(setID, folderID)
+	if err != nil {
+		return nil, err
+	}
+
+	return flashcardSet, nil
+}
+
 func createMapOfFlashcardsIDS(flashcards models.Flashcards) map[int]bool {
 	flashcardsMap := make(map[int]bool)
 	for _, flashcard := range flashcards {

@@ -144,3 +144,30 @@ func (h *FlashcardSetHandler) AddSetToFolder(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+func (h *FlashcardSetHandler) RemoveSetFromFolder(w http.ResponseWriter, r *http.Request) {
+	// Parse the JSON request body
+	var requestData struct {
+		FlashcardSetID uint64 `json:"FlashcardSetID"`
+		FolderID       uint64 `json:"FolderID"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to add the flashcard set to the folder
+	flashcardSet, err := h.Service.RemoveSetFromFolder(requestData.FlashcardSetID, requestData.FolderID)
+	if err != nil {
+		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the updated flashcard set
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
+		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)
+		return
+	}
+}
