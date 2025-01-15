@@ -1,173 +1,168 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { deleteSetByID, getFlashcardSetByID } from '../requests/flashcardset';
-import { Flashcard } from '../types/interfaces';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { dateToString } from '../utils/showDate';
-import FlashcardInput from '../components/FlashcardInput';
-import { toggleFlashcardTracking } from '../requests/flashcard';
-
+import { useParams, useNavigate } from "react-router-dom";
+import { deleteSetByID, getFlashcardSetByID } from "../requests/flashcardset";
+import { Flashcard } from "../types/interfaces";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { dateToString } from "../utils/showDate";
+import FlashcardInput from "../components/FlashcardInput";
+import { toggleFlashcardTracking } from "../requests/flashcard";
 
 const FlashcardSetView: React.FC = () => {
-    const navigate = useNavigate();
-    const { setId: setID } = useParams<{ setId: string }>();
+	const navigate = useNavigate();
+	const { setId: setID } = useParams<{ setId: string }>();
 
-    const { data: set, status: setStatus } = useQuery({
-        queryKey: ["flashcardSet", setID],
-        queryFn: () => getFlashcardSetByID(setID!),
-    });
+	const { data: set, status: setStatus } = useQuery({
+		queryKey: ["flashcardSet", setID],
+		queryFn: () => getFlashcardSetByID(setID!),
+	});
 
-    const handleReviewClick = (quality: number, cardID: number) => {
-        // setSelectedQuality(quality);
-        // setSelectedCardID(cardID);
-        const reviewData = {
-            CardID: cardID,
-            Quality: quality,
-        };
-    }
+	// Mutation to delete the set
+	const { mutate: deleteSet, isLoading: isDeleting } = useMutation({
+		mutationFn: () => deleteSetByID(setID!),
+		onSuccess: () => {
+			alert("Set deleted successfully.");
+			navigate(-1);
+		},
+		onError: (error: any) => {
+			console.error("Error deleting set:", error);
+			alert(
+				`Failed to delete set: ${
+					error?.message || "An unexpected error occurred."
+				}`
+			);
+		},
+	});
 
-    // Mutation to delete the set
-    const { mutate: deleteSet, isLoading: isDeleting } = useMutation({
-        mutationFn: () => deleteSetByID(setID!),
-        onSuccess: () => {
-            alert("Set deleted successfully.");
-            navigate(-1);
-        },
-        onError: (error: any) => {
-            console.error("Error deleting set:", error);
-            alert(`Failed to delete set: ${error?.message || "An unexpected error occurred."}`);
-        },
-    });
+	const handleDelete = async () => {
+		const confirmation = window.confirm(
+			"Are you sure you want to delete this set?"
+		);
+		if (confirmation) {
+			deleteSet();
+		}
+	};
 
-    const handleDelete = async () => {
-        const confirmation = window.confirm("Are you sure you want to delete this set?");
-        if (confirmation) { deleteSet() };
-    };
+	const handleEdit = () => {
+		navigate(`/flashcards_sets/${setID}/edit`);
+	};
 
-    const handleEdit = () => {
-        navigate(`/flashcards_sets/${setID}/edit`)
-    }
+	const handleLearning = () => {
+		navigate(`/flashcards_sets/${setID}/learn`);
+	};
 
-    const handleLearning = () => {
-        navigate(`/flashcards_sets/${setID}/learn`)
-    }
+	console.log(set?.Flashcards);
 
-    console.log(set?.Flashcards)
+	const { mutate: toggleTracking } = useMutation({
+		mutationFn: (cardID: number) => toggleFlashcardTracking(cardID),
+		onSuccess: (_, cardID) => {
+			if (set?.Flashcards) {
+				set.Flashcards = set.Flashcards.map((flashcard: Flashcard) =>
+					flashcard.ID === cardID
+						? { ...flashcard, Tracking: !flashcard.Tracking }
+						: flashcard
+				);
+			}
+		},
+		onError: (error: any) => {
+			console.error("Error toggling tracking:", error);
+		},
+	});
 
-    const { mutate: toggleTracking } = useMutation({
-        mutationFn: (cardID: number) => toggleFlashcardTracking(cardID),
-        onSuccess: (_, cardID) => {
-            if (set?.Flashcards) {
-                set.Flashcards = set.Flashcards.map((flashcard: Flashcard) =>
-                    flashcard.ID === cardID
-                        ? { ...flashcard, Tracking: !flashcard.Tracking }
-                        : flashcard
-                );
-            }
-        },
-        onError: (error: any) => {
-            console.error("Error toggling tracking:", error);
-        },
-    });
+	const handleTracking = (cardID: number) => {
+		toggleTracking(cardID);
+	};
 
-    const handleTracking = (cardID: number) => {
-        toggleTracking(cardID);
-    };
+	return (
+		<div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
+			<div className="w-screen max-w-5xl flex flex-col justify-center">
+				<div className="max-w-5xl w-5/6 mx-auto flex justify-between">
+					<h1 className="text-4xl font-bold">{set?.Title}</h1>
+					<span className="text-sm text-gray-600">
+						Created: {dateToString(set?.CreatedAt)}
+					</span>
+				</div>
 
-    return (
-        <div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
+				<div className="flex justify-start ps-24">
+					<span>Description: {set?.Description}</span>
+				</div>
+			</div>
 
-            <div className="w-screen max-w-5xl flex flex-col justify-center">
+			{/* <div className='flex justify-center'> */}
+			{/*     <div className='max-w-xl grid grid-cols-5 gap-2'> */}
+			{/*         {Array.from({ length: 5 }, (_, index) => ( */}
+			{/*             <button */}
+			{/*                 key={index} */}
+			{/*                 className='btn' */}
+			{/*                 onClick={() => handleReviewClick(index + 1, set?.Flashcards[0].ID!)} // Set the CardID as the first card's ID for simplicity */}
+			{/*             > */}
+			{/*                 {index + 1} */}
+			{/*             </button> */}
+			{/*         ))} */}
+			{/*     </div> */}
+			{/* </div> */}
 
-                <div className="max-w-5xl w-5/6 mx-auto flex justify-between">
-                    <h1 className="text-4xl font-bold">{set?.Title}</h1>
-                    <span className="text-sm text-gray-600">Created: {dateToString(set?.CreatedAt)}</span>
-                </div>
+			<div className="flex w-3/4 mx-auto mb-4 gap-4">
+				<button className="btn flex-1" onClick={handleLearning}>
+					Learn
+				</button>
+				<button className="btn flex-1">Track all</button>
+				<button className="btn flex-1" onClick={handleEdit}>
+					Edit
+				</button>
+				<button className="btn flex-1" onClick={handleDelete}>
+					Remove
+				</button>
+			</div>
 
-                <div className="flex justify-start ps-24">
-                    <span>Description: {set?.Description}</span>
-                </div>
-            </div>
+			<hr className="border-gray-300 my-4"></hr>
 
+			<h1 className="text-xl font-bold">Flashcards in this set:</h1>
+			<div className="">
+				{set?.Flashcards.map((flashcard: Flashcard, index: number) => (
+					<div className="modal-box max-w-7xl w-full rounded-3xl space-y-5">
+						<div className="flex justify-between">
+							<div>Card {index + 1}</div>
+						</div>
 
-            {/* <div className='flex justify-center'> */}
-            {/*     <div className='max-w-xl grid grid-cols-5 gap-2'> */}
-            {/*         {Array.from({ length: 5 }, (_, index) => ( */}
-            {/*             <button */}
-            {/*                 key={index} */}
-            {/*                 className='btn' */}
-            {/*                 onClick={() => handleReviewClick(index + 1, set?.Flashcards[0].ID!)} // Set the CardID as the first card's ID for simplicity */}
-            {/*             > */}
-            {/*                 {index + 1} */}
-            {/*             </button> */}
-            {/*         ))} */}
-            {/*     </div> */}
-            {/* </div> */}
+						<div className="absolute top-4 right-4">
+							<span>tracking:</span>
+							<input
+								type="checkbox"
+								className="checkbox checkbox-primary"
+								checked={flashcard.Tracking}
+								value={index}
+								onChange={() => handleTracking(flashcard.ID)}
+							/>
+						</div>
 
+						<div className="flex justify-between space-x-24 pb-5">
+							<input
+								className="input input-bordered w-full"
+								disabled
+								type="text"
+								placeholder="Question"
+								value={flashcard.Question}
+							/>
+							<input
+								className="input input-bordered w-full"
+								disabled
+								type="text"
+								placeholder="Question"
+								value={flashcard.Answer}
+							/>
+						</div>
+					</div>
+				))}
+			</div>
 
-            <div className="flex w-3/4 mx-auto mb-4 gap-4">
-                <button className="btn flex-1" onClick={handleLearning}>Learn</button>
-                <button className="btn flex-1">Track all</button>
-                <button className="btn flex-1" onClick={handleEdit}>Edit</button>
-                <button className="btn flex-1" onClick={handleDelete}>Remove</button>
-            </div>
-
-            <hr className="border-gray-300 my-4"></hr>
-
-
-
-            <h1 className="text-xl font-bold">Flashcards in this set:</h1>
-            <div className="">
-                {set?.Flashcards.map((flashcard: Flashcard, index: number) => (
-                    < div className="modal-box max-w-7xl w-full rounded-3xl space-y-5" >
-
-
-                        <div className='flex justify-between'>
-                            <div>Card {index + 1}</div>
-                        </div>
-
-                        <div className="absolute top-4 right-4">
-                            <span>tracking:</span>
-                            <input
-                                type="checkbox"
-                                className="checkbox checkbox-primary"
-                                checked={flashcard.Tracking}
-                                value={index}
-                                onChange={() => handleTracking(flashcard.ID)}
-                            />
-                        </div>
-
-                        <div className='flex justify-between space-x-24 pb-5'>
-                            <input
-                                className="input input-bordered w-full"
-                                disabled
-                                type="text"
-                                placeholder="Question"
-                                value={flashcard.Question}
-                            />
-                            <input
-                                className="input input-bordered w-full"
-                                disabled
-                                type="text"
-                                placeholder="Question"
-                                value={flashcard.Answer}
-                            />
-                        </div>
-                    </div>
-
-                ))}
-            </div>
-
-            <button
-                className="btn mb-6"
-                onClick={() => navigate(-1)} // Go back to the previous page
-            >
-                Back
-            </button>
-
-        </div >
-    );
-}
+			<button
+				className="btn mb-6"
+				onClick={() => navigate(-1)} // Go back to the previous page
+			>
+				Back
+			</button>
+		</div>
+	);
+};
 
 export default FlashcardSetView;
-

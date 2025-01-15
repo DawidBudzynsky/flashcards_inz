@@ -7,6 +7,7 @@ import (
 	"flashcards/internal/algorithm/sm2"
 	"flashcards/internal/models"
 	"flashcards/internal/repositories"
+	"fmt"
 	"time"
 )
 
@@ -20,7 +21,7 @@ func NewUserFlashcardService(repository *repositories.UserFlashcardRepo) *UserFl
 	}
 }
 
-func (s *UserFlashcardService) GetFlashcardsForToday(userID string) (*[]models.UserFlashcard, error) {
+func (s *UserFlashcardService) GetFlashcardsForToday(userID string) (*[]models.Tracking, error) {
 	flashcards, err := s.repo.GetFlashcardsForToday(userID)
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func (s *UserFlashcardService) GetFlashcardsForToday(userID string) (*[]models.U
 	return flashcards, nil
 }
 
-func (s *UserFlashcardService) UpdateOrCreateFlashcard(review review.ReviewItem, userID string) (*models.UserFlashcard, error) {
+func (s *UserFlashcardService) UpdateOrCreateFlashcard(review review.ReviewItem, userID string) (*models.Tracking, error) {
 	card, _ := s.repo.GetByCardID(review.CardId)
 	cardExists := card != nil
 
@@ -52,8 +53,8 @@ func (s *UserFlashcardService) UpdateOrCreateFlashcard(review review.ReviewItem,
 	return newCard, nil
 }
 
-func (s *UserFlashcardService) updateOrcreateFlashcard(cardExists bool, data []byte, userID string) (*models.UserFlashcard, error) {
-	var newCard *models.UserFlashcard
+func (s *UserFlashcardService) updateOrcreateFlashcard(cardExists bool, data []byte, userID string) (*models.Tracking, error) {
+	var newCard *models.Tracking
 	if cardExists {
 		newCard, err := s.update(data)
 		if err != nil {
@@ -63,6 +64,7 @@ func (s *UserFlashcardService) updateOrcreateFlashcard(cardExists bool, data []b
 	}
 	// create a card in database with info
 	newCard, err := s.create(data, userID)
+	fmt.Println(newCard)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +72,13 @@ func (s *UserFlashcardService) updateOrcreateFlashcard(cardExists bool, data []b
 	return newCard, nil
 }
 
-func (s *UserFlashcardService) update(card []byte) (*models.UserFlashcard, error) {
+func (s *UserFlashcardService) update(card []byte) (*models.Tracking, error) {
 	decodedCard, err := decode(card)
 	if err != nil {
 		return nil, err
 	}
 
-	userFlashcard := &models.UserFlashcard{
+	userFlashcard := &models.Tracking{
 		Easiness:                  decodedCard.Easiness,
 		ConsecutiveCorrectAnswers: decodedCard.ConsecutiveCorrectAnswers,
 		LastReviewed:              time.Now(),
@@ -91,14 +93,13 @@ func (s *UserFlashcardService) update(card []byte) (*models.UserFlashcard, error
 	return userFlashcard, nil
 }
 
-func (s *UserFlashcardService) create(card []byte, userGoogleID string) (*models.UserFlashcard, error) {
+func (s *UserFlashcardService) create(card []byte, userGoogleID string) (*models.Tracking, error) {
 	decodedCard, err := decode(card)
 	if err != nil {
 		return nil, err
 	}
 
-	userFlashcard := &models.UserFlashcard{
-		UserGoogleID:              userGoogleID,
+	userFlashcard := &models.Tracking{
 		FlashcardID:               decodedCard.FlashcardID,
 		Easiness:                  decodedCard.Easiness,
 		ConsecutiveCorrectAnswers: decodedCard.ConsecutiveCorrectAnswers,
@@ -116,8 +117,8 @@ func (s *UserFlashcardService) create(card []byte, userGoogleID string) (*models
 }
 
 // deserialize
-func decode(encodedItem []byte) (models.UserFlashcard, error) {
-	res := models.UserFlashcard{}
+func decode(encodedItem []byte) (models.Tracking, error) {
+	res := models.Tracking{}
 	if err := json.Unmarshal(encodedItem, &res); err != nil {
 		return res, err
 	}
@@ -126,7 +127,7 @@ func decode(encodedItem []byte) (models.UserFlashcard, error) {
 }
 
 // serialize
-func encode(item *models.UserFlashcard) ([]byte, error) {
+func encode(item *models.Tracking) ([]byte, error) {
 	if item == nil {
 		return nil, nil
 	}

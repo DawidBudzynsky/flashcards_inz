@@ -44,7 +44,9 @@ func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	// fmt.Println(updatedCard)
+
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(updatedCard); err != nil {
 		http.Error(w, "Failed to encode a flashcard", http.StatusInternalServerError)
 	}

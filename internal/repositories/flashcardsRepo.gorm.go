@@ -12,6 +12,7 @@ type FlashcardRepoInterface interface {
 	GetFlashcardByID(uint64) (*models.Flashcard, error)
 	UpdateFlashcardByID(uint64, UpdateFlashcardRequest) (*models.Flashcard, error)
 	DeleteFlashcardByID(int) error
+	DeleteTrackingByFlashcardID(flashcardID int) error
 	Save(*models.Flashcard) error
 }
 
@@ -58,7 +59,7 @@ func (s *FlashcardRepo) ListFlashcards() (models.Flashcards, error) {
 
 func (s *FlashcardRepo) GetFlashcardByID(id uint64) (*models.Flashcard, error) {
 	var flashcard models.Flashcard
-	if err := s.db.First(&flashcard, id).Error; err != nil {
+	if err := s.db.Preload("Tracking").First(&flashcard, id).Error; err != nil {
 		return nil, err
 	}
 	return &flashcard, nil
@@ -80,6 +81,10 @@ func (s *FlashcardRepo) DeleteFlashcardByID(id int) error {
 		return err
 	}
 	return nil
+}
+
+func (s *FlashcardRepo) DeleteTrackingByFlashcardID(flashcardID int) error {
+	return s.db.Where("flashcard_id = ?", flashcardID).Delete(&models.Tracking{}).Error
 }
 
 func (s *FlashcardRepo) Save(flashcard *models.Flashcard) error {

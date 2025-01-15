@@ -13,8 +13,17 @@ export interface Flashcard {
     FlashcardSetID: number;
     Question: string;
     Answer: string;
-    Tracking: boolean
     CreatedAt: string;
+    Tracking: Tracking
+}
+
+export interface Tracking {
+    FlashcardID: number
+    Easiness: number
+    ConsecutiveCorrectAnswers: number
+    LastReviewed: string
+    NextReviewDue: string
+    TotalReviews: number
 }
 
 export interface FlashcardToRevise {

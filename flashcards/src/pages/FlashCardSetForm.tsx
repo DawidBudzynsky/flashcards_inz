@@ -144,6 +144,11 @@ const FlashCardSetForm: React.FC = () => {
             alert("Please provide a set name and description.");
             return;
         }
+
+        if (flashcards.length < 3) {
+            alert("You need to have at least 3 flashcards to create a set.");
+            return;
+        }
         // Trigger the mutation for creating the flashcard set
 
         const payload = {

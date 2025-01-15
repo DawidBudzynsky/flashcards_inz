@@ -15,7 +15,10 @@ type FlashcardSetRepoInterface interface {
 	AddFlashcardSetToFolder(uint64, uint64) (*models.FlashcardSet, error)
 }
 
-const flashcards = "Flashcards"
+const (
+	flashcards     = "Flashcards"
+	userFlashcards = "UserFlashcards"
+)
 
 type CreateFlashcardSetRequest struct {
 	UserGoogleID string `json:"-"` // TODO: maybe not today
@@ -57,7 +60,7 @@ func (s *FlashcardSetRepo) ListFlashcardSets() (models.FlashcardsSets, error) {
 
 func (s *FlashcardSetRepo) GetFlashcardSetByID(id uint64) (*models.FlashcardSet, error) {
 	var flashcardSet models.FlashcardSet
-	if err := s.db.Preload(flashcards).First(&flashcardSet, id).Error; err != nil {
+	if err := s.db.Preload(flashcards).Preload("Flashcards.Tracking").First(&flashcardSet, id).Error; err != nil {
 		return nil, err
 	}
 	return &flashcardSet, nil

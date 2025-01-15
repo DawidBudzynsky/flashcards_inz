@@ -3,6 +3,7 @@ package service
 import (
 	"flashcards/internal/models"
 	"flashcards/internal/repositories"
+	"time"
 )
 
 type FlashcardService struct {
@@ -72,8 +73,22 @@ func (s *FlashcardService) ToggleTracking(id uint64) error {
 	if err != nil {
 		return err
 	}
-
-	flashcard.Tracking = !flashcard.Tracking
+	if flashcard.Tracking == nil {
+		// Enable tracking by creating a new Tracking instance
+		flashcard.Tracking = &models.Tracking{
+			Easiness:                  2.5,
+			ConsecutiveCorrectAnswers: 0,
+			LastReviewed:              time.Now(),
+			NextReviewDue:             time.Now(),
+			TotalReviews:              0,
+		}
+	} else {
+		// Disable tracking by deleting the Tracking record
+		if err := s.Repo.DeleteTrackingByFlashcardID(flashcard.ID); err != nil {
+			return err
+		}
+		flashcard.Tracking = nil
+	}
 
 	if err := s.Repo.Save(flashcard); err != nil {
 		return err
