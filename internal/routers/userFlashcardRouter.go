@@ -14,6 +14,7 @@ func UserFlashcardRouter(userFlashcardHandler *handler.UserFlashcardHandler) chi
 	//...
 
 	r.With(middlewares.UserIdFromSession).Put("/reviews", userFlashcardHandler.Create)
+	r.With(middlewares.UserIdFromSession).Get("/flashcards_today", userFlashcardHandler.GetFlashcardsForToday)
 	// r.Put("/reviews", userFlashcardHandler.Create)
 	// r.Get("/", userHandler.List)
 	// r.With(middlewares.CheckLoggedInMiddleware).Get("/", userHandler.List)

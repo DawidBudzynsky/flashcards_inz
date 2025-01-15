@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"flashcards/internal/models"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -12,6 +13,16 @@ type UserFlashcardRepo struct {
 
 func NewUserFlashcardRepo(db *gorm.DB) *UserFlashcardRepo {
 	return &UserFlashcardRepo{db: db}
+}
+
+func (r *UserFlashcardRepo) GetFlashcardsForToday(UserID string) (*[]models.UserFlashcard, error) {
+	var userFlashcards *[]models.UserFlashcard
+	// Preloading Flashcard information automatically joins the related flashcards
+	err := r.db.Where("user_google_id = ? AND next_review_due <= ?", UserID, time.Now()).
+		Preload("Flashcard"). // This will load the associated Flashcard data
+		Find(&userFlashcards).Error
+
+	return userFlashcards, err
 }
 
 func (r *UserFlashcardRepo) GetByCardID(cardID int) (*models.UserFlashcard, error) {

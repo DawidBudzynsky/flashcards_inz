@@ -10,10 +10,22 @@ export interface FlashcardSet {
 
 export interface Flashcard {
     ID: number;
+    FlashcardSetID: number;
     Question: string;
     Answer: string;
     Tracking: boolean
     CreatedAt: string;
+}
+
+export interface FlashcardToRevise {
+    UserGoogleID: string
+    FlashcardID: number;
+    Easiness: number;
+    ConsecutiveCorrectAnswers: number;
+    LastReviewed: string;
+    NextReviewDue: string;
+    TotalReviews: number;
+    Flashcard: Flashcard
 }
 
 export interface User {

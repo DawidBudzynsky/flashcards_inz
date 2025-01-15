@@ -39,3 +39,8 @@ export const toggleFlashcardTracking = async (id: number) => {
     const url = `/flashcards/${id}/tracking`;
     return await api.put(url);
 };
+
+export const getFlashcardsForToday = async () => {
+    const url = `/user_flashcards/flashcards_today`;
+    return await api.get(url);
+};

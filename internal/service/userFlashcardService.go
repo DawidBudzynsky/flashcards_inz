@@ -20,6 +20,14 @@ func NewUserFlashcardService(repository *repositories.UserFlashcardRepo) *UserFl
 	}
 }
 
+func (s *UserFlashcardService) GetFlashcardsForToday(userID string) (*[]models.UserFlashcard, error) {
+	flashcards, err := s.repo.GetFlashcardsForToday(userID)
+	if err != nil {
+		return nil, err
+	}
+	return flashcards, nil
+}
+
 func (s *UserFlashcardService) UpdateOrCreateFlashcard(review review.ReviewItem, userID string) (*models.UserFlashcard, error) {
 	card, _ := s.repo.GetByCardID(review.CardId)
 	cardExists := card != nil

@@ -49,3 +49,23 @@ func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode a flashcard", http.StatusInternalServerError)
 	}
 }
+
+func (u *UserFlashcardHandler) GetFlashcardsForToday(w http.ResponseWriter, r *http.Request) {
+	// get userGoogleID from context
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		UserUnauthorizedError(w)
+		return
+	}
+
+	todayFlashcards, err := u.Service.GetFlashcardsForToday(userGoogleID)
+	if err != nil {
+		http.Error(w, "Failed to retreive flashcards for today", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(todayFlashcards); err != nil {
+		http.Error(w, "Failed to encode a flashcard", http.StatusInternalServerError)
+	}
+}
