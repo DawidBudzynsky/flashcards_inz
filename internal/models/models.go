@@ -4,13 +4,15 @@ import "time"
 
 type User struct {
 	// ID             int            `gorm:"primaryKey"`
-	GoogleID       string         `gorm:"primaryKey" json:"google_id"`
-	Username       string         `gorm:"size:255;not null"`
-	Email          string         `gorm:"size:255;unique"`
-	Role           string         `gorm:"size:255"`
-	CreatedAt      time.Time      `gorm:"autoCreateTime"`
+	GoogleID  string    `gorm:"primaryKey" json:"google_id"`
+	Username  string    `gorm:"size:255;not null"`
+	Email     string    `gorm:"size:255;unique"`
+	Role      string    `gorm:"size:255"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+
 	FlashcardsSets FlashcardsSets `gorm:"foreignKey:UserGoogleID"`
 	Folders        Folders        `gorm:"foreignKey:UserGoogleID"`
+	Tests          Tests          `gorm:"foreignKey:UserGoogleID"`
 }
 type Users []User
 
@@ -59,11 +61,17 @@ type Tracking struct {
 }
 
 type Test struct {
-	ID             int    `gorm:"primaryKey"`
-	UserGoogleID   string `gorm:"index"`
-	SetID          int    `gorm:"index"`
-	StartTime      time.Time
-	EndTime        time.Time
-	TotalQuestions int
+	ID           int            `gorm:"primaryKey"`
+	UserGoogleID string         `gorm:"index"`
+	StartDate    time.Time      `gorm:autoCreateTime`
+	DueDate      time.Time      // When the test is next due
+	NumQuestions int            `gorm:"index"`
+	Sets         []FlashcardSet `gorm:"many2many:test_sets;foreignKey:ID;joinTableForeignKey:test_id;joinTableReferenceID:flashcard_set_id"`
 }
 type Tests []Test
+
+type TestQuestion struct {
+	Question      string
+	CorrectAnswer string
+	AnswerOptions []string
+}

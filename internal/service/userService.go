@@ -67,7 +67,7 @@ func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
 
 func (s *UserService) GetUserByGoogleID(google_id string) (*models.User, error) {
 	var user models.User
-	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload("Folders").Where("google_id = ?", google_id).First(&user).Error; err != nil {
+	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload("Folders").Preload("Tests").Where("google_id = ?", google_id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

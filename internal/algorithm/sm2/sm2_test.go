@@ -25,7 +25,7 @@ func TestCreate(t *testing.T) {
 				FlashcardID:               1,
 				Easiness:                  2.5 + EasinessConst + (EasinessLineal * 5) + (EasinessQuadratic * math.Pow(5, 2)),
 				ConsecutiveCorrectAnswers: 1,
-				NextReviewDue:             now.AddDate(0, 0, 1).Unix(),
+				NextReviewDue:             now.AddDate(0, 0, 1),
 			},
 		},
 		{
@@ -38,7 +38,7 @@ func TestCreate(t *testing.T) {
 				FlashcardID:               2,
 				Easiness:                  DefaultEasiness,
 				ConsecutiveCorrectAnswers: 0,
-				NextReviewDue:             now.AddDate(0, 0, 1).Unix(),
+				NextReviewDue:             now.AddDate(0, 0, 1),
 			},
 		},
 	}

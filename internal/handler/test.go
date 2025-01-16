@@ -2,12 +2,24 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"flashcards/internal/middlewares"
+	"flashcards/internal/models"
 	"flashcards/internal/service"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
+
+type Question struct {
+	FlashcardID     int      `json:"id"`
+	QuestionText    string   `json:"question_text"`
+	PossibleAnswers []string `json:"possible_answers"`
+}
 
 type TestHandler struct {
 	Service service.TestServiceInterface
@@ -19,6 +31,14 @@ func (t *TestHandler) Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// TODO: create a function out of this
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+	body.UserGoogleID = userGoogleID
 
 	test, err := t.Service.CreateTest(body)
 	if err != nil {
@@ -104,4 +124,187 @@ func (t *TestHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+type AnswerRequest struct {
+	UserGoogleID string         `json:"-"`
+	Answers      map[int]string `json:"answers"` // Key is question ID, value is the selected answer
+}
+
+// Verify the user's answers
+func (h *TestHandler) VerifyAnswers(w http.ResponseWriter, r *http.Request) {
+	var req AnswerRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid data", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(req.Answers)
+
+	correctAnswers := 0
+	totalQuestions := len(req.Answers)
+
+	// Verify each answer
+	for flashcardID, userAnswer := range req.Answers {
+		flashcard, err := h.Service.GetFlashcard(flashcardID)
+		if err != nil {
+			http.Error(w, "Couldn't retreive the card", http.StatusBadRequest)
+			return
+		}
+
+		if userAnswer == flashcard.Answer {
+			correctAnswers++
+		}
+	}
+
+	// Return the verification result (number of correct answers)
+	result := map[string]int{
+		"correct":   correctAnswers,
+		"incorrect": totalQuestions - correctAnswers,
+		"total":     totalQuestions,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(result); err != nil {
+		http.Error(w, "Failed to encode result", http.StatusInternalServerError)
+	}
+}
+
+func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+	testID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	test, err := t.Service.GetTestByID(testID)
+	if err != nil {
+		http.Error(w, "Failed to get test", http.StatusInternalServerError)
+		return
+	}
+
+	questions, err := t.createQuestions(test)
+	if err != nil {
+		http.Error(w, "Failed to create questions for test", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(questions); err != nil {
+		http.Error(w, "Failed to encode test", http.StatusInternalServerError)
+	}
+}
+
+func (f *TestHandler) createQuestions(test *models.Test) ([]Question, error) {
+	pickedFlashcards, err := f.PickFlashcards(test.Sets, test.NumQuestions)
+	if err != nil {
+		return nil, err
+	}
+
+	var questions []Question
+	for _, flashcard := range pickedFlashcards {
+		possibleAnswers, err := f.createAnswers(flashcard, test.Sets)
+		if err != nil {
+			return nil, err
+		}
+		questions = append(questions, Question{
+			FlashcardID:     flashcard.ID,
+			QuestionText:    flashcard.Question,
+			PossibleAnswers: possibleAnswers,
+		})
+	}
+
+	return questions, nil
+}
+
+func (f *TestHandler) PickFlashcards(sets []models.FlashcardSet, numQuestions int) ([]models.Flashcard, error) {
+	var selectedFlashcards []models.Flashcard
+	var totalFlashcards int
+
+	for _, set := range sets {
+		totalFlashcards += len(set.Flashcards)
+	}
+
+	if totalFlashcards == 0 {
+		return nil, errors.New("no flashcards available in the provided sets")
+	}
+
+	questionsPerSet := make([]int, len(sets))
+	remainder := numQuestions
+
+	for i, set := range sets {
+		if len(set.Flashcards) == 0 {
+			questionsPerSet[i] = 0
+			continue
+		}
+		questionsPerSet[i] = int(float64(numQuestions) * (float64(len(set.Flashcards)) / float64(totalFlashcards)))
+		remainder -= questionsPerSet[i]
+	}
+
+	for i, set := range sets {
+		if len(set.Flashcards) > 0 && questionsPerSet[i] == 0 {
+			questionsPerSet[i] = 1
+			remainder--
+		}
+	}
+
+	for remainder > 0 {
+		for i, set := range sets {
+			if remainder == 0 {
+				break
+			}
+			if len(set.Flashcards) > questionsPerSet[i] {
+				questionsPerSet[i]++
+				remainder--
+			}
+		}
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	for i, set := range sets {
+		if questionsPerSet[i] > len(set.Flashcards) {
+			return nil, errors.New("not enough flashcards in a set to meet the requested number")
+		}
+
+		rand.Shuffle(len(set.Flashcards), func(i, j int) {
+			set.Flashcards[i], set.Flashcards[j] = set.Flashcards[j], set.Flashcards[i]
+		})
+
+		selectedFlashcards = append(selectedFlashcards, set.Flashcards[:questionsPerSet[i]]...)
+	}
+
+	if len(selectedFlashcards) != numQuestions {
+		return nil, fmt.Errorf("unable to select the exact number of flashcards: selected %d, requested %d", len(selectedFlashcards), numQuestions)
+	}
+
+	return selectedFlashcards, nil
+}
+
+func (f *TestHandler) createAnswers(flashcard models.Flashcard, sets []models.FlashcardSet) ([]string, error) {
+	// TODO: right now there will be no correct answers used as possible answers, maybe try to change it
+	var possibleAnswers []string
+	for _, set := range sets {
+		for _, card := range set.Flashcards {
+			if card.ID != flashcard.ID {
+				possibleAnswers = append(possibleAnswers, card.Answer)
+			}
+		}
+	}
+	if len(possibleAnswers) < 3 {
+		// If there are not enough possible incorrect answers, we need to handle this case.
+		// Maybe you can return an error or simply duplicate answers until there are enough.
+		return nil, errors.New("not enough incorrect answers")
+	}
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(possibleAnswers), func(i, j int) {
+		possibleAnswers[i], possibleAnswers[j] = possibleAnswers[j], possibleAnswers[i]
+	})
+	incorrectAnswers := possibleAnswers[:3]
+	allAnswers := append(incorrectAnswers, flashcard.Answer)
+	rand.Shuffle(len(allAnswers), func(i, j int) {
+		allAnswers[i], allAnswers[j] = allAnswers[j], allAnswers[i]
+	})
+
+	return allAnswers, nil
 }
