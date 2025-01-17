@@ -1,11 +1,12 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getTestQuestions, verifyAnswers } from "../requests/test";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import ReviewModal from "../components/ReviewModal";
 import TestScoreModal from "../components/TestScoreModal";
 
 const TestQuestions: React.FC = () => {
+	const navigate = useNavigate();
 	const { testId } = useParams<{ testId: string }>();
 
 	// Fetch flashcards for today using useQuery
@@ -38,6 +39,10 @@ const TestQuestions: React.FC = () => {
 
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [modalContent, setModalContent] = useState<any>(null);
+	const handleCloseModal = () => {
+		navigate("/users");
+		setIsModalVisible(false);
+	};
 	const { mutate } = useMutation({
 		mutationFn: (answers: { [key: number]: string }) =>
 			verifyAnswers(answers),
@@ -151,7 +156,7 @@ const TestQuestions: React.FC = () => {
 			</div>
 			<TestScoreModal
 				isVisible={isModalVisible}
-				onClose={() => setIsModalVisible(false)}
+				onClose={handleCloseModal}
 				title="Results"
 				content={modalContent}
 			/>
