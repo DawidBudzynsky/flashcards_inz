@@ -1,33 +1,54 @@
-import api from '../api/api';
-import { Folder } from '../types/interfaces';
-
+import api from "../api/api";
+import { Folder } from "../types/interfaces";
 
 export const getFolderByID = async (folderid: string) => {
-    const url = `/folders/${folderid}`;
-    return await api.get(url);
+	const url = `/folders/${folderid}`;
+	return await api.get(url);
 };
 
 export const deleteFolderByID = async (folderid: string) => {
-    const url = `/folders/${folderid}`;
-    return await api.delete(url);
+	const url = `/folders/${folderid}`;
+	return await api.delete(url);
 };
 
-export const createFolder = async (folderData: Partial<Folder>): Promise<Folder> => {
-    const url = '/folders';
-    return await api.post(url, folderData);
+export const createFolder = async (
+	folderData: Partial<Folder>
+): Promise<Folder> => {
+	const url = "/folders";
+	return await api.post(url, folderData);
 };
 
-export const addSetToFolder = async (flashcardsetid: number, folderid: number) => {
-    const url = `/flashcards_sets/${flashcardsetid}`;
-    return await api.put(url, { FolderID: folderid });
-}
+export const addSetToFolder = async (
+	flashcardsetid: number,
+	folderid: number
+) => {
+	const url = `/flashcards_sets/${flashcardsetid}`;
+	return await api.put(url, { FolderID: folderid });
+};
 
-export const appendSetToFolder = async (flashcardsetid: number, folderid: number) => {
-    const url = `/flashcards_sets/add_set_to_folder`;
-    return await api.post(url, { FlashcardSetID: flashcardsetid, FolderID: Number(folderid) });
-}
+export const appendSetToFolder = async (
+	flashcardsetid: number,
+	folderid: number
+) => {
+	const url = `/flashcards_sets/add_set_to_folder`;
+	return await api.post(url, {
+		FlashcardSetID: flashcardsetid,
+		FolderID: Number(folderid),
+	});
+};
 
-export const removeSetFromFolder = async (flashcardsetid: number, folderid: number) => {
-    const url = `/flashcards_sets/remove_set_from_folder`;
-    return await api.post(url, { FlashcardSetID: flashcardsetid, FolderID: Number(folderid) });
-}
+export const removeSetFromFolder = async (
+	flashcardsetid: number,
+	folderid: number
+) => {
+	const url = `/flashcards_sets/remove_set_from_folder`;
+	return await api.post(url, {
+		FlashcardSetID: flashcardsetid,
+		FolderID: Number(folderid),
+	});
+};
+
+export const getUserFolders = async () => {
+	const url = `/folders/`;
+	return await api.get(url);
+};

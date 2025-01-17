@@ -170,6 +170,25 @@ func (h *TestHandler) VerifyAnswers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (t *TestHandler) GetTestsForUser(w http.ResponseWriter, r *http.Request) {
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	// Get grouped tests
+	groupedTests, err := t.Service.GetTestsGroupedByStatus(userGoogleID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the grouped data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(groupedTests)
+}
+
 func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	testID, err := strconv.ParseUint(idParam, 10, 64)

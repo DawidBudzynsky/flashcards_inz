@@ -45,6 +45,8 @@ function App() {
 							path="/tests/:testId/questions"
 							element={<TestQuestions />}
 						/>
+
+						<Route path="/user/tests" element={<TestQuestions />} />
 					</Route>
 				</Routes>
 			</QueryClientProvider>

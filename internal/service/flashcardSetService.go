@@ -40,6 +40,16 @@ func (s *FlashcardSetService) ListFlashcardSets() (models.FlashcardsSets, error)
 	return flashcardsSets, nil
 }
 
+func (s *FlashcardSetService) ListFlashcardSetsForUser(userID string) (models.FlashcardsSets, error) {
+	// buisiness logic here
+	//
+	flashcardsSets, err := s.Repo.ListFlashcardSetsForUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	return flashcardsSets, nil
+}
+
 func (s *FlashcardSetService) GetFlashcardSetByID(id uint64) (*models.FlashcardSet, error) {
 	// buisiness logic here
 	//

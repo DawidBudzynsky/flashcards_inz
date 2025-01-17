@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"flashcards/internal/models"
 	"time"
 
@@ -14,6 +15,7 @@ type TestServiceInterface interface {
 	UpdateTestByID(uint64, map[string]interface{}) (*models.Test, error)
 	DeleteTestByID(uint64) error
 	GetFlashcard(int) (*models.Flashcard, error)
+	GetTestsGroupedByStatus(string) (map[string][]models.Test, error)
 }
 
 type CreateTestRequest struct {
@@ -40,6 +42,7 @@ func (s *TestService) GetFlashcard(id int) (*models.Flashcard, error) {
 	}
 	return &flashcard, nil
 }
+
 func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 	// Define the date format for parsing
 	layout := "2006-01-02"
@@ -83,6 +86,34 @@ func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 
 	return test, nil
 }
+func (s *TestService) GetTestsGroupedByStatus(userID string) (map[string][]models.Test, error) {
+	var finishedTests []models.Test
+	var notFinishedTests []models.Test
+
+	// Query for finished tests
+	finishedQuery := s.db.Table("tests").
+		Select("tests.*").
+		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.user_id = ?", userID).
+		Where("test_results.is_finished = ?", true)
+	if err := finishedQuery.Find(&finishedTests).Error; err != nil {
+		return nil, err
+	}
+
+	// Query for not finished tests
+	notFinishedQuery := s.db.Table("tests").
+		Select("tests.*").
+		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.user_id = ?", userID).
+		Where("test_results.is_finished = ? OR test_results.id IS NULL", false)
+	if err := notFinishedQuery.Find(&notFinishedTests).Error; err != nil {
+		return nil, err
+	}
+
+	// Group the results
+	return map[string][]models.Test{
+		"finished":     finishedTests,
+		"not_finished": notFinishedTests,
+	}, nil
+}
 
 func (s *TestService) ListTests() (models.Tests, error) {
 	var tests models.Tests
@@ -116,4 +147,34 @@ func (s *TestService) DeleteTestByID(id uint64) error {
 		return err
 	}
 	return nil
+}
+
+func (s *TestService) SaveTestResult(userID uint64, testID uint64, answers map[uint64]string, score int) (*models.TestResult, error) {
+	var existingResult models.TestResult
+	if err := s.db.Where("user_id = ? AND test_id = ?", userID, testID).First(&existingResult).Error; err == nil {
+		if existingResult.IsFinished {
+			return nil, errors.New("already completed test")
+		}
+	}
+	// Save or update the test result
+	result := models.TestResult{
+		TestID:     testID,
+		UserID:     userID,
+		Answers:    answers,
+		Score:      score,
+		Submitted:  time.Now(),
+		IsFinished: true,
+	}
+	if existingResult.ID > 0 {
+		// Update existing result
+		if err := s.db.Model(&existingResult).Updates(result).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		// Create a new result
+		if err := s.db.Create(&result).Error; err != nil {
+			return nil, err
+		}
+	}
+	return &result, nil
 }

@@ -58,6 +58,15 @@ func (s *FlashcardSetRepo) ListFlashcardSets() (models.FlashcardsSets, error) {
 	return flashcardSets, nil
 }
 
+func (s *FlashcardSetRepo) ListFlashcardSetsForUser(userId string) (models.FlashcardsSets, error) {
+	var flashcardSets models.FlashcardsSets
+	// Filter flashcard sets where the user ID matches
+	if err := s.db.Preload("Flashcards").Where("user_id = ?", userId).Find(&flashcardSets).Error; err != nil {
+		return nil, err
+	}
+	return flashcardSets, nil
+}
+
 func (s *FlashcardSetRepo) GetFlashcardSetByID(id uint64) (*models.FlashcardSet, error) {
 	var flashcardSet models.FlashcardSet
 	if err := s.db.Preload(flashcards).Preload("Flashcards.Tracking").First(&flashcardSet, id).Error; err != nil {

@@ -75,3 +75,13 @@ type TestQuestion struct {
 	CorrectAnswer string
 	AnswerOptions []string
 }
+
+type TestResult struct {
+	ID         uint64            `gorm:"primaryKey"`
+	TestID     uint64            `gorm:"not null"`
+	UserID     uint64            `gorm:"not null"`
+	Answers    map[uint64]string `gorm:"type:jsonb"`
+	Score      int               `gorm:"not null"`
+	Submitted  time.Time         `gorm:"not null"`
+	IsFinished bool              `gorm:"default:false"` // Independent field per user
+}

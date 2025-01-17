@@ -9,6 +9,7 @@ import (
 type FolderServiceInterface interface {
 	CreateFolder(CreateFolderRequest) (*models.Folder, error)
 	ListFolders() ([]models.Folder, error)
+	GetUserFolders(string) ([]models.Folder, error)
 	GetFolderByID(uint64) (*models.Folder, error)
 	UpdateFolderByID(uint64, map[string]interface{}) (*models.Folder, error)
 	DeleteFolderByID(uint64) error
@@ -45,6 +46,16 @@ func (s *FolderService) ListFolders() ([]models.Folder, error) {
 	if err := s.db.Preload(flashcard_sets).Find(&folders).Error; err != nil {
 		return nil, err
 	}
+	return folders, nil
+}
+
+func (s *FolderService) GetUserFolders(userID string) ([]models.Folder, error) {
+	var folders []models.Folder
+
+	if err := s.db.Where("user_google_id = ?", userID).Find(&folders).Error; err != nil {
+		return nil, err
+	}
+
 	return folders, nil
 }
 

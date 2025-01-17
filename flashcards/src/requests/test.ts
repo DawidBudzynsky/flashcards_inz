@@ -10,6 +10,11 @@ interface AnswersRequest {
 	[key: number]: string;
 }
 
+export const getUserTests = async () => {
+	const url = `/tests/grouped`;
+	return await api.get(url);
+};
+
 export const createTest = async (testData: CreateTestRequest) => {
 	const url = `/tests/`;
 	return await api.post(url, testData);

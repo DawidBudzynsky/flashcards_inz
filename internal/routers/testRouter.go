@@ -16,7 +16,8 @@ func TestRouter(handler *handler.TestHandler) chi.Router {
 	r.With(middlewares.UserIdFromSession).Post("/", handler.Create)
 	r.With(middlewares.UserIdFromSession).Get("/{id}/questions", handler.CreateQuestions)
 	r.With(middlewares.UserIdFromSession).Post("/verify", handler.VerifyAnswers)
-	r.Get("/", handler.List)
+	r.With(middlewares.UserIdFromSession).Get("/grouped", handler.GetTestsForUser)
+
 	r.Get("/{id}", handler.GetByID)
 	r.Put("/{id}", handler.UpdateByID)
 	r.Delete("/{id}", handler.DeleteByID)

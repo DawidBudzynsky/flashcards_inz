@@ -78,6 +78,26 @@ func (h *FlashcardSetHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *FlashcardSetHandler) GetUserSets(w http.ResponseWriter, r *http.Request) {
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	var flashcardSets []models.FlashcardSet
+	flashcardSets, err := h.Service.ListFlashcardSetsForUser(userGoogleID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve flashcard sets", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(flashcardSets); err != nil {
+		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)
+	}
+}
+
 func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	setID, err := strconv.ParseUint(idParam, 10, 64)

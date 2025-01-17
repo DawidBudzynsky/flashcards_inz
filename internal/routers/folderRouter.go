@@ -14,7 +14,8 @@ func FolderRouter(handler *handler.FolderHandler) chi.Router {
 	//...
 
 	r.With(middlewares.UserIdFromSession).Post("/", handler.Create)
-	r.Get("/", handler.List)
+	r.With(middlewares.UserIdFromSession).Get("/", handler.GetUserFolders)
+	// r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)
 	r.Put("/{id}", handler.UpdateByID)
 	r.Delete("/{id}", handler.DeleteByID)

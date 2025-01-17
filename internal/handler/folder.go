@@ -53,6 +53,23 @@ func (h *FolderHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *FolderHandler) GetUserFolders(w http.ResponseWriter, r *http.Request) {
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+	folders, err := h.Service.GetUserFolders(userGoogleID)
+	if err != nil {
+		http.Error(w, "Failed to list folders", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(folders); err != nil {
+		http.Error(w, "Failed to encode folders", http.StatusInternalServerError)
+	}
+}
+
 func (h *FolderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	folderID, err := strconv.ParseUint(idParam, 10, 64)
