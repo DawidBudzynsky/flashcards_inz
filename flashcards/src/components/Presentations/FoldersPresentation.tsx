@@ -12,7 +12,7 @@ const FoldersPresentation: React.FC = () => {
 	const { data: folders, refetch } = useQuery<Folder[]>({
 		queryKey: ["folders"],
 		queryFn: getUserFolders,
-		staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
+		// staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
 	});
 
 	const {

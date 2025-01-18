@@ -67,6 +67,7 @@ type Test struct {
 	DueDate      time.Time      // When the test is next due
 	NumQuestions int            `gorm:"index"`
 	Sets         []FlashcardSet `gorm:"many2many:test_sets;foreignKey:ID;joinTableForeignKey:test_id;joinTableReferenceID:flashcard_set_id"`
+	AccessToken  string         `gorm:"unique;"` // Token for sharing the test
 }
 type Tests []Test
 
@@ -77,11 +78,18 @@ type TestQuestion struct {
 }
 
 type TestResult struct {
-	ID         uint64            `gorm:"primaryKey"`
-	TestID     uint64            `gorm:"not null"`
-	UserID     uint64            `gorm:"not null"`
-	Answers    map[uint64]string `gorm:"type:jsonb"`
-	Score      int               `gorm:"not null"`
-	Submitted  time.Time         `gorm:"not null"`
-	IsFinished bool              `gorm:"default:false"` // Independent field per user
+	ID           uint64    `gorm:"primaryKey"`
+	TestID       uint64    `gorm:"not null"`
+	UserGoogleID string    `gorm:"not null"`
+	Answers      []byte    `gorm:"type:jsonb"`
+	Score        int       `gorm:"not null"`
+	Submitted    time.Time `gorm:"not null"`
+	IsFinished   bool      `gorm:"default:false"` // Independent field per user
+}
+
+type TestUser struct {
+	TestID       int       `gorm:"index"`
+	UserGoogleID string    `gorm:"index"` // User with access to the test
+	AccessToken  string    `gorm:"index"`
+	AssignedAt   time.Time `gorm:"autoCreateTime"`
 }

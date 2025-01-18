@@ -29,3 +29,8 @@ export const verifyAnswers = async (answers: AnswersRequest) => {
 	const url = `/tests/verify`;
 	return await api.post(url, answers);
 };
+
+export const assignTest = async (token: string) => {
+	const url = `/tests/testToken?token=${token}`;
+	return await api.get(url);
+};

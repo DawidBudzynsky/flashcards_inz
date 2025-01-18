@@ -1,10 +1,13 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"flashcards/internal/models"
+	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +19,9 @@ type TestServiceInterface interface {
 	DeleteTestByID(uint64) error
 	GetFlashcard(int) (*models.Flashcard, error)
 	GetTestsGroupedByStatus(string) (map[string][]models.Test, error)
+	SaveTestResult(string, uint64, map[int]string, int) (*models.TestResult, error)
+	AssignTestToUser(string, string) error
+	GetTestByToken(string) (*models.Test, error)
 }
 
 type CreateTestRequest struct {
@@ -77,7 +83,11 @@ func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 		DueDate:      dueDate,
 		NumQuestions: body.NumQuestions,
 		Sets:         sets, // Attach the fetched sets
+		AccessToken:  uuid.NewString(),
 	}
+
+	testURL := fmt.Sprintf("https://myapp.com/tests/testToken?token=%s", test.AccessToken)
+	fmt.Println(testURL)
 
 	// Save the test with associations
 	if err := s.db.Create(test).Error; err != nil {
@@ -86,25 +96,57 @@ func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 
 	return test, nil
 }
+
+func (s *TestService) AssignTestToUser(userID string, token string) error {
+	// Find the test by its access token
+	var test models.Test
+	err := s.db.Where("access_token = ?", token).First(&test).Error
+	if err != nil {
+		return errors.New("test not found")
+	}
+
+	// Check if the user already has access
+	var testUser models.TestUser
+	err = s.db.Where("test_id = ? AND user_google_id = ?", test.ID, userID).First(&testUser).Error
+	if err == nil {
+		return nil // User already has access
+	}
+
+	// If not, create the relationship
+	testUser = models.TestUser{
+		TestID:       test.ID,
+		UserGoogleID: userID,
+		AccessToken:  token,
+		AssignedAt:   time.Now(),
+	}
+
+	if err := s.db.Create(&testUser).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *TestService) GetTestsGroupedByStatus(userID string) (map[string][]models.Test, error) {
 	var finishedTests []models.Test
 	var notFinishedTests []models.Test
 
-	// Query for finished tests
-	finishedQuery := s.db.Table("tests").
+	notTakenQuery := s.db.Table("tests").
 		Select("tests.*").
-		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.user_id = ?", userID).
-		Where("test_results.is_finished = ?", true)
-	if err := finishedQuery.Find(&finishedTests).Error; err != nil {
+		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id").
+		Joins("LEFT JOIN test_users ON tests.id = test_users.test_id").
+		Where("tests.user_google_id = ? OR test_users.user_google_id = ?", userID, userID).
+		Where("test_results.test_id IS NULL OR test_results.is_finished = ?", false)
+	if err := notTakenQuery.Find(&notFinishedTests).Error; err != nil {
 		return nil, err
 	}
 
-	// Query for not finished tests
-	notFinishedQuery := s.db.Table("tests").
+	// Query for finished tests
+	finishedQuery := s.db.Table("tests").
 		Select("tests.*").
-		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id AND test_results.user_id = ?", userID).
-		Where("test_results.is_finished = ? OR test_results.id IS NULL", false)
-	if err := notFinishedQuery.Find(&notFinishedTests).Error; err != nil {
+		Joins("INNER JOIN test_results ON tests.id = test_results.test_id").
+		Where("test_results.user_google_id = ? AND test_results.is_finished = ?", userID, true)
+	if err := finishedQuery.Find(&finishedTests).Error; err != nil {
 		return nil, err
 	}
 
@@ -149,32 +191,53 @@ func (s *TestService) DeleteTestByID(id uint64) error {
 	return nil
 }
 
-func (s *TestService) SaveTestResult(userID uint64, testID uint64, answers map[uint64]string, score int) (*models.TestResult, error) {
-	var existingResult models.TestResult
-	if err := s.db.Where("user_id = ? AND test_id = ?", userID, testID).First(&existingResult).Error; err == nil {
-		if existingResult.IsFinished {
-			return nil, errors.New("already completed test")
-		}
+func (s *TestService) SaveTestResult(userID string, testID uint64, answers map[int]string, score int) (*models.TestResult, error) {
+	// Marshal the answers map to JSON
+	answersJSON, err := json.Marshal(answers)
+	if err != nil {
+		return nil, err
 	}
-	// Save or update the test result
+
+	// Create a new result object
 	result := models.TestResult{
-		TestID:     testID,
-		UserID:     userID,
-		Answers:    answers,
-		Score:      score,
-		Submitted:  time.Now(),
-		IsFinished: true,
+		TestID:       testID,
+		UserGoogleID: userID,
+		Answers:      answersJSON,
+		Score:        score,
+		Submitted:    time.Now(),
+		IsFinished:   true,
 	}
-	if existingResult.ID > 0 {
-		// Update existing result
-		if err := s.db.Model(&existingResult).Updates(result).Error; err != nil {
-			return nil, err
-		}
-	} else {
-		// Create a new result
+
+	// Check if a result already exists
+	var existingResult models.TestResult
+	err = s.db.Where("user_google_id = ? AND test_id = ?", userID, testID).First(&existingResult).Error
+
+	if err == gorm.ErrRecordNotFound {
+		// Record doesn't exist, create a new one
 		if err := s.db.Create(&result).Error; err != nil {
 			return nil, err
 		}
+	} else if err == nil {
+		if err := s.db.Model(&existingResult).Where("id = ?", existingResult.ID).Updates(result).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, err
 	}
+
 	return &result, nil
+}
+
+func (s *TestService) GetTestByToken(token string) (*models.Test, error) {
+	// Find the test by its access token
+	var test models.Test
+	err := s.db.Where("access_token = ?", token).First(&test).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("test not found")
+		}
+		return nil, err
+	}
+
+	return &test, nil
 }

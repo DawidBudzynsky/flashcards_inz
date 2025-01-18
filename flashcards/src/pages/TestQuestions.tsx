@@ -2,14 +2,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getTestQuestions, verifyAnswers } from "../requests/test";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
-import ReviewModal from "../components/ReviewModal";
 import TestScoreModal from "../components/TestScoreModal";
 
 const TestQuestions: React.FC = () => {
 	const navigate = useNavigate();
 	const { testId } = useParams<{ testId: string }>();
 
-	// Fetch flashcards for today using useQuery
 	const {
 		data: testQuestions,
 		isLoading,
@@ -20,16 +18,12 @@ const TestQuestions: React.FC = () => {
 		enabled: !!testId,
 	});
 
-	// State to keep track of selected answers
 	const [selectedAnswers, setSelectedAnswers] = useState<{
 		[key: number]: string;
 	}>({});
 
-	// Refs to scroll to each question
-	// Refs to scroll to each question
 	const questionRefs = useRef<any[]>([]);
 
-	// Handle answer selection
 	const handleAnswerSelect = (questionId: number, answer: string) => {
 		setSelectedAnswers((prev) => ({
 			...prev,
@@ -60,7 +54,6 @@ const TestQuestions: React.FC = () => {
 		},
 	});
 
-	// Handle verify button click
 	const handleVerify = () => {
 		const answersToSubmit = testQuestions.reduce(
 			(acc: { [key: number]: string }, question: any) => {
@@ -71,6 +64,7 @@ const TestQuestions: React.FC = () => {
 		);
 
 		const payload = {
+			testID: testId,
 			answers: answersToSubmit,
 		};
 

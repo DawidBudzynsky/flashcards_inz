@@ -128,6 +128,7 @@ func (t *TestHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 
 type AnswerRequest struct {
 	UserGoogleID string         `json:"-"`
+	TestID       string         `json:testID`
 	Answers      map[int]string `json:"answers"` // Key is question ID, value is the selected answer
 }
 
@@ -162,6 +163,25 @@ func (h *TestHandler) VerifyAnswers(w http.ResponseWriter, r *http.Request) {
 		"correct":   correctAnswers,
 		"incorrect": totalQuestions - correctAnswers,
 		"total":     totalQuestions,
+	}
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	score := correctAnswers
+	testID, err := strconv.ParseUint(req.TestID, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("unable to retreive testID: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = h.Service.SaveTestResult(userGoogleID, testID, req.Answers, score)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to save test result: %v", err), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -326,4 +346,42 @@ func (f *TestHandler) createAnswers(flashcard models.Flashcard, sets []models.Fl
 	})
 
 	return allAnswers, nil
+}
+
+func (t *TestHandler) AccessTest(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	if token == "" {
+		http.Error(w, "Invalid test link", http.StatusBadRequest)
+		return
+	}
+
+	// Get the test using the token
+	test, err := t.Service.GetTestByToken(token)
+	if err != nil {
+		http.Error(w, "Test not found", http.StatusNotFound)
+		return
+	}
+
+	userID := userGoogleID
+	if test.UserGoogleID != userID {
+		// user is not the author of a test, assign the test
+		err = t.Service.AssignTestToUser(userID, token)
+		if err != nil {
+			http.Error(w, "Failed to assign test", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// http.Redirect(w, r, fmt.Sprintf("/user/%s/tests/%d", userID, test.ID), http.StatusFound)
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(test); err != nil {
+		http.Error(w, "Failed to encode tests", http.StatusInternalServerError)
+	}
 }

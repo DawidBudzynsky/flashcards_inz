@@ -10,6 +10,7 @@ import FlashcardSetView from "./pages/FlashcardSetView";
 import FlashcardSetLearn from "./pages/FlashcardSetLearn";
 import Home from "./pages/Home";
 import TestQuestions from "./pages/TestQuestions";
+import SharedTestHandler from "./pages/SharedTestHandler";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,11 @@ function App() {
 						/>
 
 						<Route path="/user/tests" element={<TestQuestions />} />
+
+						<Route
+							path="/tests/testToken"
+							element={<SharedTestHandler />}
+						/>
 					</Route>
 				</Routes>
 			</QueryClientProvider>
