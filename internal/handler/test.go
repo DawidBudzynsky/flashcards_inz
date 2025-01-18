@@ -217,9 +217,27 @@ func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	hasAccess := t.Service.DoesUserHaveAccess(userGoogleID, testID)
+	if !hasAccess {
+		http.Error(w, "You didn't apply for this test", http.StatusUnauthorized)
+		return
+	}
+
 	test, err := t.Service.GetTestByID(testID)
 	if err != nil {
 		http.Error(w, "Failed to get test", http.StatusInternalServerError)
+		return
+	}
+
+	err = test.IsValid()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -232,6 +250,7 @@ func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(questions); err != nil {
 		http.Error(w, "Failed to encode test", http.StatusInternalServerError)
+		return
 	}
 }
 

@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type User struct {
 	// ID             int            `gorm:"primaryKey"`
@@ -13,6 +16,7 @@ type User struct {
 	FlashcardsSets FlashcardsSets `gorm:"foreignKey:UserGoogleID"`
 	Folders        Folders        `gorm:"foreignKey:UserGoogleID"`
 	Tests          Tests          `gorm:"foreignKey:UserGoogleID"`
+	AssignedTo     []Test         `gorm:"many2many:test_users;joinForeignKey:UserGoogleID;joinReferences:TestID"`
 }
 type Users []User
 
@@ -61,15 +65,33 @@ type Tracking struct {
 }
 
 type Test struct {
-	ID           int            `gorm:"primaryKey"`
-	UserGoogleID string         `gorm:"index"`
-	StartDate    time.Time      `gorm:autoCreateTime`
-	DueDate      time.Time      // When the test is next due
-	NumQuestions int            `gorm:"index"`
-	Sets         []FlashcardSet `gorm:"many2many:test_sets;foreignKey:ID;joinTableForeignKey:test_id;joinTableReferenceID:flashcard_set_id"`
-	AccessToken  string         `gorm:"unique;"` // Token for sharing the test
+	ID            int            `gorm:"primaryKey"`
+	UserGoogleID  string         `gorm:"index"`
+	StartDate     time.Time      `gorm:autoCreateTime`
+	DueDate       time.Time      // When the test is next due
+	Title         string         `gorm:"size:255"`
+	Description   string         `gorm:"size:255"`
+	NumQuestions  int            `gorm:"index"`
+	Sets          []FlashcardSet `gorm:"many2many:test_sets;foreignKey:ID;joinTableForeignKey:test_id;joinTableReferenceID:flashcard_set_id"`
+	AccessToken   string         `gorm:"unique;"` // Token for sharing the test
+	AssignedUsers []User         `gorm:"many2many:test_users;joinForeignKey:TestID;joinReferences:UserGoogleID"`
 }
 type Tests []Test
+
+// IsValid checks if the test is open or expired based on today's date
+func (t *Test) IsValid() error {
+	currentTime := time.Now()
+
+	if currentTime.Before(t.StartDate) {
+		return errors.New("the test is not yet open. Please wait until the start date")
+	}
+
+	if currentTime.After(t.DueDate) {
+		return errors.New("the test has expired. You can no longer take the test")
+	}
+
+	return nil
+}
 
 type TestQuestion struct {
 	Question      string

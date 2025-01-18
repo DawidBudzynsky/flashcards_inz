@@ -22,6 +22,7 @@ type TestServiceInterface interface {
 	SaveTestResult(string, uint64, map[int]string, int) (*models.TestResult, error)
 	AssignTestToUser(string, string) error
 	GetTestByToken(string) (*models.Test, error)
+	DoesUserHaveAccess(string, uint64) bool
 }
 
 type CreateTestRequest struct {
@@ -130,17 +131,17 @@ func (s *TestService) AssignTestToUser(userID string, token string) error {
 func (s *TestService) GetTestsGroupedByStatus(userID string) (map[string][]models.Test, error) {
 	var finishedTests []models.Test
 	var notFinishedTests []models.Test
+	var yours []models.Test
 
 	notTakenQuery := s.db.Table("tests").
 		Select("tests.*").
 		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id").
 		Joins("LEFT JOIN test_users ON tests.id = test_users.test_id").
-		Where("tests.user_google_id = ? OR test_users.user_google_id = ?", userID, userID).
-		Where("test_results.test_id IS NULL OR test_results.is_finished = ?", false)
+		Where("test_users.user_google_id = ?", userID).                              // Only include tests that the user is assigned to
+		Where("test_results.test_id IS NULL OR test_results.is_finished = ?", false) // Include tests that are not finished or have no results
 	if err := notTakenQuery.Find(&notFinishedTests).Error; err != nil {
 		return nil, err
 	}
-
 	// Query for finished tests
 	finishedQuery := s.db.Table("tests").
 		Select("tests.*").
@@ -150,10 +151,16 @@ func (s *TestService) GetTestsGroupedByStatus(userID string) (map[string][]model
 		return nil, err
 	}
 
+	authorQuery := s.db.Preload("AssignedUsers").
+		Where("tests.user_google_id = ?", userID)
+	if err := authorQuery.Find(&yours).Error; err != nil {
+		return nil, err
+	}
 	// Group the results
 	return map[string][]models.Test{
 		"finished":     finishedTests,
 		"not_finished": notFinishedTests,
+		"yours":        yours,
 	}, nil
 }
 
@@ -188,6 +195,11 @@ func (s *TestService) DeleteTestByID(id uint64) error {
 	if err := s.db.Delete(&models.Test{}, id).Error; err != nil {
 		return err
 	}
+
+	if err := s.db.Where("test_id = ?", id).Delete(&models.TestUser{}).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -240,4 +252,19 @@ func (s *TestService) GetTestByToken(token string) (*models.Test, error) {
 	}
 
 	return &test, nil
+}
+
+func (s *TestService) DoesUserHaveAccess(userID string, testID uint64) bool {
+	test, err := s.GetTestByID(testID)
+	if err != nil {
+		return false
+	}
+	if test.UserGoogleID == userID {
+		return true
+	}
+	var testUser models.TestUser
+	if err := s.db.Where("test_id = ? AND user_google_id = ?", testID, userID).First(&testUser).Error; err != nil {
+		return false
+	}
+	return true
 }

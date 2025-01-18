@@ -34,3 +34,8 @@ export const assignTest = async (token: string) => {
 	const url = `/tests/testToken?token=${token}`;
 	return await api.get(url);
 };
+
+export const deleteTestByID = async (testID: number) => {
+	const url = `/tests/${testID}`;
+	return await api.delete(url);
+};

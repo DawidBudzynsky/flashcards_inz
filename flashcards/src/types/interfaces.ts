@@ -62,4 +62,6 @@ export interface Test {
 	DueDate: string;
 	NumQuestions: number;
 	Sets: FlashcardSet[];
+	AccessToken: string;
+	AssignedUsers: User[];
 }

@@ -72,9 +72,33 @@ const TestQuestions: React.FC = () => {
 		mutate(payload);
 	};
 
+	if (isLoading) {
+		return (
+			<div className="flex p-4 max-w-5xl w-full mx-auto">
+				{/* Sidebar with list of questions (Skeleton Loading) */}
+				<div className="pr-4 sticky top-1/4 h-screen transform overflow-y-auto">
+					<ul className="space-y-4">
+						{/* Skeleton for sidebar list items */}
+						<li className="h-8 bg-gray-300 rounded skeleton"></li>
+						<li className="h-8 bg-gray-300 rounded skeleton"></li>
+						<li className="h-8 bg-gray-300 rounded skeleton"></li>
+					</ul>
+				</div>
+
+				{/* Main content with questions (Skeleton Loading) */}
+				<div className="w-3/4">
+					<div className="h-32 bg-gray-300 rounded skeleton mb-4"></div>
+					<div className="h-32 bg-gray-300 rounded skeleton mb-4"></div>
+					<div className="h-32 bg-gray-300 rounded skeleton mb-4"></div>
+				</div>
+			</div>
+		);
+	}
 	// Handle loading and error states
-	if (isLoading) return <p>Loading questions...</p>;
-	if (error) return <p>Error loading questions</p>;
+	if (error) {
+		const errorMessage = error;
+		return <p>{errorMessage}</p>;
+	}
 
 	// Scroll to the specific question
 	const handleQuestionClick = (index: number) => {
