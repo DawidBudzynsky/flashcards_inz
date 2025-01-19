@@ -49,57 +49,71 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 	};
 
 	return (
-		<div className="flex flex-col h-72 bg-white rounded-lg overflow-hidden border-2 border-black transition-all duration-300 ease-in-out`">
-			<div className="flex justify-between p-4">
-				<h2 className="flex-2 text-xl text-start font-semibold">
-					Your Test
-				</h2>
+		<div className="collapse join-item bg-base border-2">
+			<input type="radio" name="my-accordion-1" id={`test-${test.ID}`} />
+			<div className="collapse-title text-xl font-medium">
+				{test.DueDate || "Test Details"}{" "}
+			</div>
 
-				<div className="flex-1 px-8 flex justify-around">
-					<p className="text-lg font-semibold">Share this test:</p>
-					<p className="text-lg font-semibold">{test.AccessToken}</p>
+			{/* Accordion Content */}
+			<div className="collapse-content">
+				<div className="flex flex-col h-72 bg-white rounded-lg overflow-hidden border-2 border-black transition-all duration-300 ease-in-out">
+					<div className="flex justify-between p-4">
+						<h2 className="flex-2 text-xl text-start font-semibold">
+							Your Test
+						</h2>
+
+						<div className="flex-1 px-8 flex justify-around">
+							<p className="text-lg font-semibold">
+								Share this test:
+							</p>
+							<p className="text-lg font-semibold">
+								{test.AccessToken}
+							</p>
+							<button
+								className="text-xl font-semibold underline"
+								onClick={handleCopyLink}
+							>
+								Copy to clipboard
+							</button>
+						</div>
+						<button
+							className="flex-2 flex underline justify-around font-semibold text-xl"
+							onClick={handleDelete}
+						>
+							Delete
+						</button>
+					</div>
+
+					<div className={"flex flex-grow gap-4 p-4"}>
+						<div className="flex-3 text-start">
+							<p>
+								Test opens:{" "}
+								{new Date(test.StartDate).toLocaleDateString()}
+							</p>
+							<p>
+								Test is due to:{" "}
+								{new Date(test.DueDate).toLocaleDateString()}
+							</p>
+						</div>
+						<h1>Assigned users:</h1>
+						<div className="flex-1 text-center">
+							{test.AssignedUsers.map((user: User) => (
+								<p key={user.Email}>{user.Email}</p>
+							))}
+						</div>
+					</div>
+
 					<button
-						className="text-xl font-semibold underline"
-						onClick={handleCopyLink}
+						className=" bg-black text-white py-4 flex items-center justify-center"
+						onClick={() => {
+							navigate(`/tests/${test.ID}/questions`);
+						}}
 					>
-						Copy to clipboard
+						<span className="font-semibold">Take a test!</span>
 					</button>
 				</div>
-				<button
-					className="flex-2 flex underline justify-around font-semibold text-xl"
-					onClick={handleDelete}
-				>
-					Delete
-				</button>
 			</div>
-
-			<div className={"flex flex-grow gap-4 p-4"}>
-				<div className="flex-3 text-start">
-					<p>
-						Test opens:{" "}
-						{new Date(test.StartDate).toLocaleDateString()}
-					</p>
-					<p>
-						Test is due to:{" "}
-						{new Date(test.DueDate).toLocaleDateString()}
-					</p>
-				</div>
-				<h1>Assigned users:</h1>
-				<div className="flex-1 text-center">
-					{test.AssignedUsers.map((user: User) => (
-						<p>{user.Email}</p>
-					))}
-				</div>
-			</div>
-
-			<button
-				className=" bg-black text-white py-4 flex items-center justify-center"
-				onClick={() => {
-					navigate(`/tests/${test.ID}/questions`);
-				}}
-			>
-				<span className="font-semibold">Take a test!</span>
-			</button>
 		</div>
 	);
 };

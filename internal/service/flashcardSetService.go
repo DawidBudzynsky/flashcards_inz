@@ -133,6 +133,16 @@ func (s *FlashcardSetService) RemoveSetFromFolder(setID, folderID uint64) (*mode
 	return flashcardSet, nil
 }
 
+func (s *FlashcardSetService) CheckSetInFolder(setID, folderID uint64) (bool, error) {
+
+	exists, err := s.Repo.CheckSetInFolder(setID, folderID)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
 func createMapOfFlashcardsIDS(flashcards models.Flashcards) map[int]bool {
 	flashcardsMap := make(map[int]bool)
 	for _, flashcard := range flashcards {

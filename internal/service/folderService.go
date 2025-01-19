@@ -52,7 +52,7 @@ func (s *FolderService) ListFolders() ([]models.Folder, error) {
 func (s *FolderService) GetUserFolders(userID string) ([]models.Folder, error) {
 	var folders []models.Folder
 
-	if err := s.db.Where("user_google_id = ?", userID).Find(&folders).Error; err != nil {
+	if err := s.db.Preload("FlashcardsSets").Where("user_google_id = ?", userID).Find(&folders).Error; err != nil {
 		return nil, err
 	}
 

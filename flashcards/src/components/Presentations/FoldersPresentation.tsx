@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import AddFolderModal from "../AddFolderModal";
 import { createFolder, getUserFolders } from "../../requests/folder";
 import useFuzzySearch from "../../hooks/useFuzzySearch";
+import FolderItem from "../Folders/FolderItem";
+import FoldersAccordion from "../Folders/FolderAccordion";
 
 const FoldersPresentation: React.FC = () => {
 	const navigate = useNavigate();
@@ -54,37 +56,7 @@ const FoldersPresentation: React.FC = () => {
 			</div>
 			<div className="max-w-5xl w-full space-y-3">
 				<AnimatePresence>
-					{filteredFolders && filteredFolders.length > 0 ? (
-						filteredFolders.map((folder: Folder) => (
-							<div
-								key={folder.ID}
-								className="modal-box max-w-5xl mx-auto bg-base-200 rounded-box p-4 cursor-pointer"
-								onClick={() =>
-									navigate(`/folders/${folder.ID}`)
-								}
-							>
-								<h3>{folder.Name}</h3>
-							</div>
-						))
-					) : (
-						<motion.div
-							initial={{
-								opacity: 0,
-							}}
-							animate={{
-								opacity: 1,
-							}}
-							exit={{
-								opacity: 0,
-							}}
-							transition={{
-								duration: 0.3,
-							}}
-							className="text-center text-gray-500 mt-4"
-						>
-							No searches found ☹️
-						</motion.div>
-					)}
+					<FoldersAccordion folders={filteredFolders} />
 				</AnimatePresence>
 			</div>
 		</div>

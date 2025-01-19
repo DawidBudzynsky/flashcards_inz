@@ -61,9 +61,11 @@ const TestsPresentation: React.FC = () => {
 
 			<h3 className="text-3xl font-bold">Yours</h3>
 			<div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-				{tests?.yours.map((test: Test) => (
-					<YourTest test={test} />
-				))}
+				<div className="join join-vertical w-full">
+					{tests?.yours.map((test: Test) => (
+						<YourTest test={test} />
+					))}
+				</div>
 			</div>
 
 			<h3 className="text-3xl font-bold">Not finished tests</h3>

@@ -186,7 +186,6 @@ func (h *FlashcardSetHandler) AddSetToFolder(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *FlashcardSetHandler) RemoveSetFromFolder(w http.ResponseWriter, r *http.Request) {
-	// Parse the JSON request body
 	var requestData struct {
 		FlashcardSetID uint64 `json:"FlashcardSetID"`
 		FolderID       uint64 `json:"FolderID"`
@@ -197,14 +196,57 @@ func (h *FlashcardSetHandler) RemoveSetFromFolder(w http.ResponseWriter, r *http
 		return
 	}
 
-	// Call the service to add the flashcard set to the folder
 	flashcardSet, err := h.Service.RemoveSetFromFolder(requestData.FlashcardSetID, requestData.FolderID)
 	if err != nil {
 		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with the updated flashcard set
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
+		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *FlashcardSetHandler) ChangeSetFolder(w http.ResponseWriter, r *http.Request) {
+	var requestData struct {
+		FlashcardSetID uint64 `json:"FlashcardSetID"`
+		OldFolderID    uint64 `json:"OldFolderID"`
+		FolderID       uint64 `json:"FolderID"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	//check if new folder already has this set
+	exists, err := h.Service.CheckSetInFolder(requestData.FlashcardSetID, requestData.FolderID)
+	if err != nil {
+		http.Error(w, "Error checking folder contents", http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+	if exists {
+		http.Error(w, "Flashcard set already exists in the target folder", http.StatusConflict)
+		return
+	}
+
+	_, err = h.Service.RemoveSetFromFolder(requestData.FlashcardSetID, requestData.OldFolderID)
+	if err != nil {
+		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
+	flashcardSet, err := h.Service.AddFlashcardSetToFolder(requestData.FlashcardSetID, requestData.FolderID)
+	if err != nil {
+		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
 		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)

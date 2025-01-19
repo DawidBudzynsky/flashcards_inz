@@ -141,3 +141,18 @@ func (s *FlashcardSetRepo) DeleteFlashcardSetByID(id uint64) error {
 	}
 	return nil
 }
+
+func (s *FlashcardSetRepo) CheckSetInFolder(flashcardSetID uint64, folderID uint64) (bool, error) {
+	var folder models.Folder
+	err := s.db.Preload("FlashcardsSets").First(&folder, folderID).Error
+	if err != nil {
+		return false, err
+	}
+
+	for _, set := range folder.FlashcardsSets {
+		if set.ID == int(flashcardSetID) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
