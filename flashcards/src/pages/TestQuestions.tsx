@@ -97,7 +97,7 @@ const TestQuestions: React.FC = () => {
 	// Handle loading and error states
 	if (error) {
 		const errorMessage = error;
-		return <p>{errorMessage}</p>;
+		return <p>{String(errorMessage)}</p>;
 	}
 
 	// Scroll to the specific question

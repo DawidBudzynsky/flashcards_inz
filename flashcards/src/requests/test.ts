@@ -30,7 +30,7 @@ export const verifyAnswers = async (answers: AnswersRequest) => {
 	return await api.post(url, answers);
 };
 
-export const assignTest = async (token: string) => {
+export const assignTest = async (token: string | null) => {
 	const url = `/tests/testToken?token=${token}`;
 	return await api.get(url);
 };

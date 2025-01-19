@@ -1,33 +1,30 @@
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FlashcardSet, Folder } from "../types/interfaces";
+import { FlashcardSet } from "../types/interfaces";
 import AddSetModal from "../components/AddSetToFolderModal";
-
 import ListItem from "../components/ListItem";
-import { useFolderStore } from "../hooks/stores/folderStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { deleteFolderByID, getFolderByID } from "../requests/folder";
 import { dateToString } from "../utils/showDate";
+import { notificationContext } from "../utils/notifications";
 
 function FolderView() {
 	const navigate = useNavigate();
 	const { folderId: folderID } = useParams<{ folderId: string }>();
 
-	const { data: folder, status: statusFolder } = useQuery({
+	const { data: folder } = useQuery({
 		queryKey: ["folder", folderID],
 		queryFn: () => getFolderByID(folderID!),
 	});
 
-	// Mutation to delete the folder
-	const { mutate: deleteFolder, isLoading: isDeleting } = useMutation({
+	const { mutate: deleteFolder } = useMutation({
 		mutationFn: () => deleteFolderByID(folderID!),
 		onSuccess: () => {
-			alert("Folder deleted successfully.");
+			notificationContext.notifySuccess("Folder deleted successfully");
 			navigate(-1);
 		},
 		onError: (error: any) => {
 			console.error("Error deleting folder:", error);
-			alert(
+			notificationContext.notifyError(
 				`Failed to delete folder: ${
 					error?.message || "An unexpected error occurred."
 				}`

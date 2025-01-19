@@ -2,22 +2,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import { deleteSetByID, getFlashcardSetByID } from "../requests/flashcardset";
 import { Flashcard } from "../types/interfaces";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { dateToString } from "../utils/showDate";
-import FlashcardInput from "../components/FlashcardInput";
 import { toggleFlashcardTracking } from "../requests/flashcard";
 
 const FlashcardSetView: React.FC = () => {
 	const navigate = useNavigate();
 	const { setId: setID } = useParams<{ setId: string }>();
 
-	const { data: set, status: setStatus } = useQuery({
+	const { data: set } = useQuery({
 		queryKey: ["flashcardSet", setID],
 		queryFn: () => getFlashcardSetByID(setID!),
 	});
 
 	// Mutation to delete the set
-	const { mutate: deleteSet, isLoading: isDeleting } = useMutation({
+	const { mutate: deleteSet } = useMutation({
 		mutationFn: () => deleteSetByID(setID!),
 		onSuccess: () => {
 			alert("Set deleted successfully.");
@@ -87,20 +85,6 @@ const FlashcardSetView: React.FC = () => {
 				</div>
 			</div>
 
-			{/* <div className='flex justify-center'> */}
-			{/*     <div className='max-w-xl grid grid-cols-5 gap-2'> */}
-			{/*         {Array.from({ length: 5 }, (_, index) => ( */}
-			{/*             <button */}
-			{/*                 key={index} */}
-			{/*                 className='btn' */}
-			{/*                 onClick={() => handleReviewClick(index + 1, set?.Flashcards[0].ID!)} // Set the CardID as the first card's ID for simplicity */}
-			{/*             > */}
-			{/*                 {index + 1} */}
-			{/*             </button> */}
-			{/*         ))} */}
-			{/*     </div> */}
-			{/* </div> */}
-
 			<div className="flex w-3/4 mx-auto mb-4 gap-4">
 				<button className="btn flex-1" onClick={handleLearning}>
 					Learn
@@ -129,7 +113,7 @@ const FlashcardSetView: React.FC = () => {
 							<input
 								type="checkbox"
 								className="checkbox checkbox-primary"
-								checked={flashcard.Tracking}
+								checked={Boolean(flashcard.Tracking)}
 								value={index}
 								onChange={() => handleTracking(flashcard.ID)}
 							/>

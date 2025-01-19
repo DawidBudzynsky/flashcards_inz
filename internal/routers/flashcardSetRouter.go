@@ -12,9 +12,10 @@ func FlashcardSetRouter(handler *handler.FlashcardSetHandler) chi.Router {
 
 	//middlewares
 	//...
+	r.Use(middlewares.UserIdFromSession)
 
-	r.With(middlewares.UserIdFromSession).Post("/", handler.Create)
-	r.With(middlewares.UserIdFromSession).Get("/", handler.GetUserSets)
+	r.Post("/", handler.Create)
+	r.Get("/", handler.GetUserSets)
 	// r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)
 	r.Put("/{id}", handler.UpdateByID)

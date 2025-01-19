@@ -15,14 +15,14 @@ func NewUserFlashcardRepo(db *gorm.DB) *UserFlashcardRepo {
 	return &UserFlashcardRepo{db: db}
 }
 
-func (r *UserFlashcardRepo) GetFlashcardsForToday(UserID string) (*[]models.Tracking, error) {
-	var userFlashcards *[]models.Tracking
-	// Preloading Flashcard information automatically joins the related flashcards
-	err := r.db.Where("user_google_id = ? AND next_review_due <= ?", UserID, time.Now()).
-		Preload("Flashcard"). // This will load the associated Flashcard data
-		Find(&userFlashcards).Error
+func (r *UserFlashcardRepo) GetFlashcardsForToday(UserID string) ([]models.Flashcard, error) {
+	var flashcards []models.Flashcard
+	err := r.db.Preload("Tracking").
+		Joins("JOIN trackings ON trackings.flashcard_id = flashcards.id").
+		Where("flashcards.user_google_id = ? AND trackings.next_review_due <= ?", UserID, time.Now()).
+		Find(&flashcards).Error
 
-	return userFlashcards, err
+	return flashcards, err
 }
 
 func (r *UserFlashcardRepo) GetByCardID(cardID int) (*models.Tracking, error) {

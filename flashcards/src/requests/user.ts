@@ -1,8 +1,6 @@
-import api from '../api/api';
-import { Folder, User } from '../types/interfaces';
+import api from "../api/api";
+import { User } from "../types/interfaces";
 
-// Fetch user data
 export const getUser = async (): Promise<User> => {
-    return await api.get('/users/me');
+	return await api.get("/users/me");
 };
-

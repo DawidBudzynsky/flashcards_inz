@@ -2,6 +2,7 @@ package routers
 
 import (
 	"flashcards/internal/handler"
+	"flashcards/internal/middlewares"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -12,10 +13,10 @@ func FlashcardRouter(handler *handler.FlashcardHandler) chi.Router {
 	//middlewares
 	//...
 
-	r.Post("/", handler.Create)
+	r.With(middlewares.UserIdFromSession).Post("/", handler.Create)
 	r.Put("/", handler.UpdateFlashcards)
 
-	r.Put("/{id}/tracking", handler.ToggleTracking)
+	r.With(middlewares.UserIdFromSession).Put("/{id}/tracking", handler.ToggleTracking)
 
 	r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)

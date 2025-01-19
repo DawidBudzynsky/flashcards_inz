@@ -21,12 +21,12 @@ func NewUserFlashcardService(repository *repositories.UserFlashcardRepo) *UserFl
 	}
 }
 
-func (s *UserFlashcardService) GetFlashcardsForToday(userID string) (*[]models.Tracking, error) {
+func (s *UserFlashcardService) GetFlashcardsForToday(userID string) (*[]models.Flashcard, error) {
 	flashcards, err := s.repo.GetFlashcardsForToday(userID)
 	if err != nil {
 		return nil, err
 	}
-	return flashcards, nil
+	return &flashcards, nil
 }
 
 func (s *UserFlashcardService) UpdateOrCreateFlashcard(review review.ReviewItem, userID string) (*models.Tracking, error) {

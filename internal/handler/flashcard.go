@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"flashcards/internal/middlewares"
 	"flashcards/internal/models"
 	"flashcards/internal/repositories"
 	"flashcards/internal/service"
@@ -23,9 +24,14 @@ func (h *FlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
 
 	for _, flashcard := range body {
-
+		flashcard.UserGoogleID = userGoogleID
 		_, err := h.Service.CreateFlashcard(flashcard)
 		if err != nil {
 			http.Error(w, "Failed to create flashcard", http.StatusInternalServerError)
@@ -98,6 +104,12 @@ func (h *FlashcardHandler) UpdateFlashcards(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *FlashcardHandler) ToggleTracking(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
 	flashcardIDStr := chi.URLParam(r, "id")
 	flashcardID, err := strconv.ParseUint(flashcardIDStr, 10, 64)
 	if err != nil {

@@ -22,18 +22,20 @@ const ListItem: React.FC<ListItemProps> = ({ set }) => {
 	return (
 		<div
 			ref={dragRef}
-			className={`modal-box max-w-5xl mx-auto bg-base-200 rounded-box cursor-pointer hover:scale-95 ${
+			className={`modal-box flex justify-start max-w-5xl mx-auto bg-base-200 rounded-box cursor-pointer hover:scale-95 ${
 				isDragging ? "opacity-30" : "opacity-100"
 			}`}
 			onClick={() => navigate(`/flashcards_sets/${set.ID}`)} // Navigate on click
 		>
-			<div className="flex justify-between text-opacity-25">
+			<div className="w-1/6 text-6xl items-center my-auto">
 				<PiCardsThreeFill />
+			</div>
+			<div className="flex-2 text-start text-opacity-25">
 				<p>{set.Flashcards ? set.Flashcards.length : 0} items</p>
 				<p>created at: {dateToString(set.CreatedAt)}</p>
-			</div>
 
-			<p className="text-2xl font-medium">{set.Title}</p>
+				<p className="text-2xl font-medium">{set.Title}</p>
+			</div>
 		</div>
 	);
 };

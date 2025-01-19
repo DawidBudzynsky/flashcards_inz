@@ -3,13 +3,8 @@ import { Folder, FlashcardSet } from "../../types/interfaces";
 import FolderItem from "./FolderItem";
 import ListItem from "../ListItem";
 import { useNavigate } from "react-router-dom";
-import {
-	QueryClient,
-	useMutation,
-	useQueryClient,
-} from "@tanstack/react-query";
-import { appendSetToFolder, changeSetFolder } from "../../requests/folder";
-import SetItem from "../Sets/SetItem";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { changeSetFolder } from "../../requests/folder";
 
 interface FoldersAccordionProps {
 	folders: Folder[];
@@ -24,7 +19,7 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 		mutationFn: (data: { flashcardSetId: number; folderId: number }) =>
 			changeSetFolder(data.flashcardSetId, activeFolderId, data.folderId),
 		onSuccess: () => {
-			queryClient.invalidateQueries(["folders"]);
+			queryClient.invalidateQueries({ queryKey: ["folders"] });
 		},
 		onError: (error) => {
 			console.error("Error appending flashcard set to folder:", error);
@@ -47,6 +42,10 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 	const handleFolderClick = (folderId: number) => {
 		setActiveFolderId((prev) => (prev === folderId ? null : folderId));
 	};
+
+	if (folders?.length <= 0) {
+		return <div>No folder found ☹️</div>;
+	}
 
 	return (
 		<div className="flex">

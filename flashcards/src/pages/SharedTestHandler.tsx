@@ -1,17 +1,18 @@
 import React from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { assignTest } from "../requests/test";
+import { notificationContext } from "../utils/notifications";
 
 const SharedTestHandler = () => {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 	const token = searchParams.get("token");
 
-	const { mutate, isLoading, error } = useMutation({
+	const { mutate, status, error } = useMutation({
 		mutationFn: () => assignTest(token),
-		onSuccess: (data) => {
-			console.log("Test successfully assigned:", data);
+		onSuccess: () => {
+			notificationContext.notifySuccess("Test successfully assigned");
 			navigate(`/users/`);
 		},
 		onError: (err) => {
@@ -26,7 +27,7 @@ const SharedTestHandler = () => {
 		}
 	}, [token, mutate]);
 
-	if (isLoading) {
+	if (status == "pending") {
 		return <div>Processing your test...</div>;
 	}
 

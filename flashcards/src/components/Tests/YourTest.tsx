@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom"; // Importing useNavigate hook
 import { Test, User } from "../../types/interfaces"; // Assuming Test is defined here
 import { useMutation } from "@tanstack/react-query";
 import { deleteTestByID } from "../../requests/test";
+import { IoDocumentAttach } from "react-icons/io5";
 
 interface YourTestProp {
 	test: Test;
@@ -49,15 +50,18 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 	};
 
 	return (
-		<div className="collapse join-item bg-base border-2">
-			<input type="radio" name="my-accordion-1" id={`test-${test.ID}`} />
-			<div className="collapse-title text-xl font-medium">
-				{test.DueDate || "Test Details"}{" "}
+		<div className="collapse collapse-arrow join-item bg-base border-[1px]">
+			<input type="radio" name="my-accordion-4" defaultChecked />
+
+			<div className="collapse-title text-xl font-medium flex items-center justify-around">
+				<IoDocumentAttach className="flex-2" />
+				<span className="flex-1">
+					{test.DueDate || "Test Details"}{" "}
+				</span>
 			</div>
 
-			{/* Accordion Content */}
-			<div className="collapse-content">
-				<div className="flex flex-col h-72 bg-white rounded-lg overflow-hidden border-2 border-black transition-all duration-300 ease-in-out">
+			<div className="collapse-content p-0">
+				<div className="flex flex-col h-72 bg-base overflow-hidden border-[1px] transition-all duration-300 ease-in-out">
 					<div className="flex justify-between p-4">
 						<h2 className="flex-2 text-xl text-start font-semibold">
 							Your Test

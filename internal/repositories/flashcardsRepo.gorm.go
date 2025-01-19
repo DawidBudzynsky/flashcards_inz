@@ -17,6 +17,7 @@ type FlashcardRepoInterface interface {
 }
 
 type CreateFlashcardRequest struct {
+	UserGoogleID   string `json:"-"`
 	FlashcardSetID int    `json:"flashcard_set_id"`
 	Question       string `json:"question"`
 	Answer         string `json:"answer"`
@@ -39,6 +40,7 @@ func NewFlashcardRepo(db *gorm.DB) *FlashcardRepo {
 
 func (s *FlashcardRepo) CreateFlashcard(body CreateFlashcardRequest) (*models.Flashcard, error) {
 	flashcard := &models.Flashcard{
+		UserGoogleID:   body.UserGoogleID,
 		FlashcardSetID: body.FlashcardSetID,
 		Question:       body.Question,
 		Answer:         body.Answer,

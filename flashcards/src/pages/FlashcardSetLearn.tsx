@@ -8,7 +8,7 @@ import { Flashcard, Tracking } from "../types/interfaces.ts";
 const FlashcardSetLearn: React.FC = () => {
 	const { setId: setID } = useParams<{ setId: string }>();
 
-	const { data: set, status: setStatus } = useQuery({
+	const { data: set } = useQuery({
 		queryKey: ["flashcardSet", setID],
 		queryFn: () => getFlashcardSetByID(setID!),
 	});
@@ -21,7 +21,7 @@ const FlashcardSetLearn: React.FC = () => {
 	const [flashcardTimes, setFlashcardTimes] = useState<Map<string, number>>(
 		new Map()
 	);
-	const [isCompleted, setIsCompleted] = useState(false); // Track if the set is completed
+	const [isCompleted, setIsCompleted] = useState(false);
 
 	const startTime = useRef<number | null>(null);
 

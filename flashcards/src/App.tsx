@@ -1,6 +1,7 @@
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Users from "./pages/User";
+import { ToastContainer } from "react-toastify";
 import UserDetail from "./pages/UserDetail";
 import FlashCardSetForm from "./pages/FlashCardSetForm";
 import Layout from "./layout";
@@ -11,12 +12,26 @@ import FlashcardSetLearn from "./pages/FlashcardSetLearn";
 import Home from "./pages/Home";
 import TestQuestions from "./pages/TestQuestions";
 import SharedTestHandler from "./pages/SharedTestHandler";
+import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
+import { setNavigate } from "./utils/navigation";
 
 const queryClient = new QueryClient();
 
 function App() {
+	const NavigateInitializer = () => {
+		const navigate = useNavigate();
+		useEffect(() => {
+			setNavigate(navigate);
+		}, [navigate]);
+
+		return null;
+	};
+
 	return (
 		<>
+			<ToastContainer />
+			<NavigateInitializer />
 			<QueryClientProvider client={queryClient}>
 				<Routes>
 					<Route element={<Layout />}>
@@ -53,6 +68,8 @@ function App() {
 							path="/tests/testToken"
 							element={<SharedTestHandler />}
 						/>
+
+						<Route path="*" element={<NotFound />} />
 					</Route>
 				</Routes>
 			</QueryClientProvider>

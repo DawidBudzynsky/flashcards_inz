@@ -39,7 +39,7 @@ export const appendSetToFolder = async (
 
 export const changeSetFolder = async (
 	flashcardsetid: number,
-	oldfolderid: number,
+	oldfolderid: number | null,
 	folderid: number
 ) => {
 	const url = `/flashcards_sets/changeSetFolder`;

@@ -99,6 +99,7 @@ func (h *FlashcardSetHandler) GetUserSets(w http.ResponseWriter, r *http.Request
 }
 
 func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+
 	idParam := chi.URLParam(r, "id")
 	setID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
@@ -106,6 +107,18 @@ func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	flashcardSet, err := h.Service.GetFlashcardSetByID(setID)
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	if flashcardSet.UserGoogleID != userGoogleID {
+		http.Error(w, "Not your set", http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, "FlashcardSet not found", http.StatusInternalServerError)
 		return

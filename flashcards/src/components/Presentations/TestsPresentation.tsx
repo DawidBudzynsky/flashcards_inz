@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Test } from "../../types/interfaces";
-import { useNavigate } from "react-router-dom";
 import CreateTestModal from "../CreateTestModal";
 import { assignTest, getUserTests } from "../../requests/test";
 import { useState } from "react";
@@ -9,7 +8,6 @@ import FinishedTest from "../Tests/FinishedTest";
 import YourTest from "../Tests/YourTest";
 
 const TestsPresentation: React.FC = () => {
-	const navigate = useNavigate();
 	interface response {
 		finished: Test[];
 		not_finished: Test[];
@@ -61,9 +59,9 @@ const TestsPresentation: React.FC = () => {
 
 			<h3 className="text-3xl font-bold">Yours</h3>
 			<div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-				<div className="join join-vertical w-full">
+				<div className="join join-vertical w-full rounded-3xl">
 					{tests?.yours.map((test: Test) => (
-						<YourTest test={test} />
+						<YourTest key={test.ID} test={test} />
 					))}
 				</div>
 			</div>

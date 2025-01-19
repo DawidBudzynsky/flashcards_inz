@@ -53,7 +53,6 @@ func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserFlashcardHandler) GetFlashcardsForToday(w http.ResponseWriter, r *http.Request) {
-	// get userGoogleID from context
 	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
 		UserUnauthorizedError(w)
