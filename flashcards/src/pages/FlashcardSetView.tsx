@@ -71,21 +71,21 @@ const FlashcardSetView: React.FC = () => {
 	};
 
 	return (
-		<div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
-			<div className="w-screen max-w-5xl flex flex-col justify-center">
-				<div className="max-w-5xl w-5/6 mx-auto flex justify-between">
+		<div className="md:max-w-5xl w-full mx-auto space-y-6">
+			<div className="w-screen md:max-w-5xl flex flex-col justify-center">
+				<div className="md:max-w-5xl w-full mx-auto md:flex justify-between">
 					<h1 className="text-4xl font-bold">{set?.Title}</h1>
 					<span className="text-sm text-gray-600">
 						Created: {dateToString(set?.CreatedAt)}
 					</span>
 				</div>
 
-				<div className="flex justify-start ps-24">
+				<div className="md:flex justify-start">
 					<span>Description: {set?.Description}</span>
 				</div>
 			</div>
 
-			<div className="flex w-3/4 mx-auto mb-4 gap-4">
+			<div className="flex md:w-3/4 mx-auto mb-4 gap-4">
 				<button className="btn flex-1" onClick={handleLearning}>
 					Learn
 				</button>
@@ -119,7 +119,7 @@ const FlashcardSetView: React.FC = () => {
 							/>
 						</div>
 
-						<div className="flex justify-between space-x-24 pb-5">
+						<div className="flex justify-between md:space-x-24">
 							<input
 								className="input input-bordered w-full"
 								disabled

@@ -50,28 +50,26 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 	};
 
 	return (
-		<div className="collapse collapse-arrow join-item bg-base border-[1px]">
-			<input type="radio" name="my-accordion-4" defaultChecked />
+		<div className="collapse collapse-arrow join-item bg-base rounded-box border-[1px]">
+			<input type="radio" name="test-accordion" />
 
-			<div className="collapse-title text-xl font-medium flex items-center justify-around">
-				<IoDocumentAttach className="flex-2" />
-				<span className="flex-1">
-					{test.DueDate || "Test Details"}{" "}
-				</span>
+			<div className="collapse-title text-xl font-medium flex items-center justify-start">
+				<IoDocumentAttach className="mr-4 text-3xl" />
+				<span className="mr-4">{test.DueDate || "Test Details"} </span>
 			</div>
 
 			<div className="collapse-content p-0">
-				<div className="flex flex-col h-72 bg-base overflow-hidden border-[1px] transition-all duration-300 ease-in-out">
-					<div className="flex justify-between p-4">
-						<h2 className="flex-2 text-xl text-start font-semibold">
+				<div className="flex flex-col md:h-72 bg-base overflow-hidden border-[1px] transition-all duration-300 ease-in-out">
+					<div className="md:flex justify-between p-4">
+						<h2 className="md:flex-2 text-xl text-start font-semibold">
 							Your Test
 						</h2>
 
-						<div className="flex-1 px-8 flex justify-around">
+						<div className="md:flex-1 md:flex justify-around text-start">
 							<p className="text-lg font-semibold">
 								Share this test:
 							</p>
-							<p className="text-lg font-semibold">
+							<p className="text-lg font-semibold hidden md:block">
 								{test.AccessToken}
 							</p>
 							<button
@@ -82,15 +80,15 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 							</button>
 						</div>
 						<button
-							className="flex-2 flex underline justify-around font-semibold text-xl"
+							className="md:flex-2 flex underline justify-around font-semibold text-xl"
 							onClick={handleDelete}
 						>
 							Delete
 						</button>
 					</div>
 
-					<div className={"flex flex-grow gap-4 p-4"}>
-						<div className="flex-3 text-start">
+					<div className={"md:flex md:flex-grow gap-4 p-4"}>
+						<div className="md:flex-3 text-start">
 							<p>
 								Test opens:{" "}
 								{new Date(test.StartDate).toLocaleDateString()}
@@ -100,8 +98,9 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 								{new Date(test.DueDate).toLocaleDateString()}
 							</p>
 						</div>
+
 						<h1>Assigned users:</h1>
-						<div className="flex-1 text-center">
+						<div className="md:flex-1 text-center">
 							{test.AssignedUsers.map((user: User) => (
 								<p key={user.Email}>{user.Email}</p>
 							))}
@@ -109,7 +108,7 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 					</div>
 
 					<button
-						className=" bg-black text-white py-4 flex items-center justify-center"
+						className=" bg-base-content text-white py-4 md:flex items-center justify-center"
 						onClick={() => {
 							navigate(`/tests/${test.ID}/questions`);
 						}}

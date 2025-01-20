@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Folder } from "../types/interfaces";
+import CreateButton from "./Buttons/CreateButton";
 
 interface AddFolderModalProps {
 	onFolderAdd?: (folder: Folder) => void; // Optional, if needed for immediate UI updates
@@ -21,18 +22,7 @@ const AddFolderModal: React.FC<AddFolderModalProps> = ({ onFolderAdd }) => {
 
 	return (
 		<>
-			<button
-				className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-500 hover:scale-105 duration-150"
-				onClick={() =>
-					(
-						document.getElementById(
-							"my_modal_2"
-						) as HTMLDialogElement
-					)?.showModal()
-				}
-			>
-				Create new Folder
-			</button>
+			<CreateButton title="Create new Folder" modal_id="my_modal_2" />
 			<dialog id="my_modal_2" className="modal">
 				<form onSubmit={handleSubmit} className="modal-box">
 					<h3 className="font-bold text-lg">Create New Folder!</h3>

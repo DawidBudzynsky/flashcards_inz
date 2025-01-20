@@ -51,7 +51,7 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({
 				</button>
 			</div>
 
-			<div className="flex justify-between space-x-24 pb-5">
+			<div className="flex justify-between md:space-x-24 pb-5">
 				<div className="form-control w-full">
 					<input
 						className="input input-bordered w-full"

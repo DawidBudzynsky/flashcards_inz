@@ -11,6 +11,7 @@ import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
 import { useParams, useNavigate } from "react-router-dom";
 import { Flashcard } from "../types/interfaces";
 import { notificationContext } from "../utils/notifications";
+import CreateButton from "../components/Buttons/CreateButton";
 
 const FlashCardSetForm: React.FC = () => {
 	const navigate = useNavigate();
@@ -168,30 +169,26 @@ const FlashCardSetForm: React.FC = () => {
 	}
 
 	return (
-		<div className="p-4 max-w-5xl w-5/6 mx-auto">
-			<div className="max-w-5xl w-5/6 mx-auto flex justify-between">
+		<div className="md:max-w-5xl w-full mx-auto">
+			<div className="md:max-w-5xl md:w-5/6 mx-auto md:flex justify-between">
 				<h3 className="text-4xl font-bold">
 					{setID ? "Edit Your Set" : "Create Your New Set"}
 				</h3>
 
 				<div className="space-x-5">
-					<button
-						className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+					<CreateButton
+						title={`${setID ? "Cancel" : "Back"}`}
 						onClick={() => navigate(-1)}
-					>
-						{setID ? "Cancel" : "Back"}
-					</button>
+					/>
 
-					<button
+					<CreateButton
+						title={`${setID ? "Update" : "Create"}`}
 						onClick={handleSubmit}
-						className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-					>
-						{setID ? "Update" : "Create"}
-					</button>
+					/>
 				</div>
 			</div>
 
-			<div className="modal-box max-w-5xl mx-auto w-full rounded-lg">
+			<div className="modal-box md:max-w-5xl mx-auto w-full rounded-lg">
 				<div className="my-4">
 					<div className="space-y-5">
 						<input
@@ -235,12 +232,7 @@ const FlashCardSetForm: React.FC = () => {
 			))}
 
 			<div className="modal-box max-w-5xl w-full rounded-3xl space-y-5">
-				<button
-					onClick={addFlashcard}
-					className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-				>
-					Add More
-				</button>
+				<CreateButton title="Add More" onClick={addFlashcard} />
 			</div>
 		</div>
 	);

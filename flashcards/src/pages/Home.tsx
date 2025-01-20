@@ -55,9 +55,14 @@ const Home: React.FC = () => {
 	// };
 
 	return (
-		<div className="grid grid-cols-2 p-4 max-w-5xl w-5/6 mx-auto space-x-6">
-			<div className="border-[1px] rounded-lg py-4">
-				<h1 className="text-3xl font-bold">Cards To Revise</h1>
+		<div className="md:grid grid-cols-2 flex-col p-4 md:max-w-5xl md:w-5/6 mx-auto">
+			<div className="border-[1px] rounded-lg py-4 m-2">
+				<h1 className="text-3xl font-bold">
+					Cards To{" "}
+					<span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
+						Revise
+					</span>
+				</h1>
 
 				{isFlashcardsLoading && <p>Loading flashcards...</p>}
 
@@ -78,7 +83,7 @@ const Home: React.FC = () => {
 				)}
 			</div>
 
-			<div className="rounded-lg border-[1px] py-4 space-y-2.5">
+			<div className="border-[1px] rounded-lg py-4 space-y-2.5 m-2">
 				<h1 className="text-3xl font-bold">Review progress</h1>
 				<div
 					className="radial-progress"

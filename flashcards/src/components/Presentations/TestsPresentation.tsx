@@ -42,13 +42,19 @@ const TestsPresentation: React.FC = () => {
 	};
 
 	return (
-		<div className="flex flex-col p-4 max-w-5xl w-full mx-auto">
-			<div className="flex justify-between w-5/6 mx-auto py-3">
-				<h2 className="text-3xl mb-4">Your Tests</h2>
+		<div className="md:max-w-5xl w-full mx-auto">
+			<div className="md:flex justify-between w-5/6 mx-auto py-3">
+				<h2 className="text-3xl mb-4">
+					Your{" "}
+					<span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
+						Tests
+					</span>
+				</h2>
+
 				<input
 					type="text"
 					placeholder="Redeem a token for a test"
-					className="input input-bordered w-full max-w-xs"
+					className="input input-bordered w-full max-w-xs mb-4"
 					value={testToken}
 					onChange={handleChange}
 					onPaste={handlePaste}
@@ -58,8 +64,8 @@ const TestsPresentation: React.FC = () => {
 			</div>
 
 			<h3 className="text-3xl font-bold">Yours</h3>
-			<div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-				<div className="join join-vertical w-full rounded-3xl">
+			<div className="md:max-w-5xl w-full space-y-3">
+				<div className="join join-vertical md:w-full p-4 rounded-3xl">
 					{tests?.yours.map((test: Test) => (
 						<YourTest key={test.ID} test={test} />
 					))}

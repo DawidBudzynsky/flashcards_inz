@@ -4,6 +4,8 @@ import { FlashcardSet } from "../types/interfaces";
 import { useUserData } from "../hooks/userData";
 import { createTest } from "../requests/test";
 import CreateButton from "./Buttons/CreateButton";
+import ListItem from "./ListItem";
+import { notificationContext } from "../utils/notifications";
 
 const CreateTestModal: React.FC = () => {
 	const [selectedSets, setSelectedSets] = useState<FlashcardSet[]>([]);
@@ -40,10 +42,10 @@ const CreateTestModal: React.FC = () => {
 			NumQuestions: number;
 		}) => createTest(data),
 		onSuccess: () => {
-			console.log("Test created successfully!");
+			notificationContext.notifySuccess("Test created successfully!");
 		},
-		onError: (error: any) => {
-			console.error("Error creating test:", error);
+		onError: () => {
+			notificationContext.notifyError("Unable to create test");
 		},
 	});
 
@@ -74,25 +76,23 @@ const CreateTestModal: React.FC = () => {
 			<dialog id="create_test_modal" className="modal">
 				<form
 					onSubmit={handleSubmit}
-					className="modal-box w-11/12 max-w-5xl h-1/2 max-h-xl"
+					className="modal-box w-full h-3/5 md:max-w-5xl"
 				>
-					<div className="grid grid-cols-2 gap-8">
+					<div className="md:flex gap-8">
 						{/* Left side */}
-						<div>
+						<div className="flex-1">
 							<h3 className="font-bold text-lg mb-4">
 								Create New Test
 							</h3>
 
-							<div className="gap-5 p-4 bg-gray-100 rounded-lg border border-gray-300 shadow-md">
+							<div className="gap-5 bg-base h-full rounded-lg border-base border-[1px]">
 								<p className="font-bold text-sm pb-2">
 									Sets used for test:
 								</p>
 								{/* Flashcards count */}
 								{selectedSets.length > 0 && (
-									<div className="mt-4 text-sm text-gray-700">
-										<p>
-											Total flashcards: {totalFlashcards}
-										</p>
+									<div className="text-sm">
+										Total flashcards: {totalFlashcards}
 									</div>
 								)}
 
@@ -101,49 +101,29 @@ const CreateTestModal: React.FC = () => {
 									{selectedSets.length > 0 ? (
 										selectedSets.map(
 											(set: FlashcardSet) => (
-												<li
+												<div
 													key={set.ID}
-													className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-gray-200 transition-all transform scale-95 opacity-100 duration-500 ease-in-out"
+													className="flex items-center relative"
 												>
-													<div className="flex w-full justify-between items-center">
-														{/* Left Side: Title */}
-														<span className="font-medium text-gray-700">
-															{set.Title}
-														</span>
-
-														{/* Right Side: Created Date and Flashcard Count */}
-														<div className="flex text-gray-300 font-medium justify-end ml-4 space-x-4 text-sm">
-															<p>
-																no.:{" "}
-																{
-																	set
-																		.Flashcards
-																		.length
-																}
-															</p>
-															<p>
-																{new Date(
-																	set.CreatedAt
-																).toLocaleDateString()}
-															</p>
-														</div>
-													</div>
+													<ListItem
+														set={set}
+														small={true}
+													/>
 													<button
-														type="button"
-														className="btn btn-xs btn-error"
 														onClick={() =>
 															handleRemoveSet(
 																set.ID
 															)
 														}
+														className="absolute right-10 bottom-0 px-2 py-2 rounded-xl border-[1px] bg-base-300 text-xs"
 													>
 														Remove
 													</button>
-												</li>
+												</div>
 											)
 										)
 									) : (
-										<p className="text-sm text-gray-500">
+										<p className="text-sm">
 											No sets selected yet.
 										</p>
 									)}
@@ -203,7 +183,7 @@ const CreateTestModal: React.FC = () => {
 								/>
 							</div>
 
-							<div className="dropdown dropdown-bottom w-full relative">
+							<div className="dropdown md:dropdown-left dropdown-top w-full relative">
 								<div
 									tabIndex={0}
 									className="btn btn-outline w-full"

@@ -41,10 +41,7 @@ const Navbar: React.FC = () => {
 
 	return (
 		<div className="navbar bg-base-100 w-full top-0">
-			{/* Navbar Start */}
 			<div className="navbar-start">
-				{/* Drawer */}
-
 				<a className="btn btn-ghost text-xl">daisyUI</a>
 			</div>
 

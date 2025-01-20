@@ -143,7 +143,7 @@ const FlashcardSetLearn: React.FC = () => {
 		set.Flashcards = updatedFlashcards;
 	};
 	return (
-		<div className="p-4 max-w-5xl w-5/6 mx-auto space-y-6">
+		<div className="md:max-w-5xl w-full mx-auto space-y-6">
 			<div className="text-3xl font-bold">{set.Title}</div>
 
 			{isCompleted ? (
@@ -217,16 +217,16 @@ const FlashcardSetLearn: React.FC = () => {
 						</span>
 					</div>
 
-					<div className="flex justify-center space-x-3 mt-4">
+					<div className="flex md:w-2/5 mx-auto justify-center space-x-3 mt-4">
 						<button
-							className="bg-gray-500 text-white py-1 px-3 rounded hover:bg-gray-600"
+							className="bg-base-300 py-3 px-3 flex-1 rounded hover:bg-gray-300"
 							onClick={goToPreviousFlashcard}
 							disabled={currentFlashcardIndex === 0}
 						>
 							{"<"}
 						</button>
 						<button
-							className="bg-gray-500 text-white py-1 px-3 rounded hover:bg-gray-600"
+							className="bg-base-300 py-3 px-3 flex-1 rounded hover:bg-gray-300"
 							onClick={goToNextFlashcard}
 							disabled={
 								currentFlashcardIndex === set.Flashcards.length

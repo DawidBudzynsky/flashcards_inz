@@ -37,21 +37,26 @@ const FoldersPresentation: React.FC = () => {
 	};
 
 	return (
-		<div className="p-4 max-w-5xl w-full mx-auto">
-			<div className="flex justify-between w-5/6 mx-auto py-3">
-				<h2 className="text-3xl mb-4">Your Folders</h2>
+		<div className="md:max-w-5xl w-full mx-auto">
+			<div className="md:flex justify-between w-5/6 mx-auto py-3">
+				<h2 className="text-3xl mb-4">
+					Your{" "}
+					<span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
+						Folders
+					</span>
+				</h2>
 
 				<input
 					type="text"
 					placeholder="Search for folder"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
-					className="input input-bordered w-full max-w-xs"
+					className="input input-bordered w-full max-w-xs mb-4"
 				/>
 
 				<AddFolderModal onFolderAdd={handleAddFolder} />
 			</div>
-			<div className="max-w-5xl w-full space-y-3">
+			<div className="md:max-w-5xl w-full space-y-3">
 				<AnimatePresence>
 					<FoldersAccordion folders={filteredFolders} />
 				</AnimatePresence>

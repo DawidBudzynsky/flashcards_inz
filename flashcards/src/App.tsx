@@ -15,6 +15,7 @@ import SharedTestHandler from "./pages/SharedTestHandler";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { setNavigate } from "./utils/navigation";
+import LoginPage from "./pages/LoginPage";
 
 const queryClient = new QueryClient();
 
@@ -68,7 +69,7 @@ function App() {
 							path="/tests/testToken"
 							element={<SharedTestHandler />}
 						/>
-
+						<Route path="/Unauthorized" element={<LoginPage />} />
 						<Route path="*" element={<NotFound />} />
 					</Route>
 				</Routes>

@@ -41,6 +41,10 @@ const api = async (method: string, url: string, variables: any = {}) => {
 		if (error.response.status === 404) {
 			navigateTo("/404");
 		}
+
+		if (error.response.status === 401) {
+			navigateTo("/Unauthorized");
+		}
 		console.error(`API Error [${method}] ${fullUrl}:`, error);
 		if (error.response) {
 			throw error.response.data || defaults.error;

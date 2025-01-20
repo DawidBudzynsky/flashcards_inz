@@ -48,8 +48,8 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 	}
 
 	return (
-		<div className="flex">
-			<div className="join join-vertical w-1/3 p-4 rounded-xl">
+		<div className="md:flex">
+			<div className="join join-vertical md:w-1/3 p-4 rounded-xl">
 				{folders.map((folder) => (
 					<FolderItem
 						key={folder.ID}
@@ -63,7 +63,7 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 
 			<div className="flex-1">
 				{activeFolder ? (
-					<div className="flex join join-vertical rounded-xl py-4">
+					<div className="flex flex-col rounded-xl py-4">
 						{activeFolder.FlashcardsSets &&
 						activeFolder.FlashcardsSets.length > 0 ? (
 							activeFolder.FlashcardsSets.map(
@@ -73,14 +73,14 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 								)
 							)
 						) : (
-							<p className="join-item text-gray-500 italic">
+							<p className="text-gray-500 italic">
 								No flashcards available in this folder.
 							</p>
 						)}
 
 						<button
 							onClick={handleEdit}
-							className="join-item max-w-5xl border-[1px] p-8 font-semibold"
+							className="border-[1px] md:w-1/3 mx-auto rounded-3xl p-8 font-semibold"
 						>
 							Edit this folder
 						</button>
