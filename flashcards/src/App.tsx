@@ -2,7 +2,6 @@ import "./App.css";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Users from "./pages/User";
 import { ToastContainer } from "react-toastify";
-import UserDetail from "./pages/UserDetail";
 import FlashCardSetForm from "./pages/FlashCardSetForm";
 import Layout from "./layout";
 import FolderView from "./pages/FolderView";
@@ -16,6 +15,8 @@ import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { setNavigate } from "./utils/navigation";
 import LoginPage from "./pages/LoginPage";
+import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -38,7 +39,10 @@ function App() {
 					<Route element={<Layout />}>
 						<Route path="/" element={<Home />} />
 						<Route path="/users" element={<Users />} />
-						<Route path="/users/:userId" element={<UserDetail />} />
+						<Route
+							path="/users/:userID"
+							element={<UserProfile />}
+						/>
 						<Route path="/create" element={<FlashCardSetForm />} />
 						<Route
 							path="flashcards_sets/:setId/edit"
@@ -69,6 +73,8 @@ function App() {
 							path="/tests/testToken"
 							element={<SharedTestHandler />}
 						/>
+
+						<Route path="/profile" element={<Profile />} />
 						<Route path="/Unauthorized" element={<LoginPage />} />
 						<Route path="*" element={<NotFound />} />
 					</Route>

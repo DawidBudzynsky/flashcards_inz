@@ -12,6 +12,7 @@ type FlashcardSetRepoInterface interface {
 	GetFlashcardSetByID(uint64) (*models.FlashcardSet, error)
 	UpdateFlashcardSetByID(uint64, map[string]interface{}) (*models.FlashcardSet, error)
 	DeleteFlashcardSetByID(uint64) error
+	ToggleVisibility(uint64) error
 	AddFlashcardSetToFolder(uint64, uint64) (*models.FlashcardSet, error)
 }
 
@@ -133,6 +134,21 @@ func (s *FlashcardSetRepo) RemoveSetFromFolder(id, folderID uint64) (*models.Fla
 	}
 
 	return flashcardSet, nil
+}
+
+func (s *FlashcardSetRepo) ToggleVisibility(id uint64) error {
+	var flashcardSet models.FlashcardSet
+	if err := s.db.First(&flashcardSet, id).Error; err != nil {
+		return err
+	}
+
+	flashcardSet.IsPrivate = !flashcardSet.IsPrivate
+
+	if err := s.db.Save(&flashcardSet).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *FlashcardSetRepo) DeleteFlashcardSetByID(id uint64) error {

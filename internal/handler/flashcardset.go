@@ -106,7 +106,82 @@ func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	flashcardSet, err := h.Service.GetFlashcardSetByID(setID)
+	if err != nil {
+		http.Error(w, "FlashcardSet not found", http.StatusInternalServerError)
+		return
+	}
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	if flashcardSet.IsPrivate {
+		//you are not owner
+		if flashcardSet.UserGoogleID != userGoogleID {
+			http.Error(w, "You dont have access", http.StatusNotFound)
+			return
+
+		}
+	}
+
+	response := map[string]interface{}{
+		"set":     flashcardSet,
+		"isOwner": flashcardSet.UserGoogleID == userGoogleID,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
+	}
+}
+
+func (h *FlashcardSetHandler) GetLearnSet(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+	setID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid set ID", http.StatusBadRequest)
+		return
+	}
+
+	flashcardSet, err := h.Service.GetFlashcardSetByID(setID)
+	if err != nil {
+		http.Error(w, "FlashcardSet not found", http.StatusInternalServerError)
+		return
+	}
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	if flashcardSet.IsPrivate && flashcardSet.UserGoogleID != userGoogleID {
+		http.Error(w, "You do not have access to this set", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
+		http.Error(w, "Failed to encode flashcard set", http.StatusInternalServerError)
+	}
+}
+
+func (h *FlashcardSetHandler) GetEditSet(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+	setID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid set ID", http.StatusBadRequest)
+		return
+	}
+
+	flashcardSet, err := h.Service.GetFlashcardSetByID(setID)
+	if err != nil {
+		http.Error(w, "FlashcardSet not found", http.StatusInternalServerError)
+		return
+	}
 
 	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
@@ -115,18 +190,13 @@ func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if flashcardSet.UserGoogleID != userGoogleID {
-		http.Error(w, "Not your set", http.StatusNotFound)
-		return
-	}
-
-	if err != nil {
-		http.Error(w, "FlashcardSet not found", http.StatusInternalServerError)
+		http.Error(w, "Not your content", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
-		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
+		http.Error(w, "Failed to encode flashcard set", http.StatusInternalServerError)
 	}
 }
 
@@ -257,6 +327,44 @@ func (h *FlashcardSetHandler) ChangeSetFolder(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
 		fmt.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
+		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *FlashcardSetHandler) ToggleVisibility(w http.ResponseWriter, r *http.Request) {
+	idParam := chi.URLParam(r, "id")
+	flashcardSetID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+
+	flashcardSet, err := h.Service.GetFlashcardSetByID(flashcardSetID)
+	if err != nil {
+		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
+		return
+	}
+
+	if flashcardSet.UserGoogleID != userGoogleID {
+		http.Error(w, "Failed to append set to folder", http.StatusNotFound)
+		return
+	}
+
+	err = h.Service.ToggleVisibility(flashcardSetID)
+	if err != nil {
+		http.Error(w, "Failed to toggle set visibility", http.StatusInternalServerError)
 		return
 	}
 

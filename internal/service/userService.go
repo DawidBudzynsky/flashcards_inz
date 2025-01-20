@@ -14,10 +14,12 @@ const (
 type UserServiceInterface interface {
 	CreateUser(CreateUserRequest) (*models.User, error)
 	ListUsers() (models.Users, error)
-	GetUserByID(uint64) (*models.User, error)
+	GetUserByID(string) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
 	GetUserByGoogleID(string) (*models.User, error)
-	UpdateUserByID(uint64, map[string]interface{}) (*models.User, error)
+	GetUserByGoogleIDPrivate(string) (*models.User, error)
+	ToggleVisibility(string) (*models.User, error)
+	UpdateUserByID(string, map[string]interface{}) (*models.User, error)
 	DeleteUserByID(uint64) error
 }
 
@@ -57,9 +59,9 @@ func (s *UserService) ListUsers() (models.Users, error) {
 	return users, nil
 }
 
-func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
+func (s *UserService) GetUserByID(id string) (*models.User, error) {
 	var user models.User
-	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload(folders).First(&user, id).Error; err != nil {
+	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload(folders).Where("google_id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -68,6 +70,16 @@ func (s *UserService) GetUserByID(id uint64) (*models.User, error) {
 func (s *UserService) GetUserByGoogleID(google_id string) (*models.User, error) {
 	var user models.User
 	if err := s.db.Preload("FlashcardsSets.Flashcards").Preload("Folders").Preload("Tests").Where("google_id = ?", google_id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (s *UserService) GetUserByGoogleIDPrivate(google_id string) (*models.User, error) {
+	var user models.User
+	if err := s.db.Preload("FlashcardsSets", "is_private = ?", false).
+		Where("google_id = ?", google_id).
+		First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -88,7 +100,7 @@ func (s *UserService) GetUserByEmail(email string) (*models.User, error) {
 	return nil, err
 }
 
-func (s *UserService) UpdateUserByID(id uint64, updateData map[string]interface{}) (*models.User, error) {
+func (s *UserService) UpdateUserByID(id string, updateData map[string]interface{}) (*models.User, error) {
 	user, err := s.GetUserByID(id)
 	if err != nil {
 		return nil, err
@@ -104,4 +116,19 @@ func (s *UserService) DeleteUserByID(id uint64) error {
 		return err
 	}
 	return nil
+}
+
+func (s *UserService) ToggleVisibility(google_id string) (*models.User, error) {
+	user, err := s.GetUserByGoogleID(google_id)
+	if err != nil {
+		return nil, err
+	}
+
+	user.IsPrivate = !user.IsPrivate
+
+	if err := s.db.Save(user).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

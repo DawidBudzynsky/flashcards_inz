@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
 	FlashcardSetRequest,
 	createFlashcardSet,
-	getFlashcardSetByID,
+	getFlashcardSetByIdToEdit,
 	updateFlashcardSetByID,
 } from "../requests/flashcardset";
 import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
@@ -26,7 +26,7 @@ const FlashCardSetForm: React.FC = () => {
 
 	const { data: existingSet, status: fetchStatus } = useQuery({
 		queryKey: ["flashcardSet", setID],
-		queryFn: () => getFlashcardSetByID(setID!),
+		queryFn: () => getFlashcardSetByIdToEdit(setID!),
 		enabled: !!setID,
 	});
 

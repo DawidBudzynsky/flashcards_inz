@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { getFlashcardSetByID } from "../requests/flashcardset";
+import { getFlashcardSetByIdToLearn } from "../requests/flashcardset";
 import { useQuery } from "@tanstack/react-query";
 import ReviewModal from "../components/ReviewModal.tsx";
 import { Flashcard, Tracking } from "../types/interfaces.ts";
@@ -10,7 +10,7 @@ const FlashcardSetLearn: React.FC = () => {
 
 	const { data: set } = useQuery({
 		queryKey: ["flashcardSet", setID],
-		queryFn: () => getFlashcardSetByID(setID!),
+		queryFn: () => getFlashcardSetByIdToLearn(setID!),
 	});
 
 	const [currentFlashcardIndex, setCurrentFlashcardIndex] = useState(0);

@@ -12,6 +12,7 @@ type User struct {
 	Email     string    `gorm:"size:255;unique"`
 	Role      string    `gorm:"size:255"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
+	IsPrivate bool      `gorm:"default:true"`
 
 	FlashcardsSets FlashcardsSets `gorm:"foreignKey:UserGoogleID"`
 	Folders        Folders        `gorm:"foreignKey:UserGoogleID"`
@@ -38,6 +39,7 @@ type FlashcardSet struct {
 	Title        string    `gorm:"size:255"`
 	Description  string    `gorm:"size:255"`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	IsPrivate    bool      `gorm:"default:true"`
 	Flashcards   Flashcards
 }
 type FlashcardsSets []FlashcardSet

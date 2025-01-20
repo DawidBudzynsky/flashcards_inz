@@ -122,6 +122,16 @@ func (s *FlashcardSetService) DeleteFlashcardSetByID(id uint64) error {
 	return nil
 }
 
+func (s *FlashcardSetService) ToggleVisibility(id uint64) error {
+	// buisiness logic here
+	//
+	err := s.Repo.ToggleVisibility(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *FlashcardSetService) RemoveSetFromFolder(setID, folderID uint64) (*models.FlashcardSet, error) {
 	//
 

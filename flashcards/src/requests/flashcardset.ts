@@ -34,7 +34,23 @@ export const getFlashcardSetByID = async (setID: string) => {
 	const url = `/flashcards_sets/${setID}`;
 	return await api.get(url);
 };
+
+export const getFlashcardSetByIdToEdit = async (setID: string) => {
+	const url = `/flashcards_sets/${setID}/edit`;
+	return await api.get(url);
+};
+
+export const getFlashcardSetByIdToLearn = async (setID: string) => {
+	const url = `/flashcards_sets/${setID}/learn`;
+	return await api.get(url);
+};
+
 export const getUserFlashcardsSets = async () => {
 	const url = `/flashcards_sets/`;
 	return await api.get(url);
+};
+
+export const toggleSetVisibility = async (setID: string) => {
+	const url = `/flashcards_sets/${setID}/toggle_visibility`;
+	return await api.put(url);
 };

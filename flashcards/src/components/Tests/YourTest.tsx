@@ -102,7 +102,17 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 						<h1>Assigned users:</h1>
 						<div className="md:flex-1 text-center">
 							{test.AssignedUsers.map((user: User) => (
-								<p key={user.Email}>{user.Email}</p>
+								<div className="text-underline">
+									<button
+										className="underline text-blue-500"
+										key={user.Email}
+										onClick={() =>
+											navigate(`/users/${user.google_id}`)
+										}
+									>
+										{user.Username}
+									</button>
+								</div>
 							))}
 						</div>
 					</div>

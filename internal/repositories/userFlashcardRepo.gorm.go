@@ -19,7 +19,7 @@ func (r *UserFlashcardRepo) GetFlashcardsForToday(UserID string) ([]models.Flash
 	var flashcards []models.Flashcard
 	err := r.db.Preload("Tracking").
 		Joins("JOIN trackings ON trackings.flashcard_id = flashcards.id").
-		Where("flashcards.user_google_id = ? AND trackings.next_review_due <= ?", UserID, time.Now()).
+		Where("trackings.next_review_due <= ?", time.Now()).
 		Find(&flashcards).Error
 
 	return flashcards, err

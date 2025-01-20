@@ -5,7 +5,8 @@ export interface FlashcardSet {
 	Description: string;
 	CreatedAt: string;
 	FolderID: number;
-	Flashcards: any; // Adjust the type if you have a specific type for flashcards
+	IsPrivate: boolean;
+	Flashcards: any;
 }
 
 export interface Flashcard {
@@ -45,6 +46,7 @@ export interface User {
 	Role: string;
 	CreatedAt: string;
 	Tests: Test[];
+	IsPrivate: boolean;
 	FlashcardsSets: FlashcardSet[];
 	Folders: any[]; // Adjust the type if you have a specific type for folders
 }
