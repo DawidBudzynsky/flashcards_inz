@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Breadcrumbs from "./Breadcrumbs";
 import handleLogout from "../requests/logout";
 import { useIsLoggedIn } from "../hooks/useLoggedIn";
@@ -8,10 +8,12 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ toggleDrawer }) => {
+	const navigate = useNavigate();
 	const { isLoggedIn } = useIsLoggedIn();
 
 	const handleLogin = () => {
 		window.location.href = AUTH_PROVIDER;
+		navigate("/");
 	};
 	console.log(isLoggedIn);
 

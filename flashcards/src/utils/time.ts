@@ -1,3 +1,5 @@
+import { Test } from "../types/interfaces";
+
 export const calculateTimeDifference = (nextReviewDue: string) => {
 	const now = new Date();
 	const nextReviewDate = new Date(nextReviewDue);
@@ -14,5 +16,31 @@ export const calculateTimeDifference = (nextReviewDue: string) => {
 		return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
 	} else {
 		return `Just now`;
+	}
+};
+
+export const calculateCountdown = (
+	test: Test,
+	setCountdown: React.Dispatch<React.SetStateAction<string>>,
+	setIsTestOpen: React.Dispatch<React.SetStateAction<boolean>>
+): void => {
+	const now = new Date();
+	const startDate = new Date(test.StartDate);
+	const dueDate = new Date(test.DueDate);
+
+	if (now < startDate) {
+		const diff = startDate.getTime() - now.getTime();
+		const hours = Math.floor(diff / (1000 * 60 * 60));
+		const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+		const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+		setCountdown(`${hours}h ${minutes}m ${seconds}s`);
+		setIsTestOpen(false);
+	} else if (now >= startDate && now <= dueDate) {
+		setCountdown("");
+		setIsTestOpen(true);
+	} else {
+		setCountdown("");
+		setIsTestOpen(false);
 	}
 };

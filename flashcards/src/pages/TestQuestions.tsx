@@ -16,6 +16,7 @@ const TestQuestions: React.FC = () => {
 		queryKey: ["test_questions"],
 		queryFn: () => getTestQuestions(testId!),
 		enabled: !!testId,
+		staleTime: Infinity,
 	});
 
 	const [selectedAnswers, setSelectedAnswers] = useState<{
@@ -34,7 +35,7 @@ const TestQuestions: React.FC = () => {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [modalContent, setModalContent] = useState<any>(null);
 	const handleCloseModal = () => {
-		navigate("/users");
+		navigate("/tests");
 		setIsModalVisible(false);
 	};
 	const { mutate } = useMutation({
@@ -68,29 +69,13 @@ const TestQuestions: React.FC = () => {
 			answers: answersToSubmit,
 		};
 
-		console.log("Selected Answers:", answersToSubmit);
 		mutate(payload);
 	};
 
 	if (isLoading) {
 		return (
 			<div className="flex p-4 max-w-5xl w-full mx-auto">
-				{/* Sidebar with list of questions (Skeleton Loading) */}
-				<div className="pr-4 sticky top-1/4 h-screen transform overflow-y-auto">
-					<ul className="space-y-4">
-						{/* Skeleton for sidebar list items */}
-						<li className="h-8 bg-gray-300 rounded skeleton"></li>
-						<li className="h-8 bg-gray-300 rounded skeleton"></li>
-						<li className="h-8 bg-gray-300 rounded skeleton"></li>
-					</ul>
-				</div>
-
-				{/* Main content with questions (Skeleton Loading) */}
-				<div className="w-3/4">
-					<div className="h-32 bg-gray-300 rounded skeleton mb-4"></div>
-					<div className="h-32 bg-gray-300 rounded skeleton mb-4"></div>
-					<div className="h-32 bg-gray-300 rounded skeleton mb-4"></div>
-				</div>
+				Test Is Loading
 			</div>
 		);
 	}
@@ -132,20 +117,20 @@ const TestQuestions: React.FC = () => {
 					>
 						<div className="modal-box max-w-7xl w-full rounded-3xl flex items-center justify-center h-80">
 							<h3 className="text-3xl font-semibold text-center">
-								Question: {question.question_text}
+								{question.question_text}
 							</h3>
 						</div>
 
-						<div className="grid grid-cols-2 gap-4 mt-4">
+						<div className="grid mx-16 grid-cols-2 mt-4 gap-2">
 							{question.possible_answers.map(
 								(answer: string, idx: number) => (
 									<div
 										key={idx}
-										className={`p-4 border rounded-lg text-center transition cursor-pointer ${
+										className={`p-4 border-[1px] text-center rounded-3xl transition cursor-pointer ${
 											selectedAnswers[question.id] ===
 											answer
 												? "bg-blue-500 text-white"
-												: "bg-gray-100 hover:bg-gray-200"
+												: "bg-base-100 hover:bg-gray-200"
 										}`}
 										onClick={() =>
 											handleAnswerSelect(

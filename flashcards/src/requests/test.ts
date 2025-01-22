@@ -39,3 +39,8 @@ export const deleteTestByID = async (testID: number) => {
 	const url = `/tests/${testID}`;
 	return await api.delete(url);
 };
+
+export const seeResults = async (testID: number) => {
+	const url = `/tests/${testID}/results`;
+	return await api.get(url);
+};

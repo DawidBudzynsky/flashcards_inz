@@ -9,3 +9,5 @@ export const ACTIVE_TAB = "activeTab";
 export const DEFAULT_TAB = TabNames.Folders;
 export const MAX_FOLDER_NAME = 50;
 export const MAX_FOLDER_DESCRIPTION = 100;
+export const MAX_TEST_TITLE = 20;
+export const MAX_TEST_DESCRIPTION = 50;

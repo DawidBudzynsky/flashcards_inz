@@ -16,6 +16,7 @@ func TestRouter(handler *handler.TestHandler) chi.Router {
 
 	r.Post("/", handler.Create)
 	r.Get("/{id}/questions", handler.CreateQuestions)
+	r.Get("/{id}/results", handler.GetUserResults)
 	r.Post("/verify", handler.VerifyAnswers)
 	r.Get("/grouped", handler.GetTestsForUser)
 	r.Get("/testToken", handler.AccessTest)

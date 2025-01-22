@@ -113,7 +113,7 @@ const FlashcardSetView: React.FC = () => {
 	}
 
 	return (
-		<div className="md:px-20">
+		<div className="md:px-20 lg:max-w-7xl lg:mx-auto">
 			<div className="flex md:justify-between md:text-5xl text-3xl justify-center md:my-4 bg-base-100">
 				<div className="flex flex-col text-start">
 					<h1 className="font-bold">{data.set?.Title}</h1>

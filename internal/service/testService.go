@@ -23,11 +23,14 @@ type TestServiceInterface interface {
 	AssignTestToUser(string, string) error
 	GetTestByToken(string) (*models.Test, error)
 	DoesUserHaveAccess(string, uint64) bool
+	GetUserResults(string, uint64) (*models.TestResult, error)
 }
 
 type CreateTestRequest struct {
 	UserGoogleID string `json:"-"`
 	SetIDs       []int  `json:"setIDs"`
+	Title        string `json:"Title"`
+	Description  string `json:"Description"`
 	StartDate    string `json:"startDate"`
 	DueDate      string `json:"dueDate"`
 	NumQuestions int    `json:"NumQuestions"`
@@ -81,9 +84,11 @@ func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 	test := &models.Test{
 		UserGoogleID: body.UserGoogleID,
 		StartDate:    startDate,
+		Title:        body.Title,
+		Description:  body.Description,
 		DueDate:      dueDate,
 		NumQuestions: body.NumQuestions,
-		Sets:         sets, // Attach the fetched sets
+		Sets:         sets,
 		AccessToken:  uuid.NewString(),
 	}
 
@@ -110,7 +115,7 @@ func (s *TestService) AssignTestToUser(userID string, token string) error {
 	var testUser models.TestUser
 	err = s.db.Where("test_id = ? AND user_google_id = ?", test.ID, userID).First(&testUser).Error
 	if err == nil {
-		return nil // User already has access
+		return errors.New("you already has access to this test") // User already has access
 	}
 
 	// If not, create the relationship
@@ -267,4 +272,18 @@ func (s *TestService) DoesUserHaveAccess(userID string, testID uint64) bool {
 		return false
 	}
 	return true
+}
+
+func (s *TestService) GetUserResults(userGoogleID string, testID uint64) (*models.TestResult, error) {
+	var result models.TestResult
+
+	err := s.db.Where("test_id = ? AND user_google_id = ?", testID, userGoogleID).First(&result).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &result, nil
 }

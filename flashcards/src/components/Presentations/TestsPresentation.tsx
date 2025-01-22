@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Test } from "../../types/interfaces";
 import CreateTestModal from "../CreateTestModal";
 import { assignTest, getUserTests } from "../../requests/test";
@@ -7,6 +7,7 @@ import DueTest from "../Tests/DueTest";
 import FinishedTest from "../Tests/FinishedTest";
 import YourTest from "../Tests/YourTest";
 import TabNavigation from "../../pages/TabNavigation";
+import { notificationContext } from "../../utils/notifications";
 
 const TestsPresentation: React.FC = () => {
 	interface response {
@@ -14,6 +15,7 @@ const TestsPresentation: React.FC = () => {
 		not_finished: Test[];
 		yours: Test[];
 	}
+	const queryClient = useQueryClient();
 
 	const { data: tests } = useQuery<response>({
 		queryKey: ["tests"],
@@ -22,8 +24,19 @@ const TestsPresentation: React.FC = () => {
 
 	const [testToken, setTestToken] = useState<string>("");
 
+	const { mutate: addTest } = useMutation({
+		mutationFn: assignTest,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["tests"] });
+			notificationContext.notifySuccess("Assigned to test!");
+		},
+		onError: (error) => {
+			notificationContext.notifyError(String(error));
+		},
+	});
+
 	const handleAddTest = (testToken: string) => {
-		assignTest(testToken);
+		addTest(testToken);
 	};
 
 	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -43,7 +56,7 @@ const TestsPresentation: React.FC = () => {
 	};
 
 	return (
-		<div className="md:px-20">
+		<div className="md:px-20 md:max-w-5xl md:mx-auto">
 			<TabNavigation />
 			<div className="md:flex justify-between py-3">
 				<h2 className="text-3xl mb-4">
@@ -67,7 +80,7 @@ const TestsPresentation: React.FC = () => {
 
 			<h3 className="text-3xl font-bold">Yours</h3>
 			<div className="md:max-w-5xl w-full space-y-3 mx-auto">
-				<div className="join join-vertical md:w-full p-4 rounded-3xl">
+				<div className="join join-vertical md:w-full rounded-3xl">
 					{tests?.yours.map((test: Test) => (
 						<YourTest key={test.ID} test={test} />
 					))}

@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FlashcardSet } from "../types/interfaces";
 import { useUserData } from "../hooks/userData";
 import { createTest } from "../requests/test";
 import CreateButton from "./Buttons/CreateButton";
 import ListItem from "./ListItem";
 import { notificationContext } from "../utils/notifications";
+import { MAX_TEST_DESCRIPTION, MAX_TEST_TITLE } from "../utils/constants";
+import { closeModal } from "../utils/modals";
 
 const CreateTestModal: React.FC = () => {
 	const [selectedSets, setSelectedSets] = useState<FlashcardSet[]>([]);
+	const [title, setTitle] = useState<string>(""); // State for the number picker
+	const [description, setDescription] = useState<string>(""); // State for the number picker
 	const [startDate, setStartDate] = useState("");
 	const [dueDate, setDueDate] = useState("");
 	const [numQuestions, setNumQuestions] = useState<number>(1); // State for the number picker
@@ -18,6 +22,8 @@ const CreateTestModal: React.FC = () => {
 		(set: FlashcardSet) =>
 			!selectedSets.some((selectedSet) => selectedSet.ID === set.ID)
 	);
+
+	const queryClient = useQueryClient();
 
 	const handleAddSet = (set: FlashcardSet) => {
 		if (
@@ -38,11 +44,14 @@ const CreateTestModal: React.FC = () => {
 		mutationFn: (data: {
 			SetIDs: number[];
 			StartDate: string;
+			Title: string;
+			Description: string;
 			DueDate: string;
 			NumQuestions: number;
 		}) => createTest(data),
 		onSuccess: () => {
 			notificationContext.notifySuccess("Test created successfully!");
+			queryClient.invalidateQueries({ queryKey: ["tests"] });
 		},
 		onError: () => {
 			notificationContext.notifyError("Unable to create test");
@@ -55,6 +64,8 @@ const CreateTestModal: React.FC = () => {
 		const requestData = {
 			SetIDs: selectedSets.map((set) => set.ID),
 			StartDate: startDate,
+			Title: title,
+			Description: description,
 			DueDate: dueDate,
 			NumQuestions: numQuestions,
 		};
@@ -72,6 +83,7 @@ const CreateTestModal: React.FC = () => {
 			<CreateButton
 				title={"Create new Test"}
 				modal_id={"create_test_modal"}
+				className=""
 			/>
 			<dialog id="create_test_modal" className="modal">
 				<form
@@ -131,40 +143,73 @@ const CreateTestModal: React.FC = () => {
 							</div>
 						</div>
 						{/* Right side */}
-						<div>
+						<div className="md:w-1/3">
 							<div className="mb-4">
-								<h4 className="font-semibold mb-2">
-									Set Start Date
-								</h4>
+								<label className="font-semibold mb-2">
+									Title of Test
+								</label>
 								<input
-									type="date"
+									type="text"
 									className="input input-bordered w-full"
-									value={startDate}
+									value={title}
+									onChange={(e) => setTitle(e.target.value)}
+									required
+									maxLength={MAX_TEST_TITLE}
+								/>
+							</div>
+							<div className="mb-4">
+								<label className="font-semibold mb-2">
+									Description
+								</label>
+								<input
+									type="text"
+									className="input input-bordered w-full"
+									value={description}
 									onChange={(e) =>
-										setStartDate(e.target.value)
+										setDescription(e.target.value)
 									}
 									required
+									maxLength={MAX_TEST_DESCRIPTION}
 								/>
 							</div>
 
-							<div className="mb-4">
-								<h4 className="font-semibold mb-2">
-									Set Due Date
-								</h4>
-								<input
-									type="date"
-									className="input input-bordered w-full"
-									value={dueDate}
-									onChange={(e) => setDueDate(e.target.value)}
-									required
-								/>
+							<div className="flex">
+								<div className="mb-4">
+									<label className="font-semibold mb-2">
+										Set Start Date
+									</label>
+									<input
+										type="date"
+										className="input input-bordered w-full"
+										value={startDate}
+										onChange={(e) =>
+											setStartDate(e.target.value)
+										}
+										required
+									/>
+								</div>
+
+								<div className="mb-4">
+									<label className="font-semibold mb-2">
+										Set Due Date
+									</label>
+									<input
+										type="date"
+										className="input input-bordered w-full"
+										value={dueDate}
+										onChange={(e) =>
+											setDueDate(e.target.value)
+										}
+										required
+									/>
+								</div>
 							</div>
 
 							{/* Number Picker */}
 							<div className="mb-4">
-								<h4 className="font-semibold mb-2">
+								<label className="font-semibold mb-2">
 									Number of Questions
-								</h4>
+								</label>
 								<input
 									type="number"
 									className="input input-bordered w-full"
@@ -220,6 +265,9 @@ const CreateTestModal: React.FC = () => {
 							<button
 								type="submit"
 								className="btn btn-primary w-full mt-6"
+								onClick={() => {
+									closeModal("create_test_modal");
+								}}
 							>
 								Create Test
 							</button>

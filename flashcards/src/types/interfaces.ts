@@ -60,6 +60,8 @@ export interface Folder {
 export interface Test {
 	ID: number;
 	UserGoogleID: string;
+	Title: string;
+	Description: string;
 	StartDate: string;
 	DueDate: string;
 	NumQuestions: number;
