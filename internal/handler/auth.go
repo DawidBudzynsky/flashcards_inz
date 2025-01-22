@@ -75,6 +75,7 @@ func (a *AuthHandler) CheckIfUserLoggedIn(w http.ResponseWriter, r *http.Request
 	_, err := util.GetUserSessionFromStore(r)
 	if err != nil {
 		// User is not logged in
+
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "User is not logged in",

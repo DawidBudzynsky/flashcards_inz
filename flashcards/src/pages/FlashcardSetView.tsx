@@ -5,14 +5,27 @@ import {
 	toggleSetVisibility,
 } from "../requests/flashcardset";
 import { Flashcard } from "../types/interfaces";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { dateToString } from "../utils/showDate";
 import { toggleFlashcardTracking } from "../requests/flashcard";
 import { notificationContext } from "../utils/notifications";
+import CreateButton from "../components/Buttons/CreateButton";
+import {
+	IoBookmarks,
+	IoBookmarksOutline,
+	IoCard,
+	IoEarthOutline,
+	IoLockClosed,
+	IoPaw,
+	IoPawOutline,
+	IoPawSharp,
+} from "react-icons/io5";
+import { PiCardsBold } from "react-icons/pi";
 
 const FlashcardSetView: React.FC = () => {
 	const navigate = useNavigate();
 	const { setId: setID } = useParams<{ setId: string }>();
+	const queryClient = useQueryClient();
 
 	const { data: data, isLoading } = useQuery({
 		queryKey: ["flashcardSet", setID],
@@ -43,6 +56,9 @@ const FlashcardSetView: React.FC = () => {
 		mutationFn: () => toggleSetVisibility(setID!),
 		onSuccess: () => {
 			notificationContext.notifySuccess("Visibility changed");
+			queryClient.invalidateQueries({
+				queryKey: ["flashcardSet", setID],
+			});
 		},
 		onError: (error: any) => {
 			console.error("Error toggling private status:", error);
@@ -97,26 +113,47 @@ const FlashcardSetView: React.FC = () => {
 	}
 
 	return (
-		<div className="md:max-w-5xl w-full mx-auto space-y-6">
-			<div className="w-screen md:max-w-5xl flex flex-col justify-center">
-				<div className="md:max-w-5xl w-full mx-auto md:flex justify-between">
-					<h1 className="text-4xl font-bold">{data.set?.Title}</h1>
+		<div className="md:px-20">
+			<div className="flex md:justify-between md:text-5xl text-3xl justify-center md:my-4 bg-base-100">
+				<div className="flex flex-col text-start">
+					<h1 className="font-bold">{data.set?.Title}</h1>
 					<span className="text-sm text-gray-600">
 						Created: {dateToString(data.set?.CreatedAt)}
 					</span>
+					<div className="md:flex flex-col md:text-4xl text-base-300 text-2xl justify-start flex-wrap pt-2">
+						<p className="">Description: </p>
+						<p>{data.set?.Description}</p>
+					</div>
 				</div>
-
-				<div className="md:flex justify-start">
-					<span>Description: {data.set?.Description}</span>
+				<div className="">
+					{data.set?.IsPrivate ? (
+						<IoLockClosed className="text-[150px] hidden md:block" />
+					) : (
+						<IoEarthOutline className="text-[150px] hidden md:block" />
+					)}
+					<div className="flex md:text-3xl text-sm justify-center font-bold items-center gap-2">
+						{data.isOwner && (
+							<>
+								<span>Public</span>
+								<input
+									type="checkbox"
+									className="checkbox md:size-12 my-auto"
+									checked={!Boolean(data.set?.IsPrivate)}
+									onChange={handleToggleVisibility}
+								/>
+							</>
+						)}
+					</div>
 				</div>
 			</div>
 
-			<div className="flex md:w-3/4 mx-auto mb-4 gap-4">
-				<button className="btn flex-1" onClick={handleLearning}>
-					Learn
-				</button>
-				<button className="btn flex-1">Track all</button>
-
+			<div className="flex justify-start mb-4 md:gap-16 gap-2">
+				<CreateButton
+					title="Learn"
+					className={"btn flex-1"}
+					onClick={handleLearning}
+				/>
+				<CreateButton title="Track All" className="btn flex-1" />
 				{data.isOwner ? (
 					<>
 						<button className="btn flex-1" onClick={handleEdit}>
@@ -131,75 +168,91 @@ const FlashcardSetView: React.FC = () => {
 				)}
 			</div>
 
-			<hr className="border-gray-300 my-4"></hr>
-
-			<div className="flex justify-between">
-				<h1 className="text-xl font-bold">Flashcards in this set:</h1>
-				<div className="flex items-center gap-2">
-					{data.isOwner && (
-						<>
-							<span>Private: </span>
-							<input
-								type="checkbox"
-								className="toggle hover:bg-blue-700 my-auto"
-								checked={Boolean(data.set?.IsPrivate)}
-								onChange={handleToggleVisibility}
-							/>
-						</>
-					)}
-				</div>
-			</div>
-
-			<div className="">
+			<div className="border-[1px] rounded-3xl space-y-4">
+				<h1 className="text-3xl font-bold pt-4">
+					Flashcards in this set
+				</h1>
 				{data?.set.Flashcards.map(
 					(flashcard: Flashcard, index: number) => (
-						<div className="modal-box max-w-7xl w-full rounded-3xl space-y-5">
-							<div className="flex justify-between">
-								<div>Card {index + 1}</div>
+						<div className="flex space-x-2 md:mx-16 border-t-[1px] md:border-0">
+							<div className="w-full p-4 md:border-[1px] rounded-3xl space-y-5">
+								<div className="flex font-bold justify-between gap-4">
+									<PiCardsBold className="size-[50px]" />
+									<div className="my-auto">
+										Card {index + 1}
+									</div>
+
+									{data.isOwner && (
+										<label className="md:hidden">
+											{Boolean(flashcard.Tracking) ? (
+												<IoBookmarks className="mx-auto size-[40px]" />
+											) : (
+												<IoBookmarksOutline className="mx-auto size-[40px]" />
+											)}
+
+											<input
+												type="checkbox"
+												className="checkbox hidden mx-auto"
+												checked={Boolean(
+													flashcard.Tracking
+												)}
+												value={index}
+												onChange={() =>
+													handleTracking(flashcard.ID)
+												}
+											/>
+										</label>
+									)}
+								</div>
+
+								<div className="flex justify-between md:space-x-24">
+									<input
+										className="input input-bordered w-full"
+										disabled
+										type="text"
+										placeholder="Question"
+										value={flashcard.Question}
+									/>
+									<input
+										className="input input-bordered w-full"
+										disabled
+										type="text"
+										placeholder="Question"
+										value={flashcard.Answer}
+									/>
+								</div>
 							</div>
 
 							{data.isOwner && (
-								<div className="absolute top-4 right-4">
-									<span>tracking:</span>
-									<input
-										type="checkbox"
-										className="checkbox checkbox-primary"
-										checked={Boolean(flashcard.Tracking)}
-										value={index}
-										onChange={() =>
-											handleTracking(flashcard.ID)
-										}
-									/>
+								<div className="hidden md:flex bg-base-100 p-2 py-auto justify-center space-y-4 flex-col md:border-[1px] rounded-2xl">
+									<label className="flex flex-col items-center space-y-4 cursor-pointer">
+										{Boolean(flashcard.Tracking) ? (
+											<IoBookmarks className="mx-auto size-[40px]" />
+										) : (
+											<IoBookmarksOutline className="mx-auto size-[40px]" />
+										)}
+
+										<input
+											type="checkbox"
+											className="checkbox hidden mx-auto"
+											checked={Boolean(
+												flashcard.Tracking
+											)}
+											value={index}
+											onChange={() =>
+												handleTracking(flashcard.ID)
+											}
+										/>
+										<span className="hidden md:block">
+											Tracking
+										</span>
+									</label>
 								</div>
 							)}
-
-							<div className="flex justify-between md:space-x-24">
-								<input
-									className="input input-bordered w-full"
-									disabled
-									type="text"
-									placeholder="Question"
-									value={flashcard.Question}
-								/>
-								<input
-									className="input input-bordered w-full"
-									disabled
-									type="text"
-									placeholder="Question"
-									value={flashcard.Answer}
-								/>
-							</div>
 						</div>
 					)
 				)}
 			</div>
-
-			<button
-				className="btn mb-6"
-				onClick={() => navigate(-1)} // Go back to the previous page
-			>
-				Back
-			</button>
 		</div>
 	);
 };

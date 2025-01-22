@@ -13,6 +13,7 @@ func FlashcardSetRouter(handler *handler.FlashcardSetHandler) chi.Router {
 	//middlewares
 	//...
 	r.Use(middlewares.UserIdFromSession)
+	r.Use(middlewares.CheckLoggedInMiddleware)
 
 	r.Post("/", handler.Create)
 	r.Get("/", handler.GetUserSets)
