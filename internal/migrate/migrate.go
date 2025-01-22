@@ -26,11 +26,9 @@ func main() {
 
 	err = db.AutoMigrate(
 		&models.User{},
-
 		&models.Test{},
 		&models.TestResult{},
 		&models.TestUser{},
-
 		&models.FlashcardSet{},
 		&models.Flashcard{},
 		&models.Folder{},

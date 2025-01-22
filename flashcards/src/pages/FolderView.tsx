@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { deleteFolderByID, getFolderByID } from "../requests/folder";
 import { dateToString } from "../utils/showDate";
 import { notificationContext } from "../utils/notifications";
+import useDeleteFolder from "../hooks/useDeleteFolder";
 
 function FolderView() {
 	const navigate = useNavigate();
@@ -16,21 +17,7 @@ function FolderView() {
 		queryFn: () => getFolderByID(folderID!),
 	});
 
-	const { mutate: deleteFolder } = useMutation({
-		mutationFn: () => deleteFolderByID(folderID!),
-		onSuccess: () => {
-			notificationContext.notifySuccess("Folder deleted successfully");
-			navigate(-1);
-		},
-		onError: (error: any) => {
-			console.error("Error deleting folder:", error);
-			notificationContext.notifyError(
-				`Failed to delete folder: ${
-					error?.message || "An unexpected error occurred."
-				}`
-			);
-		},
-	});
+	const { deleteFolder } = useDeleteFolder(folderID!);
 
 	const handleDelete = async () => {
 		const confirmation = window.confirm(

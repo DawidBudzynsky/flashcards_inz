@@ -13,7 +13,7 @@ const Profile: React.FC = () => {
 		mutationFn: () => toggleUserVisibility(),
 		onMutate: async () => {
 			// Cancel ongoing queries for the user
-			await queryClient.cancelQueries(["user"]);
+			await queryClient.cancelQueries({ queryKey: ["user"] });
 
 			// Snapshot the previous user data
 			const previousUser = queryClient.getQueryData<User>(["user"]);
@@ -36,7 +36,7 @@ const Profile: React.FC = () => {
 		onSuccess: () => {},
 		onSettled: () => {
 			// Refetch the user data
-			queryClient.invalidateQueries(["user"]);
+			queryClient.invalidateQueries({ queryKey: ["user"] });
 		},
 	});
 

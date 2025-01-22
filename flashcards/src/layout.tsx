@@ -1,13 +1,22 @@
-import Navbar from "./components/navbar";
 import { Outlet } from "react-router-dom";
+import SideDrawer from "./pages/SideDrawer";
+import { useState } from "react";
+import Navbar from "./components/navbar";
+import PageContainer from "./components/PageContainter";
 
 const Layout = () => {
+	const [drawerHidden, setDrawerHidden] = useState(true);
+
 	return (
-		<div className="grid grid-rows-[auto_1fr_auto] h-screen">
-			<Navbar />
-			<Outlet />
-			{/* <Footer /> */}
-		</div>
+		<main className="base mx-w-screen gap-2 md:px-6 md:pt-5">
+			<Navbar toggleDrawer={() => setDrawerHidden(!drawerHidden)} />
+			<div className="flex">
+				<SideDrawer hidden={drawerHidden} />
+				<PageContainer>
+					<Outlet />
+				</PageContainer>
+			</div>
+		</main>
 	);
 };
 

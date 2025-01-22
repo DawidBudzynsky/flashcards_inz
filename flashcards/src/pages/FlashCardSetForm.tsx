@@ -12,6 +12,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Flashcard } from "../types/interfaces";
 import { notificationContext } from "../utils/notifications";
 import CreateButton from "../components/Buttons/CreateButton";
+import { MIN_QUESTIONS } from "../utils/constants";
 
 const FlashCardSetForm: React.FC = () => {
 	const navigate = useNavigate();
@@ -134,7 +135,7 @@ const FlashCardSetForm: React.FC = () => {
 			return;
 		}
 
-		if (flashcards.length < 3) {
+		if (flashcards.length < MIN_QUESTIONS) {
 			alert("You need to have at least 3 flashcards to create a set.");
 			return;
 		}

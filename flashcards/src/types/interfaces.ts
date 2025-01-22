@@ -48,7 +48,7 @@ export interface User {
 	Tests: Test[];
 	IsPrivate: boolean;
 	FlashcardsSets: FlashcardSet[];
-	Folders: any[]; // Adjust the type if you have a specific type for folders
+	Folders: Folder[];
 }
 export interface Folder {
 	ID: number;

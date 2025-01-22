@@ -25,31 +25,36 @@ const FolderItem: React.FC<FolderItemProps> = ({
 			isOver: monitor.isOver(),
 		}),
 	}));
+
 	return (
 		<div
 			ref={dropRef}
 			className={`collapse collapse-arrow join-item bg-base rounded-box border-base ${
 				!isOver ? "border-[1px]" : "border-[4px]"
-			}`}
+			} ${isActive ? "border-[1px] border-l-blue-600" : ""}`}
 		>
 			<input
-				type="radio"
-				name="folder-accordion"
+				type="checkbox"
+				className="folder-accordion"
 				checked={isActive}
 				onChange={onClick}
 			/>
 
-			<div className="collapse-title text-xl font-medium flex items-center justify-around">
-				{!isActive ? (
-					<FaFolder className="mr-4" />
-				) : (
-					<FaFolderOpen className="mr-4" />
-				)}
-				{folder.Name}
+			<div className="collapse-title text-xl flex font-medium justify-between">
+				<div className="flex items-center">
+					{isActive ? (
+						<FaFolderOpen className="mr-2" />
+					) : (
+						<FaFolder className="mr-2" />
+					)}
+					<span>{folder.Name}</span>
+				</div>
 				<p>{folder.FlashcardsSets.length}</p>
 			</div>
 
-			<div className="collapse-content">{folder.Description}</div>
+			<div className="collapse-content text-start">
+				<p>{folder.Description}</p>
+			</div>
 		</div>
 	);
 };

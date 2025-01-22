@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 
+const POSITION = "bottom-left";
 export interface NotificationStrategy {
 	notifySuccess(message: string): void;
 	notifyError(message: string): void;
@@ -9,18 +10,18 @@ export interface NotificationStrategy {
 export class ToastNotifications implements NotificationStrategy {
 	notifySuccess(message: string): void {
 		toast.success(message, {
-			position: "top-center",
+			position: POSITION,
 		});
 	}
 	notifyError(message: string): void {
 		toast.error(message, {
-			position: "top-center",
+			position: POSITION,
 		});
 	}
 
 	notifyWarning(message: string): void {
 		toast.warning(message, {
-			position: "top-center",
+			position: POSITION,
 		});
 	}
 }

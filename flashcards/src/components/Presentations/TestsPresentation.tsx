@@ -6,6 +6,7 @@ import { useState } from "react";
 import DueTest from "../Tests/DueTest";
 import FinishedTest from "../Tests/FinishedTest";
 import YourTest from "../Tests/YourTest";
+import TabNavigation from "../../pages/TabNavigation";
 
 const TestsPresentation: React.FC = () => {
 	interface response {
@@ -42,8 +43,9 @@ const TestsPresentation: React.FC = () => {
 	};
 
 	return (
-		<div className="md:max-w-5xl w-full mx-auto">
-			<div className="md:flex justify-between w-5/6 mx-auto py-3">
+		<div className="md:px-20">
+			<TabNavigation />
+			<div className="md:flex justify-between py-3">
 				<h2 className="text-3xl mb-4">
 					Your{" "}
 					<span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
@@ -64,7 +66,7 @@ const TestsPresentation: React.FC = () => {
 			</div>
 
 			<h3 className="text-3xl font-bold">Yours</h3>
-			<div className="md:max-w-5xl w-full space-y-3">
+			<div className="md:max-w-5xl w-full space-y-3 mx-auto">
 				<div className="join join-vertical md:w-full p-4 rounded-3xl">
 					{tests?.yours.map((test: Test) => (
 						<YourTest key={test.ID} test={test} />

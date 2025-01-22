@@ -243,7 +243,7 @@ func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 
 	questions, err := t.createQuestions(test)
 	if err != nil {
-		http.Error(w, "Failed to create questions for test", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

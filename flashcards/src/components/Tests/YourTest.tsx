@@ -4,6 +4,7 @@ import { Test, User } from "../../types/interfaces"; // Assuming Test is defined
 import { useMutation } from "@tanstack/react-query";
 import { deleteTestByID } from "../../requests/test";
 import { IoDocumentAttach } from "react-icons/io5";
+import { dateToString } from "../../utils/showDate";
 
 interface YourTestProp {
 	test: Test;
@@ -51,7 +52,7 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 
 	return (
 		<div className="collapse collapse-arrow join-item bg-base rounded-box border-[1px]">
-			<input type="radio" name="test-accordion" />
+			<input type="checkbox" name="test-accordion" />
 
 			<div className="collapse-title text-xl font-medium flex items-center justify-start">
 				<IoDocumentAttach className="mr-4 text-3xl" />
@@ -89,14 +90,8 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 
 					<div className={"md:flex md:flex-grow gap-4 p-4"}>
 						<div className="md:flex-3 text-start">
-							<p>
-								Test opens:{" "}
-								{new Date(test.StartDate).toLocaleDateString()}
-							</p>
-							<p>
-								Test is due to:{" "}
-								{new Date(test.DueDate).toLocaleDateString()}
-							</p>
+							<p>Test opens: {dateToString(test.StartDate)}</p>
+							<p>Test is due to: {dateToString(test.DueDate)}</p>
 						</div>
 
 						<h1>Assigned users:</h1>

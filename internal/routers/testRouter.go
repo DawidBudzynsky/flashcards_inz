@@ -12,12 +12,13 @@ func TestRouter(handler *handler.TestHandler) chi.Router {
 
 	//middlewares
 	//...
+	r.Use(middlewares.UserIdFromSession)
 
-	r.With(middlewares.UserIdFromSession).Post("/", handler.Create)
-	r.With(middlewares.UserIdFromSession).Get("/{id}/questions", handler.CreateQuestions)
-	r.With(middlewares.UserIdFromSession).Post("/verify", handler.VerifyAnswers)
-	r.With(middlewares.UserIdFromSession).Get("/grouped", handler.GetTestsForUser)
-	r.With(middlewares.UserIdFromSession).Get("/testToken", handler.AccessTest)
+	r.Post("/", handler.Create)
+	r.Get("/{id}/questions", handler.CreateQuestions)
+	r.Post("/verify", handler.VerifyAnswers)
+	r.Get("/grouped", handler.GetTestsForUser)
+	r.Get("/testToken", handler.AccessTest)
 
 	r.Get("/{id}", handler.GetByID)
 	r.Put("/{id}", handler.UpdateByID)

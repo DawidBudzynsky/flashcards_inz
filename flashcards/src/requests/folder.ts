@@ -18,6 +18,14 @@ export const createFolder = async (
 	return await api.post(url, folderData);
 };
 
+export const editFolder = async (
+	folderId: string,
+	folderData: Partial<Folder>
+): Promise<Folder> => {
+	const url = `/folders/${folderId}`;
+	return await api.put(url, folderData);
+};
+
 export const addSetToFolder = async (
 	flashcardsetid: number,
 	folderid: number

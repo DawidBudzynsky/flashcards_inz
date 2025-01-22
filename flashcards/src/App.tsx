@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import Users from "./pages/User";
+import Users from "./pages/TabNavigation";
 import { ToastContainer } from "react-toastify";
 import FlashCardSetForm from "./pages/FlashCardSetForm";
 import Layout from "./layout";
@@ -17,6 +17,9 @@ import { setNavigate } from "./utils/navigation";
 import LoginPage from "./pages/LoginPage";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
+import SetsPresentation from "./components/Presentations/SetsPresentation";
+import FoldersPresentation from "./components/Presentations/FoldersPresentation";
+import TestsPresentation from "./components/Presentations/TestsPresentation";
 
 const queryClient = new QueryClient();
 
@@ -44,10 +47,21 @@ function App() {
 							element={<UserProfile />}
 						/>
 						<Route path="/create" element={<FlashCardSetForm />} />
+
+						<Route
+							path="flashcards_sets/"
+							element={<SetsPresentation />}
+						/>
+						<Route
+							path="folders/"
+							element={<FoldersPresentation />}
+						/>
+						<Route path="tests/" element={<TestsPresentation />} />
 						<Route
 							path="flashcards_sets/:setId/edit"
 							element={<FlashCardSetForm />}
 						/>
+
 						<Route
 							path="flashcards_sets/:setId/learn"
 							element={<FlashcardSetLearn />}

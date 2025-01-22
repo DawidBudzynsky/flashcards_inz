@@ -1,5 +1,6 @@
 import React from "react";
 import { Test } from "../../types/interfaces"; // Assuming Test is defined here
+import { dateToString } from "../../utils/showDate";
 
 interface FinishedTestProps {
 	test: Test;
@@ -14,14 +15,8 @@ const FinishedTest: React.FC<FinishedTestProps> = ({ test }) => {
 						Test Finished
 					</h2>
 					<div className="text-start">
-						<p>
-							Test opens:{" "}
-							{new Date(test.StartDate).toLocaleDateString()}
-						</p>
-						<p>
-							Test is due to:{" "}
-							{new Date(test.DueDate).toLocaleDateString()}
-						</p>
+						<p>Test opens: {dateToString(test.StartDate)}</p>
+						<p>Test is due to: {dateToString(test.DueDate)}</p>
 					</div>
 				</div>
 

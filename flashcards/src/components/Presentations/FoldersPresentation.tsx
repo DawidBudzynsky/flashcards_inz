@@ -1,17 +1,16 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Folder } from "../../types/interfaces";
 import { AnimatePresence } from "framer-motion";
 import AddFolderModal from "../AddFolderModal";
-import { createFolder, getUserFolders } from "../../requests/folder";
+import { createFolder } from "../../requests/folder";
 import useFuzzySearch from "../../hooks/useFuzzySearch";
 import FoldersAccordion from "../Folders/FolderAccordion";
 import { notificationContext } from "../../utils/notifications";
+import TabNavigation from "../../pages/TabNavigation";
+import useFolders from "../../hooks/useFolders";
 
 const FoldersPresentation: React.FC = () => {
-	const { data: folders, refetch } = useQuery<Folder[]>({
-		queryKey: ["folders"],
-		queryFn: getUserFolders,
-	});
+	const { folders, refetch } = useFolders();
 
 	const {
 		query,
@@ -37,8 +36,9 @@ const FoldersPresentation: React.FC = () => {
 	};
 
 	return (
-		<div className="md:max-w-5xl w-full mx-auto">
-			<div className="md:flex justify-between w-5/6 mx-auto py-3">
+		<div className="md:px-20">
+			<TabNavigation />
+			<div className="md:flex justify-between py-3">
 				<h2 className="text-3xl mb-4">
 					Your{" "}
 					<span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
@@ -56,11 +56,9 @@ const FoldersPresentation: React.FC = () => {
 
 				<AddFolderModal onFolderAdd={handleAddFolder} />
 			</div>
-			<div className="md:max-w-5xl w-full space-y-3">
-				<AnimatePresence>
-					<FoldersAccordion folders={filteredFolders} />
-				</AnimatePresence>
-			</div>
+			<AnimatePresence>
+				<FoldersAccordion folders={filteredFolders} />
+			</AnimatePresence>
 		</div>
 	);
 };
