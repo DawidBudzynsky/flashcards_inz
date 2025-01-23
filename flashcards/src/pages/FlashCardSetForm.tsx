@@ -11,8 +11,9 @@ import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
 import { useParams, useNavigate } from "react-router-dom";
 import { Flashcard } from "../types/interfaces";
 import { notificationContext } from "../utils/notifications";
-import CreateButton from "../components/Buttons/CreateButton";
 import { MIN_QUESTIONS } from "../utils/constants";
+import CreateButton from "../components/Buttons/CreateButton";
+import TranslateComponent from "../utils/translate";
 
 const FlashCardSetForm: React.FC = () => {
 	const navigate = useNavigate();
@@ -24,6 +25,8 @@ const FlashCardSetForm: React.FC = () => {
 	const [flashcards, setFlashcards] = useState([
 		{ id: 0, question: "", answer: "" },
 	]);
+	const [fromLanguage, setFromLanguage] = useState("en");
+	const [chosenLanguage, setChosenLanguage] = useState("pl");
 
 	const { data: existingSet, status: fetchStatus } = useQuery({
 		queryKey: ["flashcardSet", setID],
@@ -214,6 +217,31 @@ const FlashCardSetForm: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="flex items-center justify-center space-x-4">
+				<span>Translation From</span>
+				<select
+					className="select select-bordered"
+					value={fromLanguage}
+					onChange={(e) => setFromLanguage(e.target.value)}
+				>
+					<option value="en">English</option>
+					<option value="pl">Polish</option>
+					<option value="es">Spanish</option>
+					{/* Add more language options */}
+				</select>
+				<span>To</span>
+				<select
+					className="select select-bordered"
+					value={chosenLanguage}
+					onChange={(e) => setChosenLanguage(e.target.value)}
+				>
+					<option value="en">English</option>
+					<option value="pl">Polish</option>
+					<option value="es">Spanish</option>
+					{/* Add more language options */}
+				</select>
+			</div>
+
 			{flashcards.map((flashcard, index) => (
 				<div
 					key={index}
@@ -228,6 +256,8 @@ const FlashCardSetForm: React.FC = () => {
 						flashcard={flashcard}
 						handleDelete={removeFlashcard}
 						handleInputChange={handleInputChange}
+						fromLanguage={fromLanguage}
+						toLanguage={chosenLanguage}
 					/>
 				</div>
 			))}

@@ -1,5 +1,4 @@
-import React from "react";
-import { Flashcard } from "../types/interfaces";
+import React, { useState, useEffect } from "react";
 
 interface FlashcardInputs {
 	id: number;
@@ -16,6 +15,8 @@ interface FlashcardInputProps {
 		value: string
 	) => void;
 	handleDelete: (index: number) => void;
+	fromLanguage: string;
+	toLanguage: string;
 }
 
 const FlashcardInput: React.FC<FlashcardInputProps> = ({
@@ -23,7 +24,64 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({
 	flashcard,
 	handleInputChange,
 	handleDelete,
+	fromLanguage,
+	toLanguage,
 }) => {
+	const [typingTimeout, setTypingTimeout] = useState<number | undefined>(
+		undefined
+	);
+	const [translationHint, setTranslationHint] = useState<string>("");
+
+	const translateText = async (text: string) => {
+		if (!text.trim()) {
+			setTranslationHint("");
+			return;
+		}
+
+		const apiKey = "AIzaSyA4bX-dcVkPJeT1Ps2UYsZO_ZTXemmgY7A"; //its limited to this page only
+		const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+
+		const response = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				q: text,
+				source: fromLanguage,
+				target: toLanguage,
+				format: "text",
+			}),
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			const translatedText = data.data.translations[0].translatedText;
+			setTranslationHint(translatedText);
+		} else {
+			setTranslationHint("Translation failed");
+		}
+	};
+
+	// Handle debounced translation when question changes
+	const handleDebouncedChange = (value: string) => {
+		if (typingTimeout) clearTimeout(typingTimeout);
+
+		const timeout = setTimeout(() => {
+			translateText(value);
+		}, 500);
+
+		setTypingTimeout(timeout);
+	};
+
+	// Watch for changes in the question input
+	useEffect(() => {
+		handleDebouncedChange(flashcard.question);
+	}, [flashcard.question]);
+
+	// Handle user clicking the translation hint
+	const applyTranslationHint = () => {
+		handleInputChange(index, "answer", translationHint);
+	};
+
 	return (
 		<div className="modal-box max-w-7xl w-full rounded-3xl space-y-5">
 			<div className="flex justify-between">
@@ -31,7 +89,7 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({
 					Card number: {index + 1}
 				</div>
 				<button
-					className="btn btn-sm btn-circle hover: bg-red-500"
+					className="btn btn-sm btn-circle hover:bg-red-500"
 					onClick={() => handleDelete(index)}
 				>
 					<svg
@@ -56,8 +114,6 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({
 					<input
 						className="input input-bordered w-full"
 						type="text"
-						id={`question_${index}`}
-						name={`question_${index}`}
 						placeholder="Question"
 						value={flashcard.question}
 						onChange={(e) =>
@@ -66,19 +122,24 @@ const FlashcardInput: React.FC<FlashcardInputProps> = ({
 						required
 					/>
 				</div>
-				<div className="form-control w-full">
+				<div className="form-control w-full relative">
 					<input
 						className="input input-bordered w-full"
 						type="text"
-						id={`answer_${index}`}
-						name={`answer_${index}`}
 						placeholder="Answer"
 						value={flashcard.answer}
 						onChange={(e) =>
 							handleInputChange(index, "answer", e.target.value)
 						}
-						required
 					/>
+					{translationHint && (
+						<p
+							className="text-sm text-gray-500 cursor-pointer mt-2 hover:underline"
+							onClick={applyTranslationHint}
+						>
+							Suggested translation: {translationHint}
+						</p>
+					)}
 				</div>
 			</div>
 		</div>
