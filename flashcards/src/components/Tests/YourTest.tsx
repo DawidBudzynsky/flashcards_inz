@@ -23,6 +23,7 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 	const navigate = useNavigate();
 	const [countdown, setCountdown] = useState<string>("");
 	const [testStatus, setTestStatus] = useState<TestStatus>("Waiting");
+	const [_, setSocket] = useState<WebSocket | null>(null);
 	const queryClient = useQueryClient();
 
 	const { mutate: deleteTest } = useMutation({
@@ -52,8 +53,8 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 		};
 
 		updateStatus();
-		const interval = setInterval(updateStatus, 1000); // Update every second
-		return () => clearInterval(interval); // Cleanup on unmount
+		const interval = setInterval(updateStatus, 1000);
+		return () => clearInterval(interval);
 	}, [test.StartDate, test.DueDate]);
 
 	const handleDelete = async () => {
@@ -67,6 +68,24 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 
 	const handleTakeTest = () => {
 		if (testStatus === "Open") {
+			const socketConnection = new WebSocket(
+				`ws://localhost:8080/ws?userID=${test.ID}`
+			);
+
+			socketConnection.onopen = () => {
+				console.log("WebSocket connection established");
+			};
+
+			socketConnection.onmessage = (event) => {
+				console.log("Message from server:", event.data);
+			};
+
+			socketConnection.onclose = () => {
+				console.log("WebSocket connection closed");
+			};
+
+			setSocket(socketConnection);
+
 			navigate(`/tests/${test.ID}/questions`);
 		}
 	};
@@ -91,7 +110,6 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 			<div className="collapse-title text-xl font-medium flex items-center justify-start">
 				<IoDocumentAttach className="mr-4 text-3xl" />
 				<span className="mr-4">{test.Title || "Test Details"} </span>
-				{/* Display Test Status */}
 				<span className="ml-auto flex text-sm gap-2 font-semibold">
 					<span className="my-auto">{testStatus}</span>
 					{testStatus === "Open" && (

@@ -41,6 +41,7 @@ export interface FlashcardToRevise {
 export interface User {
 	ID: number;
 	GoogleID: string;
+	google_id: string;
 	Username: string;
 	Email: string;
 	Role: string;

@@ -54,33 +54,27 @@ func (s *TestService) GetFlashcard(id int) (*models.Flashcard, error) {
 }
 
 func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
-	// Define the date format for parsing
 	layout := "2006-01-02"
 
-	// Parse the start date
 	startDate, err := time.Parse(layout, body.StartDate)
 	if err != nil {
 		return nil, err
 	}
 
-	// Parse the due date
 	dueDate, err := time.Parse(layout, body.DueDate)
 	if err != nil {
 		return nil, err
 	}
 
-	// Fetch the sets from the database based on the provided SetIDs
 	var sets []models.FlashcardSet
 	if err := s.db.Where("id IN ?", body.SetIDs).Find(&sets).Error; err != nil {
 		return nil, err
 	}
 
-	// Check if the fetched sets match the requested SetIDs
 	if len(sets) != len(body.SetIDs) {
 		return nil, err
 	}
 
-	// Create the Test model
 	test := &models.Test{
 		UserGoogleID: body.UserGoogleID,
 		StartDate:    startDate,
@@ -95,7 +89,6 @@ func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 	testURL := fmt.Sprintf("https://myapp.com/tests/testToken?token=%s", test.AccessToken)
 	fmt.Println(testURL)
 
-	// Save the test with associations
 	if err := s.db.Create(test).Error; err != nil {
 		return nil, err
 	}
@@ -104,21 +97,18 @@ func (s *TestService) CreateTest(body CreateTestRequest) (*models.Test, error) {
 }
 
 func (s *TestService) AssignTestToUser(userID string, token string) error {
-	// Find the test by its access token
 	var test models.Test
 	err := s.db.Where("access_token = ?", token).First(&test).Error
 	if err != nil {
 		return errors.New("test not found")
 	}
 
-	// Check if the user already has access
 	var testUser models.TestUser
 	err = s.db.Where("test_id = ? AND user_google_id = ?", test.ID, userID).First(&testUser).Error
 	if err == nil {
 		return errors.New("you already has access to this test") // User already has access
 	}
 
-	// If not, create the relationship
 	testUser = models.TestUser{
 		TestID:       test.ID,
 		UserGoogleID: userID,
@@ -161,7 +151,7 @@ func (s *TestService) GetTestsGroupedByStatus(userID string) (map[string][]model
 	if err := authorQuery.Find(&yours).Error; err != nil {
 		return nil, err
 	}
-	// Group the results
+
 	return map[string][]models.Test{
 		"finished":     finishedTests,
 		"not_finished": notFinishedTests,

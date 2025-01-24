@@ -23,7 +23,6 @@ func (a *AuthHandler) GetAuthCallbackFunc(w http.ResponseWriter, r *http.Request
 
 	gotUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		// TODO: change to error print
 		fmt.Fprint(w, r)
 		return
 	}
@@ -66,16 +65,13 @@ func (a *AuthHandler) GetAuthCallbackFunc(w http.ResponseWriter, r *http.Request
 }
 
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	// first check if session exists
 	util.RemoveCookieSession(w, r)
 }
 
 func (a *AuthHandler) CheckIfUserLoggedIn(w http.ResponseWriter, r *http.Request) {
-	// Attempt to retrieve the user session
 	_, err := util.GetUserSessionFromStore(r)
 	if err != nil {
 		// User is not logged in
-
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "User is not logged in",
@@ -104,7 +100,6 @@ func (a *AuthHandler) GetUserDatabaseId(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Step 3: Respond with user data
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

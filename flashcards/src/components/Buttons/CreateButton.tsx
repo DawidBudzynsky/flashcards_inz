@@ -4,7 +4,7 @@ interface CreateButtonProps {
 	title: string;
 	modal_id?: string;
 	onClick?: () => void;
-	className: string;
+	className?: string;
 }
 
 const CreateButton: React.FC<CreateButtonProps> = ({

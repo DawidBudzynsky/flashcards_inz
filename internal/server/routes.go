@@ -59,6 +59,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	authHandler := &handler.AuthHandler{UserService: service.NewUserSerivce(s.db.GetDB())}
 	r.Mount("/", routers.AuthRouter(authHandler))
 
+	manager := handler.NewConnectionManager()
+	r.Mount("/sse", routers.SessionRouter(manager))
+
 	return r
 }
 

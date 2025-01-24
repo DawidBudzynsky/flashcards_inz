@@ -15,12 +15,10 @@ type UserFlashcardHandler struct {
 var (
 	UserUnauthorizedError = func(w http.ResponseWriter) {
 		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
-		return
 	}
 
 	UnableToUpdateCardError = func(w http.ResponseWriter, error string) {
 		http.Error(w, "Service was unable to update the card: "+error, http.StatusUnauthorized)
-		return
 	}
 )
 
