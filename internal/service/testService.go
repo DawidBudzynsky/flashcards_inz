@@ -161,7 +161,7 @@ func (s *TestService) GetTestsGroupedByStatus(userID string) (map[string][]model
 
 func (s *TestService) ListTests() (models.Tests, error) {
 	var tests models.Tests
-	if err := s.db.Preload("Flashcards").Preload(flashcard_sets).Preload(folders).Find(&tests).Error; err != nil {
+	if err := s.db.Preload("Flashcards").Preload("FlashcardsSets").Preload("Folders").Find(&tests).Error; err != nil {
 		return nil, err
 	}
 	return tests, nil

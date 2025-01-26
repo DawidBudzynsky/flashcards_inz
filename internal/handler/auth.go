@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flashcards/internal/models"
+	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"flashcards/internal/util"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 )
 
 type AuthHandler struct {
-	UserService service.UserServiceInterface
+	UserService service.UserService
 }
 
 func (a *AuthHandler) GetAuthCallbackFunc(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,7 @@ func (a *AuthHandler) GetAuthCallbackFunc(w http.ResponseWriter, r *http.Request
 	// if no user in db
 	if user == nil {
 		// create / register new user
-		body := service.CreateUserRequest{
+		body := repositories.CreateUserRequest{
 			GoogleID: gotUser.UserID,
 			Username: gotUser.Name,
 			Email:    gotUser.Email,

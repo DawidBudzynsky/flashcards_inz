@@ -43,7 +43,7 @@ func (s *FolderService) CreateFolder(body CreateFolderRequest) (*models.Folder, 
 
 func (s *FolderService) ListFolders() ([]models.Folder, error) {
 	var folders models.Folders
-	if err := s.db.Preload(flashcard_sets).Find(&folders).Error; err != nil {
+	if err := s.db.Preload("FlashcardsSet").Find(&folders).Error; err != nil {
 		return nil, err
 	}
 	return folders, nil
@@ -61,7 +61,7 @@ func (s *FolderService) GetUserFolders(userID string) ([]models.Folder, error) {
 
 func (s *FolderService) GetFolderByID(id uint64) (*models.Folder, error) {
 	var folder models.Folder
-	if err := s.db.Preload(flashcard_sets).First(&folder, id).Error; err != nil {
+	if err := s.db.Preload("FlashcardsSets").First(&folder, id).Error; err != nil {
 		return nil, err
 	}
 	return &folder, nil

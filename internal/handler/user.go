@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"flashcards/internal/middlewares"
+	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"net/http"
 	"strconv"
@@ -11,11 +12,11 @@ import (
 )
 
 type UserHandler struct {
-	Service service.UserServiceInterface
+	Service service.UserService
 }
 
 func (u *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var body service.CreateUserRequest
+	var body repositories.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -46,10 +47,6 @@ func (u *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
 
 	user, err := u.Service.GetUserByGoogleIDPrivate(idParam)
 	if err != nil {

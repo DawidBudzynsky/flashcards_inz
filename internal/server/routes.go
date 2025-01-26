@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"flashcards/internal/handler"
+	"flashcards/internal/middlewares"
 	"flashcards/internal/repositories"
 	"flashcards/internal/routers"
 	"flashcards/internal/service"
@@ -26,6 +27,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	})
 
 	// middlewares global
+	r.Use(middlewares.LoggingMiddleware)
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler)
 
@@ -35,7 +37,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Get("/health", s.healthHandler)
 	})
 
-	userHandler := &handler.UserHandler{Service: service.NewUserSerivce(s.db.GetDB())}
+	userRepo := repositories.NewUserRepo(s.db.GetDB())
+	userHandler := &handler.UserHandler{Service: *service.NewUserSerivce(userRepo)}
 	r.Mount("/users", routers.UserRouter(userHandler))
 
 	userFlashcardRepo := repositories.NewUserFlashcardRepo(s.db.GetDB())
@@ -56,7 +59,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	testHandler := &handler.TestHandler{Service: service.NewTestService(s.db.GetDB())}
 	r.Mount("/tests", routers.TestRouter(testHandler))
 
-	authHandler := &handler.AuthHandler{UserService: service.NewUserSerivce(s.db.GetDB())}
+	authHandler := &handler.AuthHandler{UserService: *service.NewUserSerivce(userRepo)}
 	r.Mount("/", routers.AuthRouter(authHandler))
 
 	manager := handler.NewConnectionManager()
