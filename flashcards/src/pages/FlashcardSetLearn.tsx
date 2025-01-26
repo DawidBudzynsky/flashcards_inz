@@ -176,9 +176,9 @@ const FlashcardSetLearn: React.FC = () => {
 				</div>
 			) : (
 				<>
-					<div className="flex justify-around">
+					{/* <div className="flex justify-around">
 						<button className="btn flex-1">Shuffle</button>
-					</div>
+					</div> */}
 					<div className="flex justify-center items-center">
 						<div
 							className={`flip-card relative w-96 h-80 bg-base-200 shadow-lg rounded-lg cursor-pointer transition-transform duration-300 

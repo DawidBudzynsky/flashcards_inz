@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"flashcards/internal/middlewares"
 	"flashcards/internal/models"
 	"flashcards/internal/repositories"
 	"flashcards/internal/service"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -162,3 +165,65 @@ func (h *FlashcardHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+type TranslateRequest struct {
+	Q      string `json:"q"`
+	Source string `json:"source"`
+	Target string `json:"target"`
+	Format string `json:"format"`
+}
+
+type TranslateResponse struct {
+	Data struct {
+		Translations []struct {
+			TranslatedText string `json:"translatedText"`
+		} `json:"translations"`
+	} `json:"data"`
+}
+
+func (h *FlashcardHandler) Translate(w http.ResponseWriter, r *http.Request) {
+	var req TranslateRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	apiKey := os.Getenv("GOOGLE_TRANSLATE_API_KEY")
+	if apiKey == "" {
+		http.Error(w, "API key is missing", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare request for Google Translate API
+	url := "https://translation.googleapis.com/language/translate/v2?key=" + apiKey
+	body, _ := json.Marshal(req)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		http.Error(w, "Failed to call translation API", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Failed to read response body", http.StatusInternalServerError)
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		http.Error(w, string(responseBody), resp.StatusCode)
+		return
+	}
+
+	var translateResp TranslateResponse
+	err = json.Unmarshal(responseBody, &translateResp)
+	if err != nil {
+		http.Error(w, "Failed to parse translation response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(translateResp.Data.Translations[0].TranslatedText)
+}
+

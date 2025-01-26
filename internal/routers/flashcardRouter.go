@@ -17,6 +17,7 @@ func FlashcardRouter(handler *handler.FlashcardHandler) chi.Router {
 	r.Put("/", handler.UpdateFlashcards)
 
 	r.With(middlewares.UserIdFromSession).Put("/{id}/tracking", handler.ToggleTracking)
+	r.Post("/translate", handler.Translate)
 
 	r.Get("/", handler.List)
 	r.Get("/{id}", handler.GetByID)
