@@ -81,12 +81,18 @@ func update(oldItem Item, r review.ReviewItem, s time.Time) Item {
 	newItem.Easiness = calculateEasiness(oldItem.Easiness, quality(r.Quality))
 
 	if r.Quality < review.CorrectHard {
+		// set days
 		newItem.NextReviewDue = s.AddDate(0, 0, 1)
+		// set answers streak
 		newItem.ConsecutiveCorrectAnswers = 0
+
+		return newItem
 	}
-	// TODO: take a look on that one
+
+	// set days
 	days := float64(DueDateStartDays) * math.Pow(oldItem.Easiness, float64(oldItem.ConsecutiveCorrectAnswers-1))
 	newItem.NextReviewDue = s.AddDate(0, 0, int(math.Round(days)))
+	// set answers streak
 	newItem.ConsecutiveCorrectAnswers = oldItem.ConsecutiveCorrectAnswers + 1
 
 	return newItem
