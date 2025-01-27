@@ -14,7 +14,7 @@ import (
 )
 
 type FlashcardSetHandler struct {
-	Service service.FlashcardSetService
+	Service *service.FlashcardSetService
 }
 
 func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +99,6 @@ func (h *FlashcardSetHandler) GetUserSets(w http.ResponseWriter, r *http.Request
 }
 
 func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-
 	idParam := chi.URLParam(r, "id")
 	setID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
@@ -120,7 +119,7 @@ func (h *FlashcardSetHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if flashcardSet.IsPrivate {
-		//you are not owner
+		// you are not owner
 		if flashcardSet.UserGoogleID != userGoogleID {
 			http.Error(w, "You dont have access", http.StatusNotFound)
 			return
@@ -304,7 +303,7 @@ func (h *FlashcardSetHandler) ChangeSetFolder(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	//check if new folder already has this set
+	// check if new folder already has this set
 	exists, err := h.Service.CheckSetInFolder(requestData.FlashcardSetID, requestData.FolderID)
 	if err != nil {
 		http.Error(w, "Error checking folder contents", http.StatusInternalServerError)

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"flashcards/internal/middlewares"
+	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"net/http"
 	"strconv"
@@ -11,11 +12,11 @@ import (
 )
 
 type FolderHandler struct {
-	Service service.FolderServiceInterface
+	Service *service.FolderService
 }
 
 func (h *FolderHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var body service.CreateFolderRequest
+	var body repositories.CreateFolderRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

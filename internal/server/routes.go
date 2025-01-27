@@ -38,11 +38,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	})
 
 	userRepo := repositories.NewUserRepo(s.db.GetDB())
-	userHandler := &handler.UserHandler{Service: *service.NewUserSerivce(userRepo)}
+	userHandler := &handler.UserHandler{Service: service.NewUserSerivce(userRepo)}
 	r.Mount("/users", routers.UserRouter(userHandler))
 
 	userFlashcardRepo := repositories.NewUserFlashcardRepo(s.db.GetDB())
-	userFlashcardHandler := &handler.UserFlashcardHandler{Service: *service.NewUserFlashcardService(userFlashcardRepo)}
+	userFlashcardHandler := &handler.UserFlashcardHandler{Service: service.NewUserFlashcardService(userFlashcardRepo)}
 	r.Mount("/user_flashcards", routers.UserFlashcardRouter(userFlashcardHandler))
 
 	flashcardRepo := repositories.NewFlashcardRepo(s.db.GetDB())
@@ -50,10 +50,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Mount("/flashcards", routers.FlashcardRouter(flashcardHandler))
 
 	flashcardSetRepo := repositories.NewFlashcardSetRepo(s.db.GetDB())
-	flashcardSetHandler := &handler.FlashcardSetHandler{Service: *service.NewFlashcardSetService(flashcardSetRepo, service.NewFlashcardService(flashcardRepo))}
+	flashcardSetHandler := &handler.FlashcardSetHandler{Service: service.NewFlashcardSetService(flashcardSetRepo, service.NewFlashcardService(flashcardRepo))}
 	r.Mount("/flashcards_sets", routers.FlashcardSetRouter(flashcardSetHandler))
 
-	folderHandler := &handler.FolderHandler{Service: service.NewFolderService(s.db.GetDB())}
+	folderRepo := repositories.NewFolderRepo(s.db.GetDB())
+	folderHandler := &handler.FolderHandler{Service: service.NewFolderService(folderRepo)}
 	r.Mount("/folders", routers.FolderRouter(folderHandler))
 
 	testHandler := &handler.TestHandler{Service: service.NewTestService(s.db.GetDB())}

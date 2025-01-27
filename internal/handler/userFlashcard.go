@@ -9,7 +9,7 @@ import (
 )
 
 type UserFlashcardHandler struct {
-	Service service.UserFlashcardService
+	Service *service.UserFlashcardService
 }
 
 var (

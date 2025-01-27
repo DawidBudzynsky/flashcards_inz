@@ -14,12 +14,15 @@ const (
 type UserRepoInterface interface {
 	CreateUser(CreateUserRequest) (*models.User, error)
 	ListUsers() (models.Users, error)
+
 	GetUserByID(string) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
 	GetUserByGoogleID(string) (*models.User, error)
+
 	GetUserByGoogleIDPrivate(string) (*models.User, error)
-	ToggleVisibility(string) (*models.User, error)
+
 	UpdateUserByID(string, map[string]interface{}) (*models.User, error)
+
 	DeleteUserByID(uint64) error
 	Save(interface{}) error
 }
@@ -117,21 +120,6 @@ func (s *UserRepo) DeleteUserByID(id uint64) error {
 		return err
 	}
 	return nil
-}
-
-func (s *UserRepo) ToggleVisibility(google_id string) (*models.User, error) {
-	user, err := s.GetUserByGoogleID(google_id)
-	if err != nil {
-		return nil, err
-	}
-
-	user.IsPrivate = !user.IsPrivate
-
-	if err := s.db.Save(user).Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
 }
 
 func (s *UserRepo) Save(value interface{}) error {

@@ -12,7 +12,7 @@ import (
 )
 
 type UserHandler struct {
-	Service service.UserService
+	Service *service.UserService
 }
 
 func (u *UserHandler) Create(w http.ResponseWriter, r *http.Request) {

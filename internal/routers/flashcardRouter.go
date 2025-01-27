@@ -14,6 +14,7 @@ func FlashcardRouter(handler *handler.FlashcardHandler) chi.Router {
 	//...
 
 	r.With(middlewares.UserIdFromSession).Post("/", handler.Create)
+
 	r.Put("/", handler.UpdateFlashcards)
 
 	r.With(middlewares.UserIdFromSession).Put("/{id}/tracking", handler.ToggleTracking)
