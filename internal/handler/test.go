@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flashcards/internal/middlewares"
 	"flashcards/internal/models"
+	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"fmt"
 	"math/rand"
@@ -22,11 +23,11 @@ type Question struct {
 }
 
 type TestHandler struct {
-	Service service.TestServiceInterface
+	Service *service.TestService
 }
 
 func (t *TestHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var body service.CreateTestRequest
+	var body repositories.CreateTestRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

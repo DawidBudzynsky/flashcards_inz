@@ -57,7 +57,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	folderHandler := &handler.FolderHandler{Service: service.NewFolderService(folderRepo)}
 	r.Mount("/folders", routers.FolderRouter(folderHandler))
 
-	testHandler := &handler.TestHandler{Service: service.NewTestService(s.db.GetDB())}
+	testRepo := repositories.NewTestRepo(s.db.GetDB())
+	testHandler := &handler.TestHandler{Service: service.NewTestService(testRepo)}
 	r.Mount("/tests", routers.TestRouter(testHandler))
 
 	authHandler := &handler.AuthHandler{UserService: *service.NewUserSerivce(userRepo)}
