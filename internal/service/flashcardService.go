@@ -1,8 +1,14 @@
 package service
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"flashcards/internal/models"
 	"flashcards/internal/repositories"
+	"io"
+	"net/http"
+	"os"
 	"time"
 )
 
@@ -94,4 +100,53 @@ func (s *FlashcardService) ToggleTracking(id uint64) error {
 		return err
 	}
 	return nil
+}
+
+type TranslateRequest struct {
+	Q      string `json:"q"`
+	Source string `json:"source"`
+	Target string `json:"target"`
+	Format string `json:"format"`
+}
+
+type TranslateResponse struct {
+	Data struct {
+		Translations []struct {
+			TranslatedText string `json:"translatedText"`
+		} `json:"translations"`
+	} `json:"data"`
+}
+
+func (s *FlashcardService) TranslateText(req *TranslateRequest) (*TranslateResponse, error) {
+	apiKey := os.Getenv("GOOGLE_TRANSLATE_API_KEY")
+	if apiKey == "" {
+		return nil, errors.New("API key not found in environment")
+	}
+
+	url := "https://translation.googleapis.com/language/translate/v2?key=" + apiKey
+	body, _ := json.Marshal(req)
+
+	// make erquest to translation service
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Response status code wrong")
+	}
+
+	var translateResp *TranslateResponse
+	err = json.Unmarshal(responseBody, &translateResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return translateResp, nil
 }

@@ -14,15 +14,11 @@ const (
 type UserRepoInterface interface {
 	CreateUser(CreateUserRequest) (*models.User, error)
 	ListUsers() (models.Users, error)
-
 	GetUserByID(string) (*models.User, error)
 	GetUserByEmail(string) (*models.User, error)
 	GetUserByGoogleID(string) (*models.User, error)
-
 	GetUserByGoogleIDPrivate(string) (*models.User, error)
-
 	UpdateUserByID(string, map[string]interface{}) (*models.User, error)
-
 	DeleteUserByID(uint64) error
 	Save(interface{}) error
 }
