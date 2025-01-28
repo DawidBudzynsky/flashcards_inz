@@ -272,7 +272,7 @@ func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the questions for the test
-	questions, err := t.createQuestions(test)
+	questions, err := t.CreateQuestionss(test)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -286,7 +286,7 @@ func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (f *TestHandler) createQuestions(test *models.Test) ([]Question, error) {
+func (f *TestHandler) CreateQuestionss(test *models.Test) ([]Question, error) {
 	pickedFlashcards, err := f.PickFlashcards(test.Sets, test.NumQuestions)
 	if err != nil {
 		return nil, err

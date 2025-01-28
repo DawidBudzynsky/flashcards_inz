@@ -15,12 +15,3 @@ type ReviewItem struct {
 	CardId  int
 	Quality int
 }
-
-type Due struct {
-	DeckId string
-	Items  []DueItem
-}
-
-type DueItem struct {
-	CardId int
-}

@@ -38,7 +38,6 @@ func (s *UserFlashcardService) UpdateOrCreateFlashcard(review review.ReviewItem,
 		return nil, err
 	}
 
-	// TODO: it should be passed as interface
 	// update the card using algorithm
 	sm2 := sm2.NewSm2(time.Now())
 	cardData, err := sm2.Update(marshalledCard, review)

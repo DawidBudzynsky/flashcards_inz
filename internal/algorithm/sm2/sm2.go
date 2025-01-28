@@ -8,13 +8,11 @@ import (
 )
 
 const (
-	DefaultEasiness = 2.5
-	MinEasiness     = 1.3
-
-	EasinessConst     = -0.8
-	EasinessLineal    = 0.28
-	EasinessQuadratic = 0.02
-
+	DefaultEasiness    = 2.5
+	MinEasiness        = 1.3
+	EasinessConst      = -0.8
+	EasinessLineal     = 0.28
+	EasinessQuadratic  = 0.02
 	DueDateStartDays   = 6
 	IncorrectThreshold = 3.0
 )
@@ -57,21 +55,6 @@ func (s *Sm2) Update(oldItem []byte, r review.ReviewItem) ([]byte, error) {
 		return nil, err
 	}
 	return encodedItem, nil
-}
-
-func (s *Sm2) Due(item []byte, t time.Time) (d review.DueItem) {
-	decodedItem, err := decode(item)
-	if err != nil {
-		return d
-	}
-
-	if decodedItem.NextReviewDue.Before(t) {
-		return review.DueItem{
-			CardId: decodedItem.FlashcardID,
-		}
-	}
-
-	return d
 }
 
 func update(oldItem Item, r review.ReviewItem, s time.Time) Item {

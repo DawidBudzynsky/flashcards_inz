@@ -52,7 +52,7 @@ type Flashcard struct {
 	Answer         string    `gorm:"size:255"`
 	CreatedAt      time.Time `gorm:"autoCreateTime"`
 
-	Tracking *Tracking
+	Tracking *Tracking `gorm:"foreignKey:FlashcardID"`
 }
 type Flashcards []Flashcard
 

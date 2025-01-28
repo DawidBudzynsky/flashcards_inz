@@ -7,6 +7,18 @@ export interface NotificationStrategy {
 	notifyWarning(message: string): void;
 }
 
+export class AlertNotifications implements NotificationStrategy {
+	notifySuccess(message: string): void {
+		alert(message);
+	}
+	notifyError(message: string): void {
+		alert(message);
+	}
+	notifyWarning(message: string): void {
+		alert(message);
+	}
+}
+
 export class ToastNotifications implements NotificationStrategy {
 	notifySuccess(message: string): void {
 		toast.success(message, {
@@ -18,7 +30,6 @@ export class ToastNotifications implements NotificationStrategy {
 			position: POSITION,
 		});
 	}
-
 	notifyWarning(message: string): void {
 		toast.warning(message, {
 			position: POSITION,
@@ -50,5 +61,6 @@ export class NotificationContext {
 	}
 }
 
+const alertNotifications = new AlertNotifications();
 const toastNotifications = new ToastNotifications();
-export const notificationContext = new NotificationContext(toastNotifications);
+export const notificationContext = new NotificationContext(alertNotifications);
