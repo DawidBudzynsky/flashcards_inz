@@ -23,7 +23,6 @@ func (t *TestHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: create a function out of this
 	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
 		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
@@ -212,14 +211,12 @@ func (t *TestHandler) GetTestsForUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get grouped tests
 	groupedTests, err := t.Service.GetTestsGroupedByStatus(userGoogleID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Return the grouped data
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groupedTests)
 }
@@ -238,35 +235,30 @@ func (t *TestHandler) CreateQuestions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the user has access to this test
 	hasAccess := t.Service.DoesUserHaveAccess(userGoogleID, testID)
 	if !hasAccess {
 		http.Error(w, "You didn't apply for this test", http.StatusUnauthorized)
 		return
 	}
 
-	// Retrieve the test by ID
 	test, err := t.Service.GetTestByID(testID)
 	if err != nil {
 		http.Error(w, "Failed to get test", http.StatusInternalServerError)
 		return
 	}
 
-	// Validate the test
 	err = test.IsValid()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Create the questions for the test
 	questions, err := t.Service.CreateQuestions(test)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with the created questions as usual
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(questions); err != nil {
 		http.Error(w, "Failed to encode questions", http.StatusInternalServerError)

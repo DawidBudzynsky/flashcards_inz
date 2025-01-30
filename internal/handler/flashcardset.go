@@ -240,7 +240,6 @@ func (h *FlashcardSetHandler) DeleteByID(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *FlashcardSetHandler) AddSetToFolder(w http.ResponseWriter, r *http.Request) {
-	// Parse the JSON request body
 	var requestData struct {
 		FlashcardSetID uint64 `json:"FlashcardSetID"`
 		FolderID       uint64 `json:"FolderID"`
@@ -251,7 +250,6 @@ func (h *FlashcardSetHandler) AddSetToFolder(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// Call the service to add the flashcard set to the folder
 	flashcardSet, err := h.Service.AddFlashcardSetToFolder(requestData.FlashcardSetID, requestData.FolderID)
 	if err != nil {
 		http.Error(w, "Failed to append set to folder", http.StatusInternalServerError)
@@ -259,7 +257,6 @@ func (h *FlashcardSetHandler) AddSetToFolder(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// Respond with the updated flashcard set
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(flashcardSet); err != nil {
 		http.Error(w, "Failed to encode flashcardSet", http.StatusInternalServerError)

@@ -16,18 +16,15 @@ const FlashcardSetComponent: React.FC<{ flashcardSet: FlashcardSet }> = ({
 		mutationFn: (folderId: number) =>
 			removeSetFromFolder(flashcardSet.ID, folderId),
 		onSuccess: () => {
-			// After successful mutation, update the folder's cache
 			queryClient.setQueryData<Folder>(
 				["folder", folderId],
 				(oldData) => {
 					if (!oldData) return oldData;
 
-					// Add the new flashcard set to the folder's FlashcardsSets
 					const updatedSets = oldData.FlashcardsSets.filter(
 						(set) => set.ID !== flashcardSet.ID
 					);
 
-					// Return the updated folder data with the new set
 					return { ...oldData, FlashcardsSets: updatedSets };
 				}
 			);
@@ -53,11 +50,7 @@ const FlashcardSetComponent: React.FC<{ flashcardSet: FlashcardSet }> = ({
 	return (
 		<div className="card w-full max-w-xxl bg-base-200 shadow-lg hover:scale-105 transition-all duration-300">
 			<div className="card-body p-4 flex flex-row justify-between items-center">
-				{/* Left Side: Title */}
 				<h3 className="text-xl font-semibold">{flashcardSet.Title}</h3>
-
-				{/* Right Side: Button */}
-
 				{isSetInFolder ? (
 					<button
 						className="btn"

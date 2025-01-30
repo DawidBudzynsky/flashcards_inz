@@ -24,8 +24,8 @@ const UserProfile: React.FC = () => {
 			<h1 className="text-4xl font-bold">{user?.Username}</h1>
 			<p className="text-lg text-gray-600">{user?.Email}</p>
 
-			<div className="space-y-4">
-				<h2 className="text-2xl font-semibold">Flashcard Sets:</h2>
+			<div className="md:flex flex-col md:w-2/3 mx-auto border-[1px] rounded-3xl m-2">
+				<h1 className="p-2">Public sets</h1>
 
 				{user?.FlashcardsSets.length > 0 ? (
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">

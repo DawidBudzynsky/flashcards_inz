@@ -14,7 +14,6 @@ const TestScoreModal: React.FC<ModalProps> = ({
 }) => {
 	if (!isVisible) return null;
 
-	// Calculate score percentage based on content
 	let scorePercentage = 0;
 	if (content && content.correct !== undefined && content.total) {
 		scorePercentage = Math.round((content.correct / content.total) * 100);
@@ -23,10 +22,8 @@ const TestScoreModal: React.FC<ModalProps> = ({
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
 			<div className="bg-white p-6 rounded-lg max-w-md w-full space-y-4">
-				{/* Title */}
 				<h2 className="text-xl font-semibold">Results from Test</h2>
 
-				{/* Radial Progress */}
 				{content && content.correct !== undefined && (
 					<div className="flex justify-center mt-4">
 						<div

@@ -15,9 +15,6 @@ const defaults = {
 	},
 };
 
-/**
- * Makes an API request using Axios with the given method and options.
- */
 const api = async (method: string, url: string, variables: any = {}) => {
 	const fullUrl = `${defaults.baseURL}${url}`;
 
@@ -42,7 +39,6 @@ const api = async (method: string, url: string, variables: any = {}) => {
 			navigateTo("/404");
 		}
 		if (error.response.status === 401) {
-			// error.redirect("/Unauthorized");
 		}
 		console.error(`API Error [${method}] ${fullUrl}:`, error);
 		if (error.response) {

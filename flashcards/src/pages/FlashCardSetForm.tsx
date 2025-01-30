@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import FlashcardInput from "../components/FlashcardInput";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	FlashcardSetRequest,
 	createFlashcardSet,
@@ -11,11 +11,14 @@ import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
 import { useParams, useNavigate } from "react-router-dom";
 import { Flashcard } from "../types/interfaces";
 import { notificationContext } from "../utils/notifications";
-import { MIN_FLASHCARDS_IN_SET, MIN_QUESTIONS } from "../utils/constants";
+import {
+	MAX_FLASHCARDS_IN_SET,
+	MIN_FLASHCARDS_IN_SET,
+} from "../utils/constants";
 import CreateButton from "../components/Buttons/CreateButton";
-import TranslateComponent from "../utils/translate";
 
 const FlashCardSetForm: React.FC = () => {
+	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 	const { setId: setID } = useParams<{ setId: string }>();
 	const [folderId, setFolderId] = useState<number | null>(null);
@@ -65,6 +68,12 @@ const FlashCardSetForm: React.FC = () => {
 
 	const addFlashcard = () => {
 		const newCardIndex = flashcards.length;
+		if (flashcards.length >= MAX_FLASHCARDS_IN_SET) {
+			notificationContext.notifyWarning(
+				`You can have maximum ${MAX_FLASHCARDS_IN_SET} flashcards in a set.`
+			);
+			return;
+		}
 		setFlashcards([...flashcards, { id: 0, question: "", answer: "" }]);
 		setRecentlyAdded(newCardIndex);
 		setTimeout(() => setRecentlyAdded(null), 100);
@@ -88,8 +97,6 @@ const FlashCardSetForm: React.FC = () => {
 		mutationFn: (data: FlashcardSetRequest) =>
 			createFlashcardSet(data, folderId),
 		onSuccess: (createdSet) => {
-			console.log("FlashcardSet created successfully!");
-
 			const flashcardsData = flashcards.map((card) => ({
 				flashcard_set_id: createdSet.ID,
 				question: card.question,
@@ -97,8 +104,7 @@ const FlashCardSetForm: React.FC = () => {
 			}));
 
 			createFlashcardsMutation.mutate(flashcardsData);
-
-			navigate(`/flashcards_sets/${createdSet.ID}`);
+			handleNavigate(createdSet.ID);
 		},
 		onError: (error: any) => {
 			console.error("Error creating flashcardSet:", error);
@@ -112,7 +118,7 @@ const FlashCardSetForm: React.FC = () => {
 				"Flashcard set and flashcards created successfully!"
 			);
 		},
-		onError: (error: any) => {
+		onError: () => {
 			notificationContext.notifyError("Failed to create flashcards.");
 		},
 	});
@@ -121,7 +127,6 @@ const FlashCardSetForm: React.FC = () => {
 		mutationFn: (data: { setID: string; body: FlashcardSetRequest }) =>
 			updateFlashcardSetByID(data.setID, data.body),
 		onSuccess: (updatedSet) => {
-			console.log("FlashcardSet updated successfully!");
 			notificationContext.notifySuccess(
 				"FlashcardSet updated successfully!"
 			);
@@ -143,6 +148,13 @@ const FlashCardSetForm: React.FC = () => {
 		if (flashcards.length < MIN_FLASHCARDS_IN_SET) {
 			notificationContext.notifyWarning(
 				`You need to have at least ${MIN_FLASHCARDS_IN_SET} flashcards to create a set.`
+			);
+			return;
+		}
+
+		if (flashcards.length > MAX_FLASHCARDS_IN_SET) {
+			notificationContext.notifyWarning(
+				`You can have maximum ${MAX_FLASHCARDS_IN_SET} flashcards in a set.`
 			);
 			return;
 		}
@@ -170,6 +182,11 @@ const FlashCardSetForm: React.FC = () => {
 				folder_id: null,
 			});
 		}
+	};
+
+	const handleNavigate = (setID: number) => {
+		navigate(`/flashcards_sets/${setID}`);
+		queryClient.invalidateQueries({ queryKey: ["flashcardSet", setID] });
 	};
 
 	if (fetchStatus === "error") {
@@ -231,7 +248,6 @@ const FlashCardSetForm: React.FC = () => {
 					<option value="en">English</option>
 					<option value="pl">Polish</option>
 					<option value="es">Spanish</option>
-					{/* Add more language options */}
 				</select>
 				<span>To</span>
 				<select
@@ -242,7 +258,6 @@ const FlashCardSetForm: React.FC = () => {
 					<option value="en">English</option>
 					<option value="pl">Polish</option>
 					<option value="es">Spanish</option>
-					{/* Add more language options */}
 				</select>
 			</div>
 

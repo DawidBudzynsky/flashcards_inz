@@ -13,24 +13,32 @@ import CreateButton from "../components/Buttons/CreateButton";
 import {
 	IoBookmarks,
 	IoBookmarksOutline,
-	IoCard,
 	IoEarthOutline,
 	IoLockClosed,
-	IoPaw,
-	IoPawOutline,
-	IoPawSharp,
 } from "react-icons/io5";
 import { PiCardsBold } from "react-icons/pi";
+import { useEffect } from "react";
 
 const FlashcardSetView: React.FC = () => {
 	const navigate = useNavigate();
 	const { setId: setID } = useParams<{ setId: string }>();
 	const queryClient = useQueryClient();
 
-	const { data: data, isLoading } = useQuery({
+	const {
+		data: data,
+		isLoading,
+		refetch,
+	} = useQuery({
 		queryKey: ["flashcardSet", setID],
 		queryFn: () => getFlashcardSetByID(setID!),
+		enabled: !!setID,
 	});
+
+	useEffect(() => {
+		if (setID) {
+			refetch();
+		}
+	}, [setID, refetch]);
 
 	const { mutate: deleteSet } = useMutation({
 		mutationFn: () => deleteSetByID(setID!),
@@ -84,7 +92,7 @@ const FlashcardSetView: React.FC = () => {
 	const { mutate: toggleTracking } = useMutation({
 		mutationFn: (cardID: number) => toggleFlashcardTracking(cardID),
 		onSuccess: (_, cardID) => {
-			if (data.set?.Flashcards) {
+			if (data?.set?.Flashcards) {
 				data.set.Flashcards = data.set.Flashcards.map(
 					(flashcard: Flashcard) =>
 						flashcard.ID === cardID

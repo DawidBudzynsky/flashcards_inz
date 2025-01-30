@@ -22,6 +22,7 @@ import FoldersPresentation from "./components/Presentations/FoldersPresentation"
 import TestsPresentation from "./components/Presentations/TestsPresentation";
 import { AnimatePresence } from "framer-motion";
 import { TOAST_POSITION } from "./utils/notifications";
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -43,69 +44,69 @@ function App() {
 				<AnimatePresence mode="wait">
 					<Routes>
 						<Route element={<Layout />}>
-							{/* <Route element={<ProtectedRoute />}>
-						</Route> */}
-							<Route path="/" element={<Home />} />
-							<Route path="/users" element={<Users />} />
+							<Route element={<ProtectedRoute />}>
+								<Route path="/" element={<Home />} />
+								<Route path="/users" element={<Users />} />
 
-							<Route
-								path="/users/:userID"
-								element={<UserProfile />}
-							/>
+								<Route
+									path="/users/:userID"
+									element={<UserProfile />}
+								/>
 
-							{/* //protected */}
-							<Route
-								path="/create"
-								element={<FlashCardSetForm />}
-							/>
+								{/* //protected */}
+								<Route
+									path="/create"
+									element={<FlashCardSetForm />}
+								/>
 
-							<Route
-								path="flashcards_sets/"
-								element={<SetsPresentation />}
-							/>
-							<Route
-								path="folders/"
-								element={<FoldersPresentation />}
-							/>
-							<Route
-								path="tests/"
-								element={<TestsPresentation />}
-							/>
-							<Route
-								path="flashcards_sets/:setId/edit"
-								element={<FlashCardSetForm />}
-							/>
+								<Route
+									path="flashcards_sets/"
+									element={<SetsPresentation />}
+								/>
+								<Route
+									path="folders/"
+									element={<FoldersPresentation />}
+								/>
+								<Route
+									path="tests/"
+									element={<TestsPresentation />}
+								/>
+								<Route
+									path="flashcards_sets/:setId/edit"
+									element={<FlashCardSetForm />}
+								/>
 
-							<Route
-								path="flashcards_sets/:setId/learn"
-								element={<FlashcardSetLearn />}
-							/>
+								<Route
+									path="flashcards_sets/:setId/learn"
+									element={<FlashcardSetLearn />}
+								/>
 
-							<Route
-								path="/folders/:folderId"
-								element={<FolderView />}
-							/>
-							<Route
-								path="/flashcards_sets/:setId"
-								element={<FlashcardSetView />}
-							/>
+								<Route
+									path="/folders/:folderId"
+									element={<FolderView />}
+								/>
+								<Route
+									path="/flashcards_sets/:setId"
+									element={<FlashcardSetView />}
+								/>
 
-							<Route
-								path="/tests/:testId/questions"
-								element={<TestQuestions />}
-							/>
+								<Route
+									path="/tests/:testId/questions"
+									element={<TestQuestions />}
+								/>
 
-							<Route
-								path="/user/tests"
-								element={<TestQuestions />}
-							/>
+								<Route
+									path="/user/tests"
+									element={<TestQuestions />}
+								/>
 
-							<Route
-								path="/tests/testToken"
-								element={<SharedTestHandler />}
-							/>
+								<Route
+									path="/tests/testToken"
+									element={<SharedTestHandler />}
+								/>
 
-							<Route path="/profile" element={<Profile />} />
+								<Route path="/profile" element={<Profile />} />
+							</Route>
 							<Route
 								path="/Unauthorized"
 								element={<LoginPage />}

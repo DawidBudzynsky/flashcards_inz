@@ -107,7 +107,7 @@ const FlashcardSetLearn: React.FC = () => {
 	const animateBackToNormal = () => {
 		setTimeout(() => {
 			setScaleDirection("");
-		}, 150); // 150ms for faster transition
+		}, 150);
 	};
 
 	if (!set || !set.Flashcards || set.Flashcards.length === 0) {
@@ -125,21 +125,17 @@ const FlashcardSetLearn: React.FC = () => {
 
 	const flashcard = set.Flashcards[currentFlashcardIndex];
 
-	// Calculate the progress as a percentage
 	const progress = (currentFlashcardIndex / set.Flashcards.length) * 100;
 
-	// Handle updated tracking
 	const updateFlashcardTracking = (updatedTracking: Tracking) => {
 		if (!set || !set.Flashcards) return;
 
-		// Find the flashcard and update its Tracking data
 		const updatedFlashcards = set.Flashcards.map((flashcard: Flashcard) =>
 			flashcard.ID === updatedTracking.FlashcardID
 				? { ...flashcard, Tracking: updatedTracking }
 				: flashcard
 		);
 
-		// Update the flashcard set with the updated tracking
 		set.Flashcards = updatedFlashcards;
 	};
 	return (

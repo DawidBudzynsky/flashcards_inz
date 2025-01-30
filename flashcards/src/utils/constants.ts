@@ -4,6 +4,8 @@ export const enum TabNames {
 	Tests = "tests",
 }
 export const MIN_FLASHCARDS_IN_SET = 5;
+export const MAX_FLASHCARDS_IN_SET = 50;
+export const MAX_FLASHCARD_LENGTH = 100;
 export const MIN_QUESTIONS = 4;
 export const AUTH_PROVIDER = "http://localhost:8080/auth?provider=google";
 export const ACTIVE_TAB = "activeTab";

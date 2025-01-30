@@ -11,7 +11,7 @@ const PageContainer: React.FC<CardContainerProps> = ({
 }) => {
 	return (
 		<div
-			className={`w-full border-[1px]  rounded-3xl my-4 p-4 bg-base-100 ${className}`}
+			className={`w-full border-[1px]  border-b-0 rounded-3xl my-4 p-4 bg-base-100 ${className}`}
 		>
 			{children}
 		</div>

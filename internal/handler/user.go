@@ -85,11 +85,6 @@ func (u *UserHandler) GetByGoogleID(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "id")
-	// userID, err := strconv.ParseUint(idParam, 10, 64)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
 
 	var updateData map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {

@@ -7,7 +7,6 @@ import (
 )
 
 func TestPickFlashcards(t *testing.T) {
-	// Mock Data
 	set1 := models.FlashcardSet{
 		Flashcards: []models.Flashcard{
 			{ID: 1, Question: "Q1", Answer: "A1"},
@@ -31,21 +30,17 @@ func TestPickFlashcards(t *testing.T) {
 	sets := []models.FlashcardSet{set1, set2, set3}
 	numQuestions := 5
 
-	// Initialize TestHandler (assuming it is in your application code)
 	handler := &handler.TestHandler{}
 
-	// Call the function
 	selectedFlashcards, err := handler.PickFlashcards(sets, numQuestions)
 	if err != nil {
 		t.Fatalf("Error selecting flashcards: %v", err)
 	}
 
-	// Assert the number of questions returned is as expected
 	if len(selectedFlashcards) != numQuestions {
 		t.Errorf("Expected %d flashcards, but got %d", numQuestions, len(selectedFlashcards))
 	}
 
-	// Assert that the number of questions selected from each set is proportional
 	flashcardsInSet1 := 0
 	flashcardsInSet2 := 0
 	flashcardsInSet3 := 0
@@ -70,7 +65,6 @@ func TestPickFlashcards(t *testing.T) {
 		t.Errorf("Set 3 should have 1 flashcard, but got %d", flashcardsInSet3)
 	}
 
-	// Edge case: No flashcards in a set
 	emptySet := models.FlashcardSet{}
 	setsWithEmptySet := append(sets, emptySet)
 	selectedFlashcards, err = handler.PickFlashcards(setsWithEmptySet, 4)

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface DrawerProps {
-	children: React.ReactNode; // Content inside the drawer
+	children: React.ReactNode;
 }
 
 const Drawer: React.FC<DrawerProps> = ({ children }) => {

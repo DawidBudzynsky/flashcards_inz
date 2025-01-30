@@ -78,7 +78,7 @@ func (cm *NotificationManager) SseHandler(w http.ResponseWriter, r *http.Request
 		cm.AddClient(testID, userID, dataCh)
 	}
 
-	timeout := time.After(15 * time.Second)
+	timeout := time.After(30 * time.Minute)
 	_, cancel := context.WithCancel(r.Context())
 	defer cancel()
 

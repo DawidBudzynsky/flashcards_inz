@@ -7,13 +7,16 @@ const isUserLoggedIn = async () => {
 };
 
 export const useIsLoggedIn = () => {
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, isPending, isFetched } = useQuery({
 		queryKey: ["isUserLoggedIn"],
 		queryFn: isUserLoggedIn,
+		retry: false,
 	});
 
 	return {
-		isLoggedIn: data?.success,
+		isLoggedIn: data?.success ?? false,
 		isLoading,
+		isPending,
+		isFetched,
 	};
 };

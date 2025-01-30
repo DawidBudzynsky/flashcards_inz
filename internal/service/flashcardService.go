@@ -63,8 +63,6 @@ func (s *FlashcardService) UpdateFlashcardByID(id uint64, updateData repositorie
 }
 
 func (s *FlashcardService) DeleteFlashcardByID(id int) error {
-	// buisiness logic here
-	//
 	err := s.Repo.DeleteFlashcardByID(id)
 	if err != nil {
 		return err
@@ -73,14 +71,11 @@ func (s *FlashcardService) DeleteFlashcardByID(id int) error {
 }
 
 func (s *FlashcardService) ToggleTracking(id uint64) error {
-	// buisiness logic here
-	//
 	flashcard, err := s.Repo.GetFlashcardByID(id)
 	if err != nil {
 		return err
 	}
 	if flashcard.Tracking == nil {
-		// Enable tracking by creating a new Tracking instance
 		flashcard.Tracking = &models.Tracking{
 			Easiness:                  2.5,
 			ConsecutiveCorrectAnswers: 0,
@@ -89,7 +84,6 @@ func (s *FlashcardService) ToggleTracking(id uint64) error {
 			TotalReviews:              0,
 		}
 	} else {
-		// Disable tracking by deleting the Tracking record
 		if err := s.Repo.DeleteTrackingByFlashcardID(flashcard.ID); err != nil {
 			return err
 		}

@@ -29,7 +29,6 @@ func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get userGoogleID from context
 	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
 		UserUnauthorizedError(w)
@@ -41,8 +40,6 @@ func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 		UnableToUpdateCardError(w, err.Error())
 		return
 	}
-
-	// fmt.Println(updatedCard)
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(updatedCard); err != nil {

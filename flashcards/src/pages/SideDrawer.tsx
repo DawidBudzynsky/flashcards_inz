@@ -64,7 +64,7 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ hidden }) => {
 			</div>
 
 			<div
-				className={`bg-base-100 shadow-lg my-4 mr-8 transition-all duration-300 ease-in-out rounded-2xl border-[1px] hidden md:block ${
+				className={`bg-base-100 shadow-lg my-4 mr-8 transition-all duration-300 ease-in-out rounded-2xl border-[1px] border-b-0 hidden md:block ${
 					hidden ? "w-[70px]" : "w-[300px]"
 				}`}
 			>

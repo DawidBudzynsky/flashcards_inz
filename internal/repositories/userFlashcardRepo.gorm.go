@@ -48,7 +48,6 @@ func (r *UserFlashcardRepo) Create(userFlashcard *models.Tracking) (*models.Trac
 }
 
 func (r *UserFlashcardRepo) UpdateByID(id int, body *models.Tracking) (*models.Tracking, error) {
-	// TODO: where should also include userID
 	if err := r.db.Model(&models.Tracking{}).Where("flashcard_id = ?", id).Updates(body).Error; err != nil {
 		return nil, err
 	}

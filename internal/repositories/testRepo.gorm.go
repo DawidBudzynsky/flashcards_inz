@@ -44,7 +44,6 @@ func NewTestRepo(db *gorm.DB) *TestRepo {
 	return &TestRepo{db: db}
 }
 
-// GetFlashcardsByIDs retrieves flashcards by their IDs
 func (s *TestRepo) GetFlashcard(id int) (*models.Flashcard, error) {
 	var flashcard models.Flashcard
 	if err := s.db.First(&flashcard, id).Error; err != nil {
@@ -106,7 +105,7 @@ func (s *TestRepo) AssignTestToUser(userID string, token string) error {
 	var testUser models.TestUser
 	err = s.db.Where("test_id = ? AND user_google_id = ?", test.ID, userID).First(&testUser).Error
 	if err == nil {
-		return errors.New("you already has access to this test") // User already has access
+		return errors.New("you already has access to this test")
 	}
 
 	testUser = models.TestUser{
@@ -132,8 +131,8 @@ func (s *TestRepo) GetTestsGroupedByStatus(userID string) (map[string][]models.T
 		Select("tests.*").
 		Joins("LEFT JOIN test_results ON tests.id = test_results.test_id").
 		Joins("LEFT JOIN test_users ON tests.id = test_users.test_id").
-		Where("test_users.user_google_id = ?", userID).                              // Only include tests that the user is assigned to
-		Where("test_results.test_id IS NULL OR test_results.is_finished = ?", false) // Include tests that are not finished or have no results
+		Where("test_users.user_google_id = ?", userID).
+		Where("test_results.test_id IS NULL OR test_results.is_finished = ?", false)
 	if err := notTakenQuery.Find(&notFinishedTests).Error; err != nil {
 		return nil, err
 	}
@@ -199,13 +198,11 @@ func (s *TestRepo) DeleteTestByID(id uint64) error {
 }
 
 func (s *TestRepo) SaveTestResult(userID string, testID uint64, answers map[int]string, score int) (*models.TestResult, error) {
-	// Marshal the answers map to JSON
 	answersJSON, err := json.Marshal(answers)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a new result object
 	result := models.TestResult{
 		TestID:       testID,
 		UserGoogleID: userID,
@@ -215,12 +212,10 @@ func (s *TestRepo) SaveTestResult(userID string, testID uint64, answers map[int]
 		IsFinished:   true,
 	}
 
-	// Check if a result already exists
 	var existingResult models.TestResult
 	err = s.db.Where("user_google_id = ? AND test_id = ?", userID, testID).First(&existingResult).Error
 
 	if err == gorm.ErrRecordNotFound {
-		// Record doesn't exist, create a new one
 		if err := s.db.Create(&result).Error; err != nil {
 			return nil, err
 		}
@@ -236,7 +231,6 @@ func (s *TestRepo) SaveTestResult(userID string, testID uint64, answers map[int]
 }
 
 func (s *TestRepo) GetTestByToken(token string) (*models.Test, error) {
-	// Find the test by its access token
 	var test models.Test
 	err := s.db.Where("access_token = ?", token).First(&test).Error
 	if err != nil {

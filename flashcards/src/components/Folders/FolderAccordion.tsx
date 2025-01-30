@@ -18,8 +18,6 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 	const navigate = useNavigate();
 	const [activeFolderId, setActiveFolderId] = useState<number | null>(null);
 	const { sets } = useFlashcardSets();
-	//TODO: check if set is in
-	// const { addSetToFolder } = useAddSetToFolder(flashcardSet, folderId);
 	const { changeSetFolder } = useChangeSetFolder(activeFolderId);
 	const { deleteFolder } = useDeleteFolder(String(activeFolderId));
 	const activeFolder = folders.find((folder) => folder.ID === activeFolderId);
@@ -34,7 +32,6 @@ const FoldersAccordion: React.FC<FoldersAccordionProps> = ({ folders }) => {
 
 	const handleChangeName = () => {
 		openModal("edit_folder_modal");
-		console.log("XD");
 	};
 
 	const handleFolderClick = (folderId: number) => {

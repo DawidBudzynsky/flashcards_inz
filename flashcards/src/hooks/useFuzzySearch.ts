@@ -13,7 +13,7 @@ function useFuzzySearch<T>(data: T[], searchQuery: string, searchKey: string) {
 
 const fuzzyMatch = (query: string, target: string) => {
 	if (typeof target !== "string") {
-		return false; // If it's not a string, don't perform matching
+		return false;
 	}
 
 	let queryIndex = 0;

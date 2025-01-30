@@ -2,10 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FlashcardSet } from "../types/interfaces";
 import AddSetModal from "../components/AddSetToFolderModal";
 import ListItem from "../components/ListItem";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { deleteFolderByID, getFolderByID } from "../requests/folder";
+import { useQuery } from "@tanstack/react-query";
+import { getFolderByID } from "../requests/folder";
 import { dateToString } from "../utils/showDate";
-import { notificationContext } from "../utils/notifications";
 import useDeleteFolder from "../hooks/useDeleteFolder";
 
 function FolderView() {
@@ -62,10 +61,7 @@ function FolderView() {
 					<ListItem set={set} />
 				))}
 
-				<button
-					className="btn mb-6"
-					onClick={() => navigate(-1)} // Go back to the previous page
-				>
+				<button className="btn mb-6" onClick={() => navigate(-1)}>
 					Back
 				</button>
 			</div>

@@ -13,7 +13,7 @@ import (
 
 const (
 	key    = "testString"
-	MaxAge = 86400 * 30
+	MaxAge = 30 * 60
 	IsProd = true
 )
 

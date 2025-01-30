@@ -17,7 +17,6 @@ type FlashcardHandler struct {
 }
 
 func (h *FlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// WARNING: assuuming that in the payload there is list of flashcards
 	var body []repositories.CreateFlashcardRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -128,29 +127,6 @@ func (h *FlashcardHandler) ToggleTracking(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// func (h *FlashcardHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
-// 	idParam := chi.URLParam(r, "id")
-// 	flashcardID, err := strconv.ParseUint(idParam, 10, 64)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-// 	var updateData map[string]interface{}
-// 	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-// 	flashcard, err := h.Service.UpdateFlashcardByID(flashcardID, updateData)
-// 	if err != nil {
-// 		http.Error(w, "Failed to update flashcard", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	w.Header().Set("Content-Type", "application/json")
-// 	if err := json.NewEncoder(w).Encode(flashcard); err != nil {
-// 		http.Error(w, "Failed to encode flashcard", http.StatusInternalServerError)
-// 	}
-// }
-
 func (h *FlashcardHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	flashcardID, err := strconv.Atoi(idParam)
@@ -185,4 +161,3 @@ func (h *FlashcardHandler) Translate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode translation response", http.StatusInternalServerError)
 	}
 }
-
