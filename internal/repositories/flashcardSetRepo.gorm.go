@@ -22,7 +22,7 @@ const (
 )
 
 type CreateFlashcardSetRequest struct {
-	UserGoogleID string `json:"-"` // TODO: maybe not today
+	UserGoogleID string `json:"-"`
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	FolderID     int    `json:"folder_id"`
@@ -36,8 +36,6 @@ func NewFlashcardSetRepo(db *gorm.DB) *FlashcardSetRepo {
 	return &FlashcardSetRepo{db: db}
 }
 
-// TODO: should add each flashcard inside the request
-// TODO: or first on frontend send create set and then add flashcards to sets
 func (s *FlashcardSetRepo) CreateFlashcardSet(body CreateFlashcardSetRequest) (*models.FlashcardSet, error) {
 	flashcardSet := &models.FlashcardSet{
 		UserGoogleID: body.UserGoogleID,
@@ -61,7 +59,6 @@ func (s *FlashcardSetRepo) ListFlashcardSets() (models.FlashcardsSets, error) {
 
 func (s *FlashcardSetRepo) ListFlashcardSetsForUser(userId string) (models.FlashcardsSets, error) {
 	var flashcardSets models.FlashcardsSets
-	// Filter flashcard sets where the user ID matches
 	if err := s.db.Preload("Flashcards").Where("user_google_id = ?", userId).Find(&flashcardSets).Error; err != nil {
 		return nil, err
 	}
@@ -83,31 +80,17 @@ func (s *FlashcardSetRepo) UpdateFlashcardSetByID(id uint64, updateData *models.
 	return updateData, nil
 }
 
-// func (s *FlashcardSetRepo) UpdateFlashcardSetByID(id uint64, updateData map[string]interface{}) (*models.FlashcardSet, error) {
-// 	flashcardSet, err := s.GetFlashcardSetByID(id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if err := s.db.Model(flashcardSet).FullSaveAssociations.Updates(updateData).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return flashcardSet, nil
-// }
-
 func (s *FlashcardSetRepo) AddFlashcardSetToFolder(id, folderID uint64) (*models.FlashcardSet, error) {
-	// Get the flashcard set by ID
 	flashcardSet, err := s.GetFlashcardSetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the folder by ID
 	var folder models.Folder
 	if err := s.db.First(&folder, folderID).Error; err != nil {
 		return nil, err
 	}
 
-	// Append the flashcard set to the folder's association
 	if err := s.db.Model(&folder).Association("FlashcardsSets").Append(flashcardSet); err != nil {
 		return nil, err
 	}
@@ -116,19 +99,16 @@ func (s *FlashcardSetRepo) AddFlashcardSetToFolder(id, folderID uint64) (*models
 }
 
 func (s *FlashcardSetRepo) RemoveSetFromFolder(id, folderID uint64) (*models.FlashcardSet, error) {
-	// Get the flashcard set by ID
 	flashcardSet, err := s.GetFlashcardSetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the folder by ID
 	var folder models.Folder
 	if err := s.db.First(&folder, folderID).Error; err != nil {
 		return nil, err
 	}
 
-	// Remove the flashcard set from the folder's association
 	if err := s.db.Model(&folder).Association("FlashcardsSets").Delete(flashcardSet); err != nil {
 		return nil, err
 	}
@@ -152,6 +132,10 @@ func (s *FlashcardSetRepo) ToggleVisibility(id uint64) error {
 }
 
 func (s *FlashcardSetRepo) DeleteFlashcardSetByID(id uint64) error {
+	if err := s.db.Where("flashcard_set_id = ?", id).Delete(&models.Flashcard{}).Error; err != nil {
+		return err
+	}
+
 	if err := s.db.Delete(&models.FlashcardSet{}, id).Error; err != nil {
 		return err
 	}

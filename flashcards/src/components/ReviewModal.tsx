@@ -9,7 +9,7 @@ import { notificationContext } from "../utils/notifications";
 
 interface ReviewModalProps {
 	flashcard: Flashcard;
-	onTrackingUpdate: (updatedTracking: Tracking) => void; // Callback to update tracking
+	onTrackingUpdate: (updatedTracking: Tracking) => void;
 }
 
 const ReviewModal: React.FC<ReviewModalProps> = ({
@@ -24,7 +24,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 			console.log(data);
 			onTrackingUpdate(data);
 		},
-		onError: (error) => {
+		onError: () => {
 			notificationContext.notifyError(
 				"There was an error submitting your review. Please try again."
 			);
