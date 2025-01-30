@@ -30,12 +30,20 @@ func (s *FlashcardSetService) CreateFlashcardSet(body repositories.CreateFlashca
 	return newFlashcardSet, nil
 }
 
-func (s *FlashcardSetService) ListFlashcardSets() (models.FlashcardsSets, error) {
-	// buisiness logic here
-	//
+func (s *FlashcardSetService) ListFlashcardSets(isPublic bool) (models.FlashcardsSets, error) {
 	flashcardsSets, err := s.Repo.ListFlashcardSets()
 	if err != nil {
 		return nil, err
+	}
+
+	if isPublic {
+		var publicSets models.FlashcardsSets
+		for _, set := range flashcardsSets {
+			if !set.IsPrivate { // assuming the FlashcardSet model has an IsPrivate field
+				publicSets = append(publicSets, set)
+			}
+		}
+		return publicSets, nil
 	}
 	return flashcardsSets, nil
 }
@@ -144,7 +152,6 @@ func (s *FlashcardSetService) RemoveSetFromFolder(setID, folderID uint64) (*mode
 }
 
 func (s *FlashcardSetService) CheckSetInFolder(setID, folderID uint64) (bool, error) {
-
 	exists, err := s.Repo.CheckSetInFolder(setID, folderID)
 	if err != nil {
 		return false, err

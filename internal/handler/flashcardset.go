@@ -66,7 +66,7 @@ func (h *FlashcardSetHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h *FlashcardSetHandler) List(w http.ResponseWriter, r *http.Request) {
 	var flashcardSets []models.FlashcardSet
-	flashcardSets, err := h.Service.ListFlashcardSets()
+	flashcardSets, err := h.Service.ListFlashcardSets(true)
 	if err != nil {
 		http.Error(w, "Failed to retrieve flashcard sets", http.StatusInternalServerError)
 		return

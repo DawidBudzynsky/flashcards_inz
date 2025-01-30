@@ -5,6 +5,7 @@ import {
 } from "../requests/flashcard";
 import { useMutation } from "@tanstack/react-query";
 import { Flashcard, Tracking } from "../types/interfaces";
+import { notificationContext } from "../utils/notifications";
 
 interface ReviewModalProps {
 	flashcard: Flashcard;
@@ -24,8 +25,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 			onTrackingUpdate(data);
 		},
 		onError: (error) => {
-			console.error("Error submitting rating:", error);
-			alert(
+			notificationContext.notifyError(
 				"There was an error submitting your review. Please try again."
 			);
 		},
@@ -39,7 +39,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 		e.preventDefault();
 
 		if (rating === 0) {
-			alert("Please select a rating before submitting.");
+			notificationContext.notifyWarning(
+				"Please select a rating before submitting."
+			);
 			return;
 		}
 

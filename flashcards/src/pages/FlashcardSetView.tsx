@@ -35,12 +35,11 @@ const FlashcardSetView: React.FC = () => {
 	const { mutate: deleteSet } = useMutation({
 		mutationFn: () => deleteSetByID(setID!),
 		onSuccess: () => {
-			alert("Set deleted successfully.");
+			notificationContext.notifySuccess("Set deleted successfully.");
 			navigate(-1);
 		},
 		onError: (error: any) => {
-			console.error("Error deleting set:", error);
-			alert(
+			notificationContext.notifyError(
 				`Failed to delete set: ${
 					error?.message || "An unexpected error occurred."
 				}`
@@ -60,9 +59,8 @@ const FlashcardSetView: React.FC = () => {
 				queryKey: ["flashcardSet", setID],
 			});
 		},
-		onError: (error: any) => {
-			console.error("Error toggling private status:", error);
-			alert("Failed to toggle private status.");
+		onError: () => {
+			notificationContext.notifyError("Failed to toggle private status.");
 		},
 	});
 

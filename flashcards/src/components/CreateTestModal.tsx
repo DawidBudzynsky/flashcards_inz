@@ -32,7 +32,9 @@ const CreateTestModal: React.FC = () => {
 		) {
 			setSelectedSets((prev) => [...prev, set]);
 		} else if (selectedSets.length >= 5) {
-			alert("You can only select up to 5 sets.");
+			notificationContext.notifyWarning(
+				"You can only select up to 5 sets."
+			);
 		}
 	};
 

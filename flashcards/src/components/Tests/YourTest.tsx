@@ -98,8 +98,9 @@ const YourTest: React.FC<YourTestProp> = ({ test }) => {
 				notificationContext.notifySuccess("Link copied to clipboard!");
 			})
 			.catch((error) => {
-				console.error("Failed to copy link:", error);
-				alert("Failed to copy link. Please try again.");
+				notificationContext.notifyError(
+					"Failed to copy link. Please try again."
+				);
 			});
 	};
 

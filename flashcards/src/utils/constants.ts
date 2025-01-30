@@ -3,6 +3,7 @@ export const enum TabNames {
 	Folders = "folders",
 	Tests = "tests",
 }
+export const MIN_FLASHCARDS_IN_SET = 5;
 export const MIN_QUESTIONS = 4;
 export const AUTH_PROVIDER = "http://localhost:8080/auth?provider=google";
 export const ACTIVE_TAB = "activeTab";

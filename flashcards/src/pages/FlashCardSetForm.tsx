@@ -11,7 +11,7 @@ import { FlashcardsDataRequest, createFlashcards } from "../requests/flashcard";
 import { useParams, useNavigate } from "react-router-dom";
 import { Flashcard } from "../types/interfaces";
 import { notificationContext } from "../utils/notifications";
-import { MIN_QUESTIONS } from "../utils/constants";
+import { MIN_FLASHCARDS_IN_SET, MIN_QUESTIONS } from "../utils/constants";
 import CreateButton from "../components/Buttons/CreateButton";
 import TranslateComponent from "../utils/translate";
 
@@ -108,12 +108,12 @@ const FlashCardSetForm: React.FC = () => {
 	const createFlashcardsMutation = useMutation({
 		mutationFn: (data: FlashcardsDataRequest[]) => createFlashcards(data),
 		onSuccess: () => {
-			console.log("Flashcards created successfully.");
-			alert("Flashcard set and flashcards created successfully!");
+			notificationContext.notifySuccess(
+				"Flashcard set and flashcards created successfully!"
+			);
 		},
 		onError: (error: any) => {
-			console.error("Error creating flashcards:", error);
-			alert("Failed to create flashcards.");
+			notificationContext.notifyError("Failed to create flashcards.");
 		},
 	});
 
@@ -134,12 +134,16 @@ const FlashCardSetForm: React.FC = () => {
 
 	const handleSubmit = () => {
 		if (!setName || !setDescription) {
-			alert("Please provide a set name and description.");
+			notificationContext.notifyWarning(
+				"Please provide a set name and description."
+			);
 			return;
 		}
 
-		if (flashcards.length < MIN_QUESTIONS) {
-			alert("You need to have at least 3 flashcards to create a set.");
+		if (flashcards.length < MIN_FLASHCARDS_IN_SET) {
+			notificationContext.notifyWarning(
+				`You need to have at least ${MIN_FLASHCARDS_IN_SET} flashcards to create a set.`
+			);
 			return;
 		}
 

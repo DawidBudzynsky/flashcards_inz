@@ -158,12 +158,12 @@ const FlashcardSetLearn: React.FC = () => {
 					<div className="text-xl font-semibold">
 						Time Spent on Each Flashcard:
 					</div>
-					<div className="space-y-2">
+					<div className="space-y-2 border-[1px] max-w-sm mx-auto p-2 rounded-3xl">
 						{Array.from(flashcardTimes.entries()).map(
 							([flashcardID, timeSpent]) => (
 								<div
 									key={flashcardID}
-									className="flex justify-around bg-slate-100 py-4"
+									className="flex mx-auto max-w-sm gap-8 justify-center auto bg-base"
 								>
 									<span>Flashcard {flashcardID}:</span>
 									<span>
@@ -176,9 +176,6 @@ const FlashcardSetLearn: React.FC = () => {
 				</div>
 			) : (
 				<>
-					{/* <div className="flex justify-around">
-						<button className="btn flex-1">Shuffle</button>
-					</div> */}
 					<div className="flex justify-center items-center">
 						<div
 							className={`flip-card relative w-96 h-80 bg-base-200 shadow-lg rounded-lg cursor-pointer transition-transform duration-300 

@@ -209,7 +209,6 @@ func (s *TestService) PickFlashcards(sets []models.FlashcardSet, numQuestions in
 }
 
 func (s *TestService) CreateAnswers(flashcard models.Flashcard, sets []models.FlashcardSet) ([]string, error) {
-	// TODO: right now there will be no correct answers used as possible answers, maybe try to change it
 	var possibleAnswers []string
 	for _, set := range sets {
 		for _, card := range set.Flashcards {
@@ -222,8 +221,6 @@ func (s *TestService) CreateAnswers(flashcard models.Flashcard, sets []models.Fl
 	uniqueAnswers := util.SliceToSet(possibleAnswers)
 
 	if len(uniqueAnswers) < 3 {
-		// If there are not enough possible incorrect answers, we need to handle this case.
-		// Maybe you can return an error or simply duplicate answers until there are enough.
 		return nil, errors.New("not enough incorrect answers without duplicates")
 	}
 	rand.Seed(uint64(time.Now().UnixNano()))

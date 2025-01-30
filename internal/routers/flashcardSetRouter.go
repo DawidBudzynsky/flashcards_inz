@@ -17,7 +17,7 @@ func FlashcardSetRouter(handler *handler.FlashcardSetHandler) chi.Router {
 
 	r.Post("/", handler.Create)
 	r.Get("/", handler.GetUserSets)
-	// r.Get("/", handler.List)
+	r.Get("/list", handler.List)
 	r.Get("/{id}", handler.GetByID)
 	r.Get("/{id}/learn", handler.GetLearnSet)
 	r.Get("/{id}/edit", handler.GetEditSet)
