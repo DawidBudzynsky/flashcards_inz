@@ -19,7 +19,7 @@ type UserRepoInterface interface {
 	GetUserByGoogleID(string) (*models.User, error)
 	GetUserByGoogleIDPrivate(string) (*models.User, error)
 	UpdateUserByID(string, map[string]interface{}) (*models.User, error)
-	DeleteUserByID(uint64) error
+	DeleteUserByGoogleID(string) error
 	Save(interface{}) error
 }
 
@@ -111,8 +111,16 @@ func (s *UserRepo) UpdateUserByID(id string, updateData map[string]interface{}) 
 	return user, nil
 }
 
-func (s *UserRepo) DeleteUserByID(id uint64) error {
-	if err := s.db.Delete(&models.User{}, id).Error; err != nil {
+func (s *UserRepo) DeleteUserByGoogleID(id string) error {
+	if err := s.db.Where("user_google_id = ?", id).Delete(&models.Flashcard{}).Error; err != nil {
+		return err
+	}
+
+	if err := s.db.Where("user_google_id = ?", id).Delete(&models.FlashcardSet{}).Error; err != nil {
+		return err
+	}
+
+	if err := s.db.Where("google_id = ?", id).Delete(&models.User{}).Error; err != nil {
 		return err
 	}
 	return nil

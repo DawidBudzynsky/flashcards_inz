@@ -76,8 +76,8 @@ func (s *UserService) UpdateUserByID(id string, updateData map[string]interface{
 	return user, nil
 }
 
-func (s *UserService) DeleteUserByID(id uint64) error {
-	if err := s.repo.DeleteUserByID(id); err != nil {
+func (s *UserService) DeleteUserByGoogleID(google_id string) error {
+	if err := s.repo.DeleteUserByGoogleID(google_id); err != nil {
 		return err
 	}
 	return nil

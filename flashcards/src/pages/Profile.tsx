@@ -1,10 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUser, toggleUserVisibility } from "../requests/user";
+import {
+	deleteUserProfile,
+	getUser,
+	toggleUserVisibility,
+} from "../requests/user";
 import { FlashcardSet, User } from "../types/interfaces";
 import { notificationContext } from "../utils/notifications";
 import ListItem from "../components/ListItem";
 import { toggleSetVisibility } from "../requests/flashcardset";
 import { IoEarthOutline, IoLockClosed } from "react-icons/io5";
+import handleLogout from "../requests/logout";
 
 const Profile: React.FC = () => {
 	const queryClient = useQueryClient();
@@ -40,6 +45,30 @@ const Profile: React.FC = () => {
 			queryClient.invalidateQueries({ queryKey: ["user"] });
 		},
 	});
+	const { mutate: deleteProfile } = useMutation({
+		mutationFn: deleteUserProfile,
+		onSuccess: () => {
+			notificationContext.notifySuccess("User deleted");
+			queryClient.invalidateQueries({
+				queryKey: ["user"],
+			});
+			handleLogout();
+		},
+		onError: () => {
+			notificationContext.notifyError("Failed to delete user.");
+		},
+	});
+	const handleDeleteUser = () => {
+		const confirmation = window.confirm(
+			"Are you sure you want to delete this user? This action cannot be undone."
+		);
+
+		if (confirmation) {
+			deleteProfile();
+		} else {
+			notificationContext.notifyError("User deletion canceled.");
+		}
+	};
 
 	const handleVisibilityChange = () => {
 		toggleVisibility();
@@ -90,6 +119,15 @@ const Profile: React.FC = () => {
 						checked={Boolean(user?.IsPrivate)}
 						onChange={handleVisibilityChange}
 					/>
+				</div>
+				<div className="text-left p-4 flex justify-between border-r-0 border-b-0 border-l-0 font-semibold border-[1px] h-full">
+					<span className="text-3xl p-4">Delete account</span>
+					<button
+						className="hover:bg-red-700 p-2  rounded-full my-auto"
+						onClick={handleDeleteUser}
+					>
+						Delete
+					</button>
 				</div>
 			</div>
 

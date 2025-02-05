@@ -12,3 +12,8 @@ export const toggleUserVisibility = async () => {
 	const url = `/users/toggle_visibility`;
 	return await api.put(url);
 };
+
+export const deleteUserProfile = async () => {
+	const url = `/users/`;
+	return await api.delete(url);
+};

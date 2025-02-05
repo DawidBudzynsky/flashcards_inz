@@ -6,7 +6,6 @@ import (
 	"flashcards/internal/repositories"
 	"flashcards/internal/service"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -105,14 +104,13 @@ func (u *UserHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	userID, err := strconv.ParseUint(idParam, 10, 64)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusUnauthorized)
 		return
 	}
 
-	if err := u.Service.DeleteUserByID(userID); err != nil {
+	if err := u.Service.DeleteUserByGoogleID(userGoogleID); err != nil {
 		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
 	}
 
