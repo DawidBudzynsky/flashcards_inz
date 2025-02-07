@@ -45,9 +45,9 @@ func (s *Sm2) Update(oldItem []byte, r review.ReviewItem) ([]byte, error) {
 			return nil, err
 		}
 
-		newItem = update(decodedItem, r, s.now)
+		newItem = Update(decodedItem, r, s.now)
 	} else {
-		newItem = create(r, s.now)
+		newItem = Create(r, s.now)
 	}
 
 	encodedItem, err := encode(newItem)
@@ -57,11 +57,11 @@ func (s *Sm2) Update(oldItem []byte, r review.ReviewItem) ([]byte, error) {
 	return encodedItem, nil
 }
 
-func update(oldItem Item, r review.ReviewItem, s time.Time) Item {
+func Update(oldItem Item, r review.ReviewItem, s time.Time) Item {
 	newItem := Item{}
 	newItem.FlashcardID = r.CardId
 
-	newItem.Easiness = calculateEasiness(oldItem.Easiness, quality(r.Quality))
+	newItem.Easiness = CalculateEasiness(oldItem.Easiness, Quality(r.Quality))
 
 	if r.Quality < review.CorrectHard {
 		// set days
@@ -81,17 +81,17 @@ func update(oldItem Item, r review.ReviewItem, s time.Time) Item {
 	return newItem
 }
 
-func quality(q int) float64 {
+func Quality(q int) float64 {
 	return float64(q - 1)
 }
 
-func create(r review.ReviewItem, now time.Time) Item {
+func Create(r review.ReviewItem, now time.Time) Item {
 	newItem := Item{}
 	newItem.FlashcardID = r.CardId
 
 	if r.Quality != review.NoReview {
 		// the first reveiw for a card
-		newItem.Easiness = calculateEasiness(DefaultEasiness, quality(r.Quality))
+		newItem.Easiness = CalculateEasiness(DefaultEasiness, Quality(r.Quality))
 		newItem.ConsecutiveCorrectAnswers = 1
 	} else {
 		newItem.Easiness = DefaultEasiness
@@ -102,7 +102,7 @@ func create(r review.ReviewItem, now time.Time) Item {
 	return newItem
 }
 
-func calculateEasiness(oldEasiness float64, quality float64) float64 {
+func CalculateEasiness(oldEasiness float64, quality float64) float64 {
 	newEasiness := easinessFormula(oldEasiness, quality)
 	if newEasiness < MinEasiness {
 		return MinEasiness

@@ -9,8 +9,8 @@ import (
 const flashcards = "Flashcards"
 
 type FlashcardSetService struct {
-	Repo             *repositories.FlashcardSetRepo
-	FlashcardService *FlashcardService
+	Repo             repositories.FlashcardSetRepoInterface
+	FlashcardService FlashcardServieInterface
 }
 
 func NewFlashcardSetService(repository *repositories.FlashcardSetRepo, flashcardService *FlashcardService) *FlashcardSetService {
@@ -88,7 +88,7 @@ func (s *FlashcardSetService) UpdateFlashcardSetByID(id uint64, updateData map[s
 	}
 
 	// delete non existand flashcards
-	idsMap := createMapOfFlashcardsIDS(updateFlashcardSet.Flashcards)
+	idsMap := CreateMapOfFlashcardsIDS(updateFlashcardSet.Flashcards)
 	for _, existingFlashcard := range existingSet.Flashcards {
 		if !idsMap[existingFlashcard.ID] {
 			if err := s.FlashcardService.DeleteFlashcardByID(existingFlashcard.ID); err != nil {
@@ -160,7 +160,7 @@ func (s *FlashcardSetService) CheckSetInFolder(setID, folderID uint64) (bool, er
 	return exists, nil
 }
 
-func createMapOfFlashcardsIDS(flashcards models.Flashcards) map[int]bool {
+func CreateMapOfFlashcardsIDS(flashcards models.Flashcards) map[int]bool {
 	flashcardsMap := make(map[int]bool)
 	for _, flashcard := range flashcards {
 		if flashcard.ID != 0 {

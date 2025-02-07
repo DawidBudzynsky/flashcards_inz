@@ -7,15 +7,22 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserFlashcardRepo struct {
+type TrackingRepoInterface interface {
+	GetFlashcardsForToday(UserID string) ([]models.Flashcard, error)
+	GetByCardID(cardID int) (*models.Tracking, error)
+	Create(*models.Tracking) (*models.Tracking, error)
+	UpdateByID(id int, body *models.Tracking) (*models.Tracking, error)
+}
+
+type TrackingRepo struct {
 	db *gorm.DB
 }
 
-func NewUserFlashcardRepo(db *gorm.DB) *UserFlashcardRepo {
-	return &UserFlashcardRepo{db: db}
+func NewTrackingRepo(db *gorm.DB) *TrackingRepo {
+	return &TrackingRepo{db: db}
 }
 
-func (r *UserFlashcardRepo) GetFlashcardsForToday(UserID string) ([]models.Flashcard, error) {
+func (r *TrackingRepo) GetFlashcardsForToday(UserID string) ([]models.Flashcard, error) {
 	var flashcards []models.Flashcard
 	err := r.db.Preload("Tracking").
 		Joins("JOIN trackings ON trackings.flashcard_id = flashcards.id").
@@ -25,7 +32,7 @@ func (r *UserFlashcardRepo) GetFlashcardsForToday(UserID string) ([]models.Flash
 	return flashcards, err
 }
 
-func (r *UserFlashcardRepo) GetByCardID(cardID int) (*models.Tracking, error) {
+func (r *TrackingRepo) GetByCardID(cardID int) (*models.Tracking, error) {
 	var userFlashcard models.Tracking
 	err := r.db.First(&userFlashcard, "flashcard_id = ?", cardID).Error
 	if err == nil {
@@ -39,7 +46,7 @@ func (r *UserFlashcardRepo) GetByCardID(cardID int) (*models.Tracking, error) {
 	return nil, err
 }
 
-func (r *UserFlashcardRepo) Create(userFlashcard *models.Tracking) (*models.Tracking, error) {
+func (r *TrackingRepo) Create(userFlashcard *models.Tracking) (*models.Tracking, error) {
 	if err := r.db.Create(userFlashcard).Error; err != nil {
 		return nil, err
 	}
@@ -47,7 +54,7 @@ func (r *UserFlashcardRepo) Create(userFlashcard *models.Tracking) (*models.Trac
 	return userFlashcard, nil
 }
 
-func (r *UserFlashcardRepo) UpdateByID(id int, body *models.Tracking) (*models.Tracking, error) {
+func (r *TrackingRepo) UpdateByID(id int, body *models.Tracking) (*models.Tracking, error) {
 	if err := r.db.Model(&models.Tracking{}).Where("flashcard_id = ?", id).Updates(body).Error; err != nil {
 		return nil, err
 	}

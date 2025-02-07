@@ -12,6 +12,15 @@ import (
 	"time"
 )
 
+type FlashcardServieInterface interface {
+	CreateFlashcard(flashcard repositories.CreateFlashcardRequest) (*models.Flashcard, error)
+	ListFlashcards() (models.Flashcards, error)
+	GetFlashcardByID(id uint64) (*models.Flashcard, error)
+	UpdateFlashcardByID(id uint64, updateData repositories.UpdateFlashcardRequest) (*models.Flashcard, error)
+	DeleteFlashcardByID(id int) error
+	ToggleTracking(id uint64) error
+}
+
 type FlashcardService struct {
 	Repo repositories.FlashcardRepoInterface
 }

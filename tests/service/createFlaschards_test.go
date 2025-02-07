@@ -1,4 +1,4 @@
-package handler_test
+package service_test
 
 import (
 	"flashcards/internal/models"

@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"flashcards/internal/handler"
-	"flashcards/internal/middlewares"
 	"flashcards/internal/repositories"
 	"flashcards/internal/routers"
 	"flashcards/internal/service"
@@ -23,11 +22,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
-		MaxAge:           300, // Maximum age for preflight requests
+		MaxAge:           300,
 	})
 
 	// middlewares global
-	r.Use(middlewares.LoggingMiddleware)
+	// r.Use(middlewares.LoggingMiddleware)
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler)
 
@@ -41,9 +40,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 	userHandler := &handler.UserHandler{Service: service.NewUserSerivce(userRepo)}
 	r.Mount("/users", routers.UserRouter(userHandler))
 
-	userFlashcardRepo := repositories.NewUserFlashcardRepo(s.db.GetDB())
-	userFlashcardHandler := &handler.UserFlashcardHandler{Service: service.NewUserFlashcardService(userFlashcardRepo)}
-	r.Mount("/user_flashcards", routers.UserFlashcardRouter(userFlashcardHandler))
+	trackingRepo := repositories.NewTrackingRepo(s.db.GetDB())
+	trackingHandler := &handler.TrackingHandler{Service: service.NewTrackingService(trackingRepo)}
+	r.Mount("/user_flashcards", routers.TrackingRouter(trackingHandler))
 
 	flashcardRepo := repositories.NewFlashcardRepo(s.db.GetDB())
 	flashcardHandler := &handler.FlashcardHandler{Service: service.NewFlashcardService(flashcardRepo)}

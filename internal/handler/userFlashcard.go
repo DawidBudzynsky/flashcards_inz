@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-type UserFlashcardHandler struct {
-	Service *service.UserFlashcardService
+type TrackingHandler struct {
+	Service *service.TrackingService
 }
 
 var (
@@ -22,7 +22,7 @@ var (
 	}
 )
 
-func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (u *TrackingHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var reviewItem review.ReviewItem
 	if err := json.NewDecoder(r.Body).Decode(&reviewItem); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -47,7 +47,7 @@ func (u *UserFlashcardHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (u *UserFlashcardHandler) GetFlashcardsForToday(w http.ResponseWriter, r *http.Request) {
+func (u *TrackingHandler) GetFlashcardsForToday(w http.ResponseWriter, r *http.Request) {
 	userGoogleID, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
 		UserUnauthorizedError(w)

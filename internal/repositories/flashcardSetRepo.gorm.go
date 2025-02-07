@@ -9,11 +9,14 @@ import (
 type FlashcardSetRepoInterface interface {
 	CreateFlashcardSet(CreateFlashcardSetRequest) (*models.FlashcardSet, error)
 	ListFlashcardSets() (models.FlashcardsSets, error)
+	ListFlashcardSetsForUser(string) (models.FlashcardsSets, error)
 	GetFlashcardSetByID(uint64) (*models.FlashcardSet, error)
-	UpdateFlashcardSetByID(uint64, map[string]interface{}) (*models.FlashcardSet, error)
+	UpdateFlashcardSetByID(uint64, *models.FlashcardSet) (*models.FlashcardSet, error)
 	DeleteFlashcardSetByID(uint64) error
 	ToggleVisibility(uint64) error
 	AddFlashcardSetToFolder(uint64, uint64) (*models.FlashcardSet, error)
+	RemoveSetFromFolder(uint64, uint64) (*models.FlashcardSet, error)
+	CheckSetInFolder(uint64, uint64) (bool, error)
 }
 
 const (

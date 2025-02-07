@@ -14,8 +14,12 @@ run:
 
 # Test the application
 test:
-	@echo "Testing..."
+	@echo "Testing servies"
+	@go test ./tests/service -v
+	@echo "Testing tests"
 	@go test ./tests -v
+	@echo "Testing algorithms"
+	@go test ./tests/algorithims -v
 
 # Clean the binary
 clean:

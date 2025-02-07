@@ -1,8 +1,8 @@
-package tests
+package service_test
 
 import (
-	"flashcards/internal/handler"
 	"flashcards/internal/models"
+	"flashcards/internal/service"
 	"testing"
 )
 
@@ -30,7 +30,7 @@ func TestPickFlashcards(t *testing.T) {
 	sets := []models.FlashcardSet{set1, set2, set3}
 	numQuestions := 5
 
-	handler := &handler.TestHandler{}
+	handler := &service.TestService{}
 
 	selectedFlashcards, err := handler.PickFlashcards(sets, numQuestions)
 	if err != nil {
