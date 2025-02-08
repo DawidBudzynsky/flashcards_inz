@@ -1,31 +1,48 @@
-# Simple Makefile for a Go project
-#
+# Simple Makefile for a Go + React project with SQLite database setup
+
+# Paths
 FRONTEND_DIR=flashcards
+DB_FILE=test.db
 
 # Build the application
 all: build
 
 build:
-	@echo "Building..."
+	@echo "Building backend..."
 	@go build -o main cmd/api/main.go
 
-# Run the backend
-run-backend:
-	@echo "Starting backend..."
-	@go run cmd/api/main.go
+run-backend-prod: 
+	@echo "Starting backend in production mode..."
+	@./main 
 
-# Run the frontend
-run-frontend:
-	@echo "Starting frontend..."
+run-frontend-prod: build-frontend
+	@echo "Starting frontend in production mode..."
+	@cd $(FRONTEND_DIR) && npm run build && serve -s build
+
+run-prod: 
+	@echo "Starting backend and frontend in production mode..."
+	@make -j2 run-backend-prod run-frontend-prod
+
+run-backend-dev: 
+	@echo "Starting backend in development mode..."
+	@go run cmd/api/main.go 
+
+run-frontend-dev:
+	@echo "Starting frontend in development mode..."
 	@cd $(FRONTEND_DIR) && npm install && npm run dev
 
-# Run both backend and frontend in parallel
-run:
-	@echo "Starting backend and frontend..."
-	@make -j2 run-backend run-frontend
+run-dev: 
+	@echo "Starting backend and frontend in development mode..."
+	@make -j2 run-backend-dev run-frontend-dev
+
+run: dev
+	@echo "Running in default (development) mode, use 'make run prod' for production."
+
+build-frontend:
+	@echo "Building frontend..."
+	@cd $(FRONTEND_DIR) && npm install && npm run build
 
 
-# Test the application
 test:
 	@echo "Testing servies"
 	@go test ./tests/service -v
@@ -34,26 +51,21 @@ test:
 	@echo "Testing algorithms"
 	@go test ./tests/algorithims -v
 
-# Clean the binary
 clean:
-	@echo "Cleaning..."
-	@rm -f main
+	@echo "Cleaning up..."
+	@rm -f main $(DB_FILE)
 
-# Live Reload
 watch:
 	@if command -v air > /dev/null; then \
 	    air; \
-	    echo "Watching...";\
 	else \
-	    read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
+	    read -p "Go's 'air' is not installed. Install it? [Y/n] " choice; \
 	    if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
 	        go install github.com/cosmtrek/air@latest; \
 	        air; \
-	        echo "Watching...";\
 	    else \
-	        echo "You chose not to install air. Exiting..."; \
-	        exit 1; \
+	        echo "Skipping air installation."; \
 	    fi; \
 	fi
 
-.PHONY: all build run test clean
+.PHONY: all build run run-prod run-dev run-backend-prod run-frontend-prod run-backend-dev run-frontend-dev test clean watch build-frontend
