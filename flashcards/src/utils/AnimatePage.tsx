@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
+import { ReactNode } from "react";
 
 const animations = {
   initial: { opacity: 0, x: 100 },
@@ -7,7 +7,11 @@ const animations = {
   exit: { opacity: 0, x: -100 },
 };
 
-const AnimatePage = ({ children }) => {
+interface AnimatePageProps {
+  children: ReactNode;
+}
+
+const AnimatePage: React.FC<AnimatePageProps> = ({ children }) => {
   return (
     <motion.div
       variants={animations}

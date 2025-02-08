@@ -1,16 +1,29 @@
 # Simple Makefile for a Go project
+#
+FRONTEND_DIR=flashcards
 
 # Build the application
 all: build
 
 build:
 	@echo "Building..."
-	
 	@go build -o main cmd/api/main.go
 
-# Run the application
-run:
+# Run the backend
+run-backend:
+	@echo "Starting backend..."
 	@go run cmd/api/main.go
+
+# Run the frontend
+run-frontend:
+	@echo "Starting frontend..."
+	@cd $(FRONTEND_DIR) && npm install && npm run dev
+
+# Run both backend and frontend in parallel
+run:
+	@echo "Starting backend and frontend..."
+	@make -j2 run-backend run-frontend
+
 
 # Test the application
 test:

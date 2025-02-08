@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Users from "./pages/TabNavigation";
 import { ToastContainer } from "react-toastify";
 import FlashCardSetForm from "./pages/FlashCardSetForm";
@@ -27,97 +27,73 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 const queryClient = new QueryClient();
 
 function App() {
-	const NavigateInitializer = () => {
-		const navigate = useNavigate();
-		useEffect(() => {
-			setNavigate(navigate);
-		}, [navigate]);
+  const NavigateInitializer = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+      setNavigate(navigate);
+    }, [navigate]);
 
-		return null;
-	};
+    return null;
+  };
 
-	return (
-		<>
-			<ToastContainer stacked position={TOAST_POSITION} />
-			<NavigateInitializer />
-			<QueryClientProvider client={queryClient}>
-				<AnimatePresence mode="wait">
-					<Routes>
-						<Route element={<Layout />}>
-							<Route element={<ProtectedRoute />}>
-								<Route path="/" element={<Home />} />
-								<Route path="/users" element={<Users />} />
+  return (
+    <>
+      <ToastContainer stacked position={TOAST_POSITION} />
+      <NavigateInitializer />
+      <QueryClientProvider client={queryClient}>
+        <AnimatePresence mode="wait">
+          <Routes>
+            <Route element={<Layout />}>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/users" element={<Users />} />
 
-								<Route
-									path="/users/:userID"
-									element={<UserProfile />}
-								/>
+                <Route path="/users/:userID" element={<UserProfile />} />
 
-								{/* //protected */}
-								<Route
-									path="/create"
-									element={<FlashCardSetForm />}
-								/>
+                {/* //protected */}
+                <Route path="/create" element={<FlashCardSetForm />} />
 
-								<Route
-									path="flashcards_sets/"
-									element={<SetsPresentation />}
-								/>
-								<Route
-									path="folders/"
-									element={<FoldersPresentation />}
-								/>
-								<Route
-									path="tests/"
-									element={<TestsPresentation />}
-								/>
-								<Route
-									path="flashcards_sets/:setId/edit"
-									element={<FlashCardSetForm />}
-								/>
+                <Route path="flashcards_sets/" element={<SetsPresentation />} />
+                <Route path="folders/" element={<FoldersPresentation />} />
+                <Route path="tests/" element={<TestsPresentation />} />
+                <Route
+                  path="flashcards_sets/:setId/edit"
+                  element={<FlashCardSetForm />}
+                />
 
-								<Route
-									path="flashcards_sets/:setId/learn"
-									element={<FlashcardSetLearn />}
-								/>
+                <Route
+                  path="flashcards_sets/:setId/learn"
+                  element={<FlashcardSetLearn />}
+                />
 
-								<Route
-									path="/folders/:folderId"
-									element={<FolderView />}
-								/>
-								<Route
-									path="/flashcards_sets/:setId"
-									element={<FlashcardSetView />}
-								/>
+                <Route path="/folders/:folderId" element={<FolderView />} />
+                <Route
+                  path="/flashcards_sets/:setId"
+                  element={<FlashcardSetView />}
+                />
 
-								<Route
-									path="/tests/:testId/questions"
-									element={<TestQuestions />}
-								/>
+                <Route
+                  path="/tests/:testId/questions"
+                  element={<TestQuestions />}
+                />
 
-								<Route
-									path="/user/tests"
-									element={<TestQuestions />}
-								/>
+                <Route path="/user/tests" element={<TestQuestions />} />
 
-								<Route
-									path="/tests/testToken"
-									element={<SharedTestHandler />}
-								/>
+                <Route
+                  path="/tests/testToken"
+                  element={<SharedTestHandler />}
+                />
 
-								<Route path="/profile" element={<Profile />} />
-							</Route>
-							<Route
-								path="/Unauthorized"
-								element={<LoginPage />}
-							/>
-							<Route path="*" element={<NotFound />} />
-						</Route>
-					</Routes>
-				</AnimatePresence>
-			</QueryClientProvider>
-		</>
-	);
+                <Route path="/profile" element={<Profile />} />
+              </Route>
+              <Route path="/Unauthorized" element={<LoginPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </AnimatePresence>
+      </QueryClientProvider>
+    </>
+  );
 }
 
 export default App;
